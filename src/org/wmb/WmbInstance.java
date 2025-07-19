@@ -4,6 +4,8 @@ import org.lwjgl.glfw.Callbacks;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL30;
+import org.wmb.rendering.AllocatedVertexData;
+import org.wmb.rendering.Renderer;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -27,6 +29,7 @@ public final class WmbInstance {
     private final long windowId;
     private Dimension windowSize;
     private boolean resizeHappened;
+    private AllocatedVertexData testData;
 
     public WmbInstance() {
         GLFW.glfwDefaultWindowHints();
@@ -61,6 +64,16 @@ public final class WmbInstance {
         GL.createCapabilities();
 
         WmbInstance.instances.add(this);
+
+        testData = new AllocatedVertexData(new float[] {
+                -0.5f, 0.5f, 0.0f,
+                -0.5f, -0.5f, 0.0f,
+                0.5f, -0.5f, 0.0f,
+                0.5f, -0.5f, 0.0f,
+                0.5f, 0.5f, 0.0f,
+                -0.5f, 0.5f, 0.0f
+        });
+
     }
 
     public void requestClose() {
@@ -82,6 +95,7 @@ public final class WmbInstance {
         }
 
         // Do logic...
+        Renderer.render(testData);
 
         GLFW.glfwSwapBuffers(this.windowId);
 
@@ -89,6 +103,7 @@ public final class WmbInstance {
             Callbacks.glfwFreeCallbacks(windowId);
             GLFW.glfwDestroyWindow(this.windowId);
             WmbInstance.instances.remove(this);
+            testData.delete();
         }
     }
 }
