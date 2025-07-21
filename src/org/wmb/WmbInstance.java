@@ -27,9 +27,10 @@ public final class WmbInstance {
     }
 
     private final long windowId;
-    private Dimension windowSize;
+    private final Dimension windowSize;
     private boolean resizeHappened;
-    private AllocatedVertexData testData;
+    private final AllocatedVertexData testData;
+    private final Renderer renderer;
 
     public WmbInstance() {
         GLFW.glfwDefaultWindowHints();
@@ -69,11 +70,13 @@ public final class WmbInstance {
                 -0.5f, 0.5f, 0.0f,
                 -0.5f, -0.5f, 0.0f,
                 0.5f, -0.5f, 0.0f,
-                0.5f, -0.5f, 0.0f,
-                0.5f, 0.5f, 0.0f,
-                -0.5f, 0.5f, 0.0f
+                0.5f, 0.5f, 0.0f
+            }, new short[] {
+                0, 1, 2,
+                2, 3, 0
         });
 
+        this.renderer = new Renderer();
     }
 
     public void requestClose() {
@@ -95,7 +98,7 @@ public final class WmbInstance {
         }
 
         // Do logic...
-        Renderer.render(testData);
+        this.renderer.render(this.testData);
 
         GLFW.glfwSwapBuffers(this.windowId);
 
@@ -103,7 +106,8 @@ public final class WmbInstance {
             Callbacks.glfwFreeCallbacks(windowId);
             GLFW.glfwDestroyWindow(this.windowId);
             WmbInstance.instances.remove(this);
-            testData.delete();
+            this.testData.delete();
+            this.renderer.delete();
         }
     }
 }
