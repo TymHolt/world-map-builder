@@ -12,12 +12,13 @@ public final class AllocatedVertexData implements AllocatedData {
     private final int[] vboIds;
     private final int vertexCount;
 
-    public AllocatedVertexData(float[] positionData, short[] indexData) {
+    public AllocatedVertexData(float[] positionData, float[] textureCoordData, short[] indexData) {
         vaoId = GL30.glGenVertexArrays();
         GL30.glBindVertexArray(vaoId);
 
         vboIds = new int[] {
             createVbo(0, 3, positionData),
+            createVbo(1, 2, textureCoordData),
             createEbo(indexData)
         };
 

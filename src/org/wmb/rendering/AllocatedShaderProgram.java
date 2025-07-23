@@ -13,25 +13,25 @@ public final class AllocatedShaderProgram implements AllocatedData {
             throw new IllegalStateException("Program could not be created by OpenGL");
 
         int vsId = loadShader(GL30.GL_VERTEX_SHADER, vsSource);
-        GL30.glAttachShader(programId, vsId);
+        GL30.glAttachShader(this.programId, vsId);
         int fsId = loadShader(GL30.GL_FRAGMENT_SHADER, fsSource);
-        GL30.glAttachShader(programId, fsId);
+        GL30.glAttachShader(this.programId, fsId);
 
-        GL30.glLinkProgram(programId);
-        if (GL30.glGetProgrami(programId, GL30.GL_LINK_STATUS) == 0)
+        GL30.glLinkProgram(this.programId);
+        if (GL30.glGetProgrami(this.programId, GL30.GL_LINK_STATUS) == 0)
             throw new IllegalStateException("Program could not link: " +
-                    GL30.glGetProgramInfoLog(programId));
+                    GL30.glGetProgramInfoLog(this.programId));
 
         // Shaders are not needed after linking
-        GL30.glDetachShader(programId, vsId);
-        GL30.glDetachShader(programId, fsId);
+        GL30.glDetachShader(this.programId, vsId);
+        GL30.glDetachShader(this.programId, fsId);
         GL30.glDeleteShader(vsId);
         GL30.glDeleteShader(fsId);
 
-        GL30.glValidateProgram(programId);
-        if (GL30.glGetProgrami(programId, GL30.GL_VALIDATE_STATUS) == 0)
+        GL30.glValidateProgram(this.programId);
+        if (GL30.glGetProgrami(this.programId, GL30.GL_VALIDATE_STATUS) == 0)
             throw new IllegalStateException("Program could not validate: " +
-                    GL30.glGetProgramInfoLog(programId));
+                    GL30.glGetProgramInfoLog(this.programId));
 
     }
 
@@ -49,6 +49,10 @@ public final class AllocatedShaderProgram implements AllocatedData {
                 GL30.glGetShaderInfoLog(shaderId));
 
         return shaderId;
+    }
+
+    public int getUniformLocation(String name) {
+        return GL30.glGetUniformLocation(this.programId, name);
     }
 
     @Override

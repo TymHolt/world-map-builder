@@ -4,8 +4,10 @@ import org.lwjgl.glfw.Callbacks;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL30;
+import org.wmb.rendering.AllocatedTexture;
 import org.wmb.rendering.AllocatedVertexData;
 import org.wmb.rendering.Renderer;
+import org.wmb.rendering.TextureUtil;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -31,6 +33,7 @@ public final class WmbInstance {
     private boolean resizeHappened;
     private final AllocatedVertexData testData;
     private final Renderer renderer;
+    private final AllocatedTexture texture;
 
     public WmbInstance() {
         GLFW.glfwDefaultWindowHints();
@@ -66,17 +69,23 @@ public final class WmbInstance {
 
         WmbInstance.instances.add(this);
 
-        testData = new AllocatedVertexData(new float[] {
+        this.testData = new AllocatedVertexData(new float[] {
                 -0.5f, 0.5f, 0.0f,
                 -0.5f, -0.5f, 0.0f,
                 0.5f, -0.5f, 0.0f,
                 0.5f, 0.5f, 0.0f
+            }, new float[]{
+                0.0f, 0.0f,
+                0.0f, 1.0f,
+                1.0f, 1.0f,
+                1.0f, 0.0f
             }, new short[] {
-                0, 1, 2,
-                2, 3, 0
-        });
+                        0, 1, 2,
+                        2, 3, 0
+            });
 
         this.renderer = new Renderer();
+        this.texture = new AllocatedTexture(TextureUtil.getDebugBufferedImage());
     }
 
     public void requestClose() {
@@ -98,7 +107,7 @@ public final class WmbInstance {
         }
 
         // Do logic...
-        this.renderer.render(this.testData);
+        this.renderer.render(this.testData, this.texture);
 
         GLFW.glfwSwapBuffers(this.windowId);
 
@@ -108,6 +117,7 @@ public final class WmbInstance {
             WmbInstance.instances.remove(this);
             this.testData.delete();
             this.renderer.delete();
+            this.texture.delete();
         }
     }
 }
