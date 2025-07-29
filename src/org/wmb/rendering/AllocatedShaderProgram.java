@@ -1,6 +1,8 @@
 package org.wmb.rendering;
 
+import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL30;
+import org.lwjgl.system.MemoryStack;
 
 public final class AllocatedShaderProgram implements AllocatedData {
 
@@ -63,5 +65,12 @@ public final class AllocatedShaderProgram implements AllocatedData {
     @Override
     public void delete() {
         GL30.glDeleteProgram(this.programId);
+    }
+
+    public static void uniformMat4(int location, Matrix4f matrix) {
+        try (MemoryStack stack = MemoryStack.stackPush()) {
+            // 4x4 Matrix -> 16 values
+            GL30.glUniformMatrix4fv(location, false, matrix.get(stack.mallocFloat(16)));
+        }
     }
 }

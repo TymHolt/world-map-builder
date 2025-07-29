@@ -8,6 +8,8 @@ import org.wmb.rendering.AllocatedTexture;
 import org.wmb.rendering.AllocatedVertexData;
 import org.wmb.rendering.Renderer;
 import org.wmb.rendering.TextureUtil;
+import org.wmb.world.WorldObject;
+import org.wmb.world.WorldPosition;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -31,8 +33,9 @@ public final class WmbInstance {
     private final long windowId;
     private final Dimension windowSize;
     private boolean resizeHappened;
-    private final AllocatedVertexData testData;
     private final Renderer renderer;
+    private final ArrayList<WorldObject> objectList = new ArrayList<>();
+    private final AllocatedVertexData testData;
     private final AllocatedTexture texture;
 
     public WmbInstance() {
@@ -67,8 +70,7 @@ public final class WmbInstance {
         GLFW.glfwShowWindow(this.windowId);
         GL.createCapabilities();
 
-        WmbInstance.instances.add(this);
-
+        this.renderer = new Renderer();
         this.testData = new AllocatedVertexData(new float[] {
                 -0.5f, 0.5f, 0.0f,
                 -0.5f, -0.5f, 0.0f,
@@ -83,9 +85,11 @@ public final class WmbInstance {
                         0, 1, 2,
                         2, 3, 0
             });
-
-        this.renderer = new Renderer();
         this.texture = new AllocatedTexture(TextureUtil.getDebugBufferedImage());
+
+        this.objectList.add(new WorldObject(testData, texture, new WorldPosition(-0.5f, -0.5f, 0.0f)));
+
+        WmbInstance.instances.add(this);
     }
 
     public void requestClose() {
@@ -107,7 +111,9 @@ public final class WmbInstance {
         }
 
         // Do logic...
-        this.renderer.render(this.testData, this.texture);
+        for (WorldObject object : objectList) {
+            object.render(renderer);
+        }
 
         GLFW.glfwSwapBuffers(this.windowId);
 
@@ -115,8 +121,8 @@ public final class WmbInstance {
             Callbacks.glfwFreeCallbacks(windowId);
             GLFW.glfwDestroyWindow(this.windowId);
             WmbInstance.instances.remove(this);
-            this.testData.delete();
             this.renderer.delete();
+            this.testData.delete();
             this.texture.delete();
         }
     }

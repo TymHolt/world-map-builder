@@ -1,21 +1,24 @@
 package org.wmb.rendering;
 
+import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL30;
 
 public final class Renderer {
 
     private final AllocatedShaderProgram shaderProgram;
     private final int textureUl;
+    private final int transformUl;
 
     public Renderer() {
         shaderProgram = new AllocatedShaderProgram(
                 "#version 330 core\n" +
                 "layout(location=0) in vec3 i_pos;\n" +
                 "layout(location=1) in vec2 i_texCoord;\n" +
+                "uniform mat4 u_transform;\n" +
                 "out vec2 p_texCoord;\n" +
                 "void main() {\n" +
                 "    p_texCoord = i_texCoord;\n" +
-                "    gl_Position = vec4(vec3(i_pos.x + 0.25, i_pos.y, i_pos.z), 1.0);\n" +
+                "    gl_Position = u_transform * vec4(vec3(i_pos.x + 0.25, i_pos.y, i_pos.z), 1.0);\n" +
                 "}",
                 "#version 330 core\n" +
                  "in vec2 p_texCoord;\n" +
@@ -25,14 +28,18 @@ public final class Renderer {
                  "    o_color =  texture(u_texture, p_texCoord);\n" +
                  "}"
         );
+
         textureUl = shaderProgram.getUniformLocation("u_texture");
+        transformUl = shaderProgram.getUniformLocation("u_transform");
     }
 
     public void delete() {
         shaderProgram.delete();
     }
 
-    public void render(AllocatedVertexData vertexData, AllocatedTexture texture) {
+    public void render(AllocatedVertexData vertexData, AllocatedTexture texture,
+        Matrix4f transform) {
+
         GL30.glUseProgram(shaderProgram.getId());
         GL30.glUniform1i(textureUl, 0);
         GL30.glActiveTexture(GL30.GL_TEXTURE0);
@@ -42,6 +49,7 @@ public final class Renderer {
         GL30.glEnableVertexAttribArray(0);
         GL30.glEnableVertexAttribArray(1);
 
+        AllocatedShaderProgram.uniformMat4(transformUl, transform);
         GL30.glDrawElements(GL30.GL_TRIANGLES, vertexData.getVertexCount(),
             GL30.GL_UNSIGNED_SHORT, 0);
 
