@@ -4,3 +4,7 @@ A tool to create basic 3D worlds.
 Required libraries:
 - lwjgl-3.3.6
 - joml-1.10.7
+
+#### Controls
+- WASD - Move
+- Arrows - Look around
