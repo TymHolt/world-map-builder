@@ -4,10 +4,7 @@ import org.lwjgl.glfw.Callbacks;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL30;
-import org.wmb.rendering.AllocatedTexture;
-import org.wmb.rendering.AllocatedVertexData;
-import org.wmb.rendering.Renderer;
-import org.wmb.rendering.TextureUtil;
+import org.wmb.rendering.*;
 import org.wmb.world.WorldObject;
 import org.wmb.world.WorldPosition;
 
@@ -15,6 +12,8 @@ import java.awt.*;
 import java.util.ArrayList;
 
 public final class WmbInstance {
+
+    private static final float CAMERA_MOVE_SPEED = 4.0f; // Units per second
 
     private static final ArrayList<WmbInstance> instances = new ArrayList<>();
 
@@ -33,7 +32,9 @@ public final class WmbInstance {
     private final long windowId;
     private final Dimension windowSize;
     private boolean resizeHappened;
+    private long lastUpdateTime = System.currentTimeMillis();
     private final Renderer renderer;
+    private final Camera camera;
     private final ArrayList<WorldObject> objectList = new ArrayList<>();
     private final AllocatedVertexData testData;
     private final AllocatedTexture texture;
@@ -71,6 +72,8 @@ public final class WmbInstance {
         GL.createCapabilities();
 
         this.renderer = new Renderer();
+        this.camera = new Camera(0.0f, 0.0f, 0.0f, 90.0f, 0.1f, 1024.0f);
+
         this.testData = new AllocatedVertexData(new float[] {
                 -0.5f, 0.5f, 0.0f,
                 -0.5f, -0.5f, 0.0f,
@@ -82,12 +85,12 @@ public final class WmbInstance {
                 1.0f, 1.0f,
                 1.0f, 0.0f
             }, new short[] {
-                        0, 1, 2,
-                        2, 3, 0
+                0, 1, 2,
+                2, 3, 0
             });
         this.texture = new AllocatedTexture(TextureUtil.getDebugBufferedImage());
 
-        this.objectList.add(new WorldObject(testData, texture, new WorldPosition(-0.5f, -0.5f, 0.0f)));
+        this.objectList.add(new WorldObject(testData, texture, new WorldPosition(0.0f, 0.0f, 0.0f)));
 
         WmbInstance.instances.add(this);
     }
@@ -105,15 +108,42 @@ public final class WmbInstance {
         GL30.glClearColor(0.33f, 0.33f, 0.7f, 1.0f);
         GL30.glClear(GL30.GL_COLOR_BUFFER_BIT);
 
-        if (resizeHappened) {
+        if (this.resizeHappened) {
             // Handle resizing buffers etc.
-            resizeHappened = false;
+            this.resizeHappened = false;
         }
 
-        // Do logic...
-        for (WorldObject object : objectList) {
-            object.render(renderer);
+        long currentUpdateTime = System.currentTimeMillis();
+        float deltaTime = (float) (currentUpdateTime - this.lastUpdateTime) / 1000.0f;
+        this.lastUpdateTime = currentUpdateTime;
+
+        // --- Begin Logic ---
+
+        float moveDelta = CAMERA_MOVE_SPEED * deltaTime;
+
+        if (isKeyPressed(GLFW.GLFW_KEY_W)) // Forwards
+            camera.moveZ(-moveDelta);
+        if (isKeyPressed(GLFW.GLFW_KEY_S)) // Backwards
+            camera.moveZ(moveDelta);
+        if (isKeyPressed(GLFW.GLFW_KEY_D)) // Right
+            camera.moveX(moveDelta);
+        if (isKeyPressed(GLFW.GLFW_KEY_A)) // Left
+            camera.moveX(-moveDelta);
+        if (isKeyPressed(GLFW.GLFW_KEY_Q)) // Up
+            camera.moveY(moveDelta);
+        if (isKeyPressed(GLFW.GLFW_KEY_Z)) // Down (American layout Z!)
+            camera.moveY(-moveDelta);
+
+        this.renderer.begin();
+        this.renderer.uniformCamera(this.camera, (float) this.windowSize.width / (float) this.windowSize.height);
+
+        for (WorldObject object : this.objectList) {
+            object.render(this.renderer);
         }
+
+        this.renderer.end();
+
+        // --- End Logic ---
 
         GLFW.glfwSwapBuffers(this.windowId);
 
@@ -125,5 +155,9 @@ public final class WmbInstance {
             this.testData.delete();
             this.texture.delete();
         }
+    }
+
+    private boolean isKeyPressed(int keyCode) {
+        return GLFW.glfwGetKey(this.windowId, keyCode) == GLFW.GLFW_PRESS;
     }
 }

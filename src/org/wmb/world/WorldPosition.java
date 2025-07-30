@@ -13,18 +13,18 @@ public final class WorldPosition {
     }
 
     public float getX() {
-        return x;
+        return this.x;
     }
 
     public float getY() {
-        return y;
+        return this.y;
     }
 
     public float getZ() {
-        return z;
+        return this.z;
     }
 
     public Matrix4f getAsMatrix() {
-        return new Matrix4f().identity().translate(x, y, z);
+        return new Matrix4f().identity().translate(this.x, this.y, this.z);
     }
 }
