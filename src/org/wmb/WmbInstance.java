@@ -5,8 +5,9 @@ import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL30;
 import org.wmb.rendering.*;
+import org.wmb.world.ObjectTransform;
 import org.wmb.world.WorldObject;
-import org.wmb.world.WorldPosition;
+import org.wmb.world.ObjectPosition;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -90,7 +91,8 @@ public final class WmbInstance {
             });
         this.texture = new AllocatedTexture(TextureUtil.getDebugBufferedImage());
 
-        this.objectList.add(new WorldObject(testData, texture, new WorldPosition(0.0f, 0.0f, 0.0f)));
+        this.objectList.add(new WorldObject(testData, texture,
+            new ObjectTransform(0.0f, 0.0f, 0.0f, 45.0f, 0.0f, 45.0f)));
 
         WmbInstance.instances.add(this);
     }
@@ -133,7 +135,8 @@ public final class WmbInstance {
         this.renderer.uniformCamera(this.camera, (float) this.windowSize.width / (float) this.windowSize.height);
 
         for (WorldObject object : this.objectList) {
-            object.render(this.renderer);
+            object.getTransform().getRotation().setYaw(object.getTransform().getRotation().getYaw() + 130.0f * deltaTime);
+            this.renderer.render(object);
         }
 
         this.renderer.end();

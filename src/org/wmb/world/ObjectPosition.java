@@ -2,22 +2,34 @@ package org.wmb.world;
 
 import org.joml.Matrix4f;
 
-public final class WorldPosition {
+public final class ObjectPosition {
 
-    private final float x, y, z;
+    private float x, y, z;
 
-    public WorldPosition(float x, float y, float z) {
+    public ObjectPosition(float x, float y, float z) {
         this.x = x;
         this.y = y;
         this.z = z;
+    }
+
+    public void setX(float x) {
+        this.x = x;
     }
 
     public float getX() {
         return this.x;
     }
 
+    public void setY(float y) {
+        this.y = y;
+    }
+
     public float getY() {
         return this.y;
+    }
+
+    public void setZ(float z) {
+        this.z = z;
     }
 
     public float getZ() {

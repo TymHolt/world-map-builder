@@ -1,29 +1,50 @@
 package org.wmb.world;
 
+import org.joml.Matrix4f;
 import org.wmb.debug.Assert;
 import org.wmb.rendering.AllocatedTexture;
 import org.wmb.rendering.AllocatedVertexData;
-import org.wmb.rendering.Renderer;
+import org.wmb.rendering.IRenderObject;
 
-public final class WorldObject {
+public final class WorldObject implements IRenderObject {
 
     private final AllocatedVertexData model;
     private final AllocatedTexture material;
-    private final WorldPosition position;
+    private final ObjectTransform transform;
 
     public WorldObject(AllocatedVertexData model, AllocatedTexture material,
-        WorldPosition position) {
+        ObjectTransform transform) {
 
         Assert.argNotNull(model, "model");
         Assert.argNotNull(material, "material");
-        Assert.argNotNull(position, "position");
+        Assert.argNotNull(transform, "transform");
 
         this.model = model;
         this.material = material;
-        this.position = position;
+        this.transform = transform;
     }
 
-    public void render(Renderer renderer) {
-        renderer.render(model, material, position.getAsMatrix());
+    public ObjectTransform getTransform() {
+        return this.transform;
+    }
+
+    @Override
+    public AllocatedVertexData getVertexData() {
+        return this.model;
+    }
+
+    @Override
+    public AllocatedTexture getTexture() {
+        return this.material;
+    }
+
+    @Override
+    public Matrix4f getRotationMatrix() {
+        return this.transform.getRotation().getAsMatrix();
+    }
+
+    @Override
+    public Matrix4f getTransformMatrix() {
+        return this.transform.getAsMatrix();
     }
 }

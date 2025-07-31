@@ -52,16 +52,14 @@ public final class Renderer {
         AllocatedShaderProgram.uniformMat4(projectionUl, camera.getProjectionMatrix(aspect));
     }
 
-    public void render(AllocatedVertexData vertexData, AllocatedTexture texture,
-        Matrix4f transform) {
-
-        GL30.glBindTexture(GL30.GL_TEXTURE_2D, texture.getId());
-        GL30.glBindVertexArray(vertexData.getId());
+    public void render(IRenderObject renderObject) {
+        GL30.glBindTexture(GL30.GL_TEXTURE_2D, renderObject.getTexture().getId());
+        GL30.glBindVertexArray(renderObject.getVertexData().getId());
         GL30.glEnableVertexAttribArray(0);
         GL30.glEnableVertexAttribArray(1);
 
-        AllocatedShaderProgram.uniformMat4(transformUl, transform);
-        GL30.glDrawElements(GL30.GL_TRIANGLES, vertexData.getVertexCount(),
+        AllocatedShaderProgram.uniformMat4(transformUl, renderObject.getTransformMatrix());
+        GL30.glDrawElements(GL30.GL_TRIANGLES, renderObject.getVertexData().getVertexCount(),
             GL30.GL_UNSIGNED_SHORT, 0);
 
         GL30.glDisableVertexAttribArray(0);
