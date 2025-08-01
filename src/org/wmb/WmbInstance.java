@@ -5,9 +5,10 @@ import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL30;
 import org.wmb.rendering.*;
+import org.wmb.rendering.floor.FloorRenderer;
+import org.wmb.rendering.object.ObjectRenderer;
 import org.wmb.world.ObjectTransform;
 import org.wmb.world.WorldObject;
-import org.wmb.world.ObjectPosition;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -32,7 +33,8 @@ public final class WmbInstance {
     private final Dimension windowSize;
     private boolean resizeHappened;
     private long lastUpdateTime = System.currentTimeMillis();
-    private final Renderer renderer;
+    private final ObjectRenderer objectRenderer;
+    private final FloorRenderer floorRenderer;
     private final Camera camera;
     private final KeyboardCameraController cameraController;
     private final ArrayList<WorldObject> objectList = new ArrayList<>();
@@ -71,8 +73,9 @@ public final class WmbInstance {
         GLFW.glfwShowWindow(this.windowId);
         GL.createCapabilities();
 
-        this.renderer = new Renderer();
-        this.camera = new Camera(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 90.0f, 0.1f, 1024.0f);
+        this.objectRenderer = new ObjectRenderer();
+        this.floorRenderer = new FloorRenderer(1024.0f);
+        this.camera = new Camera(0.0f, 4.0f, 4.0f, 45.0f, 0.0f, 90.0f, 0.1f, 1024.0f);
         this.cameraController = new KeyboardCameraController(this);
 
         this.testData = new AllocatedVertexData(new float[] {
@@ -92,7 +95,7 @@ public final class WmbInstance {
         this.texture = new AllocatedTexture(TextureUtil.getDebugBufferedImage());
 
         this.objectList.add(new WorldObject(testData, texture,
-            new ObjectTransform(0.0f, 0.0f, 0.0f, 45.0f, 0.0f, 45.0f)));
+            new ObjectTransform(0.0f, 1.0f, 0.0f, 45.0f, 0.0f, 45.0f)));
 
         WmbInstance.instances.add(this);
     }
@@ -116,7 +119,7 @@ public final class WmbInstance {
     private void update() {
         GLFW.glfwMakeContextCurrent(this.windowId);
         GL30.glClearColor(0.33f, 0.33f, 0.7f, 1.0f);
-        GL30.glClear(GL30.GL_COLOR_BUFFER_BIT);
+        GL30.glClear(GL30.GL_COLOR_BUFFER_BIT | GL30.GL_DEPTH_BUFFER_BIT);
 
         if (this.resizeHappened) {
             // Handle resizing buffers etc.
@@ -127,19 +130,22 @@ public final class WmbInstance {
         float deltaTime = (float) (currentUpdateTime - this.lastUpdateTime) / 1000.0f;
         this.lastUpdateTime = currentUpdateTime;
 
+        float aspect = (float) this.windowSize.width / (float) this.windowSize.height;
+
         // --- Begin Logic ---
 
         this.cameraController.update(deltaTime);
 
-        this.renderer.begin();
-        this.renderer.uniformCamera(this.camera, (float) this.windowSize.width / (float) this.windowSize.height);
-
+        this.objectRenderer.begin();
+        this.objectRenderer.uniformCamera(this.camera, aspect);
         for (WorldObject object : this.objectList) {
-            object.getTransform().getRotation().setYaw(object.getTransform().getRotation().getYaw() + 130.0f * deltaTime);
-            this.renderer.render(object);
+            this.objectRenderer.render(object);
         }
+        this.objectRenderer.end();
 
-        this.renderer.end();
+        this.floorRenderer.begin();
+        this.floorRenderer.renderGuideLines(camera, aspect, 0.025f, 0.5f, 0.5f, 0.5f);
+        this.floorRenderer.end();
 
         // --- End Logic ---
 
@@ -149,7 +155,8 @@ public final class WmbInstance {
             Callbacks.glfwFreeCallbacks(windowId);
             GLFW.glfwDestroyWindow(this.windowId);
             WmbInstance.instances.remove(this);
-            this.renderer.delete();
+            this.objectRenderer.delete();
+            this.floorRenderer.delete();
             this.testData.delete();
             this.texture.delete();
         }

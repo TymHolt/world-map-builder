@@ -102,10 +102,6 @@ public final class Camera {
         return this.far;
     }
 
-    public Vector4f getLookDirection() {
-        return new Vector4f(0.0f, 0.0f, -1.0f, 0.0f).mul(getRotationMatrix());
-    }
-
     // Vector4f to make calculations easier. w is ignored
     public void move(Vector4f direction) {
         moveX(direction.x);

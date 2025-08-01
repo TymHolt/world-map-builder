@@ -4,7 +4,7 @@ import org.joml.Matrix4f;
 import org.wmb.debug.Assert;
 import org.wmb.rendering.AllocatedTexture;
 import org.wmb.rendering.AllocatedVertexData;
-import org.wmb.rendering.IRenderObject;
+import org.wmb.rendering.object.IRenderObject;
 
 public final class WorldObject implements IRenderObject {
 
