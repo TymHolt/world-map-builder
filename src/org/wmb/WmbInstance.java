@@ -136,16 +136,16 @@ public final class WmbInstance {
 
         this.cameraController.update(deltaTime);
 
-        this.objectRenderer.begin();
+        this.floorRenderer.begin(0, 0, this.windowSize.width, this.windowSize.height);
+        this.floorRenderer.renderGuideLines(camera, aspect, 0.025f, 0.5f, 0.5f, 0.5f);
+        this.floorRenderer.end();
+
+        this.objectRenderer.begin(0, 0, this.windowSize.width, this.windowSize.height);
         this.objectRenderer.uniformCamera(this.camera, aspect);
         for (WorldObject object : this.objectList) {
             this.objectRenderer.render(object);
         }
         this.objectRenderer.end();
-
-        this.floorRenderer.begin();
-        this.floorRenderer.renderGuideLines(camera, aspect, 0.025f, 0.5f, 0.5f, 0.5f);
-        this.floorRenderer.end();
 
         // --- End Logic ---
 

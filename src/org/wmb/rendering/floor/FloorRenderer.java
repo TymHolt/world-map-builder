@@ -53,7 +53,12 @@ public final class FloorRenderer {
                     "    float localZ = getLocal(p_worldPos.z);\n" +
                     "    if (!isOuter(localX, u_lineWidth) && !isOuter(localZ, u_lineWidth))\n" +
                     "        discard;" +
-                    "    o_color = vec4(u_color, 1.0);\n" +
+                    "    if (abs(p_worldPos.x) <= u_lineWidth)\n" +
+                    "        o_color = vec4(1.0, 0.0, 0.0, 1.0);\n" +
+                    "    else if (abs(p_worldPos.z) <= u_lineWidth)\n" +
+                    "        o_color = vec4(0.0, 1.0, 0.0, 1.0);\n" +
+                    "    else\n" +
+                    "        o_color = vec4(u_color, 1.0);\n" +
                     "}"
         );
 
@@ -69,7 +74,8 @@ public final class FloorRenderer {
         this.shaderProgram.delete();
     }
 
-    public void begin() {
+    public void begin(int x, int y, int width, int height) {
+        GL30.glViewport(x, y, width, height);
         GL30.glUseProgram(shaderProgram.getId());
         GL30.glEnable(GL30.GL_DEPTH_TEST);
     }

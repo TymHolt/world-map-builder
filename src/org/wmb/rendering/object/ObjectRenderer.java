@@ -41,7 +41,8 @@ public final class ObjectRenderer {
         this.shaderProgram.delete();
     }
 
-    public void begin() {
+    public void begin(int x, int y, int width, int height) {
+        GL30.glViewport(x, y, width, height);
         GL30.glUseProgram(this.shaderProgram.getId());
         GL30.glUniform1i(this.textureUl, 0);
         GL30.glActiveTexture(GL30.GL_TEXTURE0);
