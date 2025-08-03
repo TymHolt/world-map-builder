@@ -8,7 +8,7 @@ import org.wmb.rendering.Camera;
 public final class FloorRenderer {
 
     private final AllocatedVertexData floorVertexData;
-    private final AllocatedShaderProgram shaderProgram;
+    private final AllocatedShaderProgram floorShaderProgram;
     private final int worldPosUl, viewUl, projectionUl, colorUl, lineWidthUl;
 
     public FloorRenderer(float floorSize) {
@@ -21,12 +21,13 @@ public final class FloorRenderer {
             0.0f, 0.0f,
             0.0f, 0.0f,
             0.0f, 0.0f,
+            0.0f, 0.0f
         }, new short[] {
             0, 1, 2,
             2, 3, 0
         });
 
-        this.shaderProgram = new AllocatedShaderProgram(
+        this.floorShaderProgram = new AllocatedShaderProgram(
             "#version 330 core\n" +
                     "layout(location=0) in vec3 i_pos;\n" +
                     "uniform vec3 u_worldPos;\n" +
@@ -62,21 +63,21 @@ public final class FloorRenderer {
                     "}"
         );
 
-        this.worldPosUl = shaderProgram.getUniformLocation("u_worldPos");
-        this.viewUl = shaderProgram.getUniformLocation("u_view");
-        this.projectionUl = shaderProgram.getUniformLocation("u_projection");
-        this.colorUl = shaderProgram.getUniformLocation("u_color");
-        this.lineWidthUl = shaderProgram.getUniformLocation("u_lineWidth");
+        this.worldPosUl = floorShaderProgram.getUniformLocation("u_worldPos");
+        this.viewUl = floorShaderProgram.getUniformLocation("u_view");
+        this.projectionUl = floorShaderProgram.getUniformLocation("u_projection");
+        this.colorUl = floorShaderProgram.getUniformLocation("u_color");
+        this.lineWidthUl = floorShaderProgram.getUniformLocation("u_lineWidth");
     }
 
     public void delete() {
         this.floorVertexData.delete();
-        this.shaderProgram.delete();
+        this.floorShaderProgram.delete();
     }
 
     public void begin(int x, int y, int width, int height) {
         GL30.glViewport(x, y, width, height);
-        GL30.glUseProgram(shaderProgram.getId());
+        GL30.glUseProgram(floorShaderProgram.getId());
         GL30.glEnable(GL30.GL_DEPTH_TEST);
     }
 

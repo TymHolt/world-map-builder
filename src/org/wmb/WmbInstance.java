@@ -7,6 +7,7 @@ import org.lwjgl.opengl.GL30;
 import org.wmb.gui.WorldViewComponent;
 import org.wmb.rendering.*;
 import org.wmb.world.ObjectTransform;
+import org.wmb.world.WmbGui;
 import org.wmb.world.WorldObject;
 
 import java.awt.*;
@@ -36,7 +37,7 @@ public final class WmbInstance {
     private final ArrayList<WorldObject> objectList = new ArrayList<>();
     private final AllocatedVertexData testData;
     private final AllocatedTexture texture;
-    private final WorldViewComponent worldViewComponent;
+    private WmbGui gui;
 
     public WmbInstance() {
         GLFW.glfwDefaultWindowHints();
@@ -91,8 +92,7 @@ public final class WmbInstance {
         this.objectList.add(new WorldObject(testData, texture,
             new ObjectTransform(0.0f, 1.0f, 0.0f, 45.0f, 0.0f, 45.0f)));
 
-        this.worldViewComponent = new WorldViewComponent(0, 0, this.windowSize.width,
-            this.windowSize.height, this.objectList);
+        this.gui = new WmbGui(this.windowSize.width, this.windowSize.height, this);
 
         WmbInstance.instances.add(this);
     }
@@ -110,16 +110,22 @@ public final class WmbInstance {
     }
 
     public Camera getCamera() {
-        return this.worldViewComponent.getCamera();
+        return this.gui.getMainView().getCamera();
+    }
+
+    public ArrayList<WorldObject> getObjectList() {
+        return this.objectList;
     }
 
     private void update() {
         GLFW.glfwMakeContextCurrent(this.windowId);
         GL30.glClearColor(0.33f, 0.33f, 0.7f, 1.0f);
         GL30.glClear(GL30.GL_COLOR_BUFFER_BIT | GL30.GL_DEPTH_BUFFER_BIT);
+        GL30.glBlendFunc(GL30.GL_SRC_ALPHA, GL30.GL_ONE_MINUS_SRC_ALPHA);
+        GL30.glEnable(GL30.GL_BLEND);
 
         if (this.resizeHappened) {
-            this.worldViewComponent.setBounds(0, 0, this.windowSize.width, this.windowSize.height);
+            this.gui.resize(this.windowSize.width, this.windowSize.height);
             this.resizeHappened = false;
         }
 
@@ -130,7 +136,7 @@ public final class WmbInstance {
         // --- Begin Logic ---
 
         this.cameraController.update(deltaTime);
-        this.worldViewComponent.render();
+        this.gui.render();
 
         // --- End Logic ---
 
@@ -140,7 +146,7 @@ public final class WmbInstance {
             Callbacks.glfwFreeCallbacks(windowId);
             GLFW.glfwDestroyWindow(this.windowId);
             WmbInstance.instances.remove(this);
-            this.worldViewComponent.delete();
+            this.gui.delete();
             this.testData.delete();
             this.texture.delete();
         }
