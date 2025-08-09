@@ -3,6 +3,8 @@ package org.wmb.rendering.gui;
 import org.lwjgl.opengl.GL30;
 import org.wmb.rendering.AllocatedShaderProgram;
 import org.wmb.rendering.AllocatedVertexData;
+import resources.baked.GuiFS;
+import resources.baked.GuiVS;
 
 public final class GuiRenderer {
 
@@ -26,20 +28,7 @@ public final class GuiRenderer {
                 2, 3, 0
         });
 
-        this.quadShaderProgram = new AllocatedShaderProgram(
-                "#version 330 core\n" +
-                        "layout(location=0) in vec3 i_pos;\n" +
-                        "void main() {\n" +
-                        "    gl_Position = vec4(i_pos, 1.0);\n" +
-                        "}",
-                "#version 330 core\n" +
-                        "uniform vec4 u_color;\n" +
-                        "out vec4 o_color;\n" +
-                        "void main() {\n" +
-                        "    o_color = u_color;\n" +
-                        "}"
-        );
-
+        this.quadShaderProgram = new AllocatedShaderProgram(GuiVS.content, GuiFS.content);
 
         this.colorUl = quadShaderProgram.getUniformLocation("u_color");
     }

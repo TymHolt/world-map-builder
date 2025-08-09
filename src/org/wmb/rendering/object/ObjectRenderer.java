@@ -3,6 +3,8 @@ package org.wmb.rendering.object;
 import org.lwjgl.opengl.GL30;
 import org.wmb.rendering.AllocatedShaderProgram;
 import org.wmb.rendering.Camera;
+import resources.baked.ObjectFS;
+import resources.baked.ObjectVS;
 
 public final class ObjectRenderer {
 
@@ -10,26 +12,7 @@ public final class ObjectRenderer {
     private final int textureUl, transformUl, viewUl, projectionUl;
 
     public ObjectRenderer() {
-        this.shaderProgram = new AllocatedShaderProgram(
-                "#version 330 core\n" +
-                "layout(location=0) in vec3 i_pos;\n" +
-                "layout(location=1) in vec2 i_texCoord;\n" +
-                "uniform mat4 u_transform;\n" +
-                "uniform mat4 u_view;\n" +
-                "uniform mat4 u_projection;\n" +
-                "out vec2 p_texCoord;\n" +
-                "void main() {\n" +
-                "    p_texCoord = i_texCoord;\n" +
-                "    gl_Position = u_projection * u_view * u_transform * vec4(i_pos, 1.0);\n" +
-                "}",
-                "#version 330 core\n" +
-                 "in vec2 p_texCoord;\n" +
-                 "uniform sampler2D u_texture;\n" +
-                 "out vec4 o_color;\n" +
-                 "void main() {\n" +
-                 "    o_color = texture(u_texture, p_texCoord);\n" +
-                 "}"
-        );
+        this.shaderProgram = new AllocatedShaderProgram(ObjectVS.content, ObjectFS.content);
 
         this.textureUl = shaderProgram.getUniformLocation("u_texture");
         this.transformUl = shaderProgram.getUniformLocation("u_transform");

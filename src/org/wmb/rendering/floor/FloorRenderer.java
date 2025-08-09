@@ -4,6 +4,8 @@ import org.lwjgl.opengl.GL30;
 import org.wmb.rendering.AllocatedShaderProgram;
 import org.wmb.rendering.AllocatedVertexData;
 import org.wmb.rendering.Camera;
+import resources.baked.FloorFS;
+import resources.baked.FloorVS;
 
 public final class FloorRenderer {
 
@@ -27,41 +29,7 @@ public final class FloorRenderer {
             2, 3, 0
         });
 
-        this.floorShaderProgram = new AllocatedShaderProgram(
-            "#version 330 core\n" +
-                    "layout(location=0) in vec3 i_pos;\n" +
-                    "uniform vec3 u_worldPos;\n" +
-                    "uniform mat4 u_view;\n" +
-                    "uniform mat4 u_projection;\n" +
-                    "out vec3 p_worldPos;\n" +
-                    "void main() {\n" +
-                    "    p_worldPos = i_pos + u_worldPos;\n" +
-                    "    gl_Position = u_projection * u_view * vec4(i_pos + u_worldPos, 1.0);\n" +
-                    "}",
-            "#version 330 core\n" +
-                    "in vec3 p_worldPos;\n" +
-                    "uniform vec3 u_color;\n" +
-                    "uniform float u_lineWidth;\n" +
-                    "out vec4 o_color;\n" +
-                    "float getLocal(float value) {\n" +
-                    "    return value - floor(value);\n" +
-                    "}\n" +
-                    "bool isOuter(float value, float range) {\n" +
-                    "    return value <= range || value >= 1.0 - range;\n" +
-                    "}\n" +
-                    "void main() {\n" +
-                    "    float localX = getLocal(p_worldPos.x);\n" +
-                    "    float localZ = getLocal(p_worldPos.z);\n" +
-                    "    if (!isOuter(localX, u_lineWidth) && !isOuter(localZ, u_lineWidth))\n" +
-                    "        discard;" +
-                    "    if (abs(p_worldPos.x) <= u_lineWidth)\n" +
-                    "        o_color = vec4(1.0, 0.0, 0.0, 1.0);\n" +
-                    "    else if (abs(p_worldPos.z) <= u_lineWidth)\n" +
-                    "        o_color = vec4(0.0, 1.0, 0.0, 1.0);\n" +
-                    "    else\n" +
-                    "        o_color = vec4(u_color, 1.0);\n" +
-                    "}"
-        );
+        this.floorShaderProgram = new AllocatedShaderProgram(FloorVS.content, FloorFS.content);
 
         this.worldPosUl = floorShaderProgram.getUniformLocation("u_worldPos");
         this.viewUl = floorShaderProgram.getUniformLocation("u_view");
