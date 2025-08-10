@@ -1,19 +1,27 @@
-package org.wmb.world;
+package org.wmb;
 
-import org.wmb.WmbInstance;
+import org.wmb.gui.IconToggleComponent;
 import org.wmb.gui.TabComponent;
 import org.wmb.gui.WorldViewComponent;
+import org.wmb.rendering.AllocatedTexture;
 import org.wmb.rendering.gui.GuiRenderer;
+
+import java.io.IOException;
 
 public final class WmbGui {
 
     private final GuiRenderer guiRenderer = new GuiRenderer();
     private final WorldViewComponent mainView;
     private final TabComponent toolPanel;
+    private final IconToggleComponent toggleComponent;
 
-    public WmbGui(int width, int height, WmbInstance instance) {
+    public WmbGui(int width, int height, WmbInstance instance) throws IOException {
         this.mainView = new WorldViewComponent(0, 0, 1, 1, instance.getObjectList());
         this.toolPanel = new TabComponent(0, 0, 1, 1);
+        this.toggleComponent = new IconToggleComponent(0, 0, 1, 1,
+            // TODO Memory leak
+            new AllocatedTexture(ResourceLoader.loadImage("/org/wmb/icons/icon_eye_solid.png")),
+            new AllocatedTexture(ResourceLoader.loadImage("/org/wmb/icons/icon_eye.png")));
 
         resize(width, height);
     }
@@ -22,6 +30,11 @@ public final class WmbGui {
         int viewBorder = (width * 4) / 5;
         this.mainView.setBounds(0, 0, viewBorder, height);
         this.toolPanel.setBounds(viewBorder, 0, width - viewBorder, height);
+
+        final int padding = 8;
+        final int tcSize = 32;
+        this.toggleComponent.setBounds(viewBorder - padding - tcSize, height - padding - tcSize,
+            tcSize, tcSize);
     }
 
     public void render() {
@@ -29,6 +42,7 @@ public final class WmbGui {
 
         this.guiRenderer.begin();
         this.toolPanel.render(this.guiRenderer);
+        this.toggleComponent.render(this.guiRenderer);
         this.guiRenderer.end();
     }
 
@@ -43,5 +57,9 @@ public final class WmbGui {
 
     public TabComponent getToolPanel() {
         return this.toolPanel;
+    }
+
+    public IconToggleComponent getToggleComponent() {
+        return this.toggleComponent;
     }
 }

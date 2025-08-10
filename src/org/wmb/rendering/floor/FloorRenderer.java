@@ -1,11 +1,12 @@
 package org.wmb.rendering.floor;
 
 import org.lwjgl.opengl.GL30;
+import org.wmb.ResourceLoader;
 import org.wmb.rendering.AllocatedShaderProgram;
 import org.wmb.rendering.AllocatedVertexData;
 import org.wmb.rendering.Camera;
-import resources.baked.FloorFS;
-import resources.baked.FloorVS;
+
+import java.io.IOException;
 
 public final class FloorRenderer {
 
@@ -13,7 +14,7 @@ public final class FloorRenderer {
     private final AllocatedShaderProgram floorShaderProgram;
     private final int worldPosUl, viewUl, projectionUl, colorUl, lineWidthUl;
 
-    public FloorRenderer(float floorSize) {
+    public FloorRenderer(float floorSize) throws IOException {
         this.floorVertexData = new AllocatedVertexData(new float[] {
             -floorSize, 0.0f, -floorSize,
             -floorSize, 0.0f, floorSize,
@@ -29,7 +30,9 @@ public final class FloorRenderer {
             2, 3, 0
         });
 
-        this.floorShaderProgram = new AllocatedShaderProgram(FloorVS.content, FloorFS.content);
+        this.floorShaderProgram = new AllocatedShaderProgram(
+            ResourceLoader.loadText("/org/wmb/rendering/floor/floor_renderer_vs.glsl"),
+            ResourceLoader.loadText("/org/wmb/rendering/floor/floor_renderer_fs.glsl"));
 
         this.worldPosUl = floorShaderProgram.getUniformLocation("u_worldPos");
         this.viewUl = floorShaderProgram.getUniformLocation("u_view");

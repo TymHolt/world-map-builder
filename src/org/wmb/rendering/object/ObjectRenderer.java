@@ -1,18 +1,21 @@
 package org.wmb.rendering.object;
 
 import org.lwjgl.opengl.GL30;
+import org.wmb.ResourceLoader;
 import org.wmb.rendering.AllocatedShaderProgram;
 import org.wmb.rendering.Camera;
-import resources.baked.ObjectFS;
-import resources.baked.ObjectVS;
+
+import java.io.IOException;
 
 public final class ObjectRenderer {
 
     private final AllocatedShaderProgram shaderProgram;
     private final int textureUl, transformUl, viewUl, projectionUl;
 
-    public ObjectRenderer() {
-        this.shaderProgram = new AllocatedShaderProgram(ObjectVS.content, ObjectFS.content);
+    public ObjectRenderer() throws IOException {
+        this.shaderProgram = new AllocatedShaderProgram(
+            ResourceLoader.loadText("/org/wmb/rendering/object/object_renderer_vs.glsl"),
+            ResourceLoader.loadText("/org/wmb/rendering/object/object_renderer_fs.glsl"));
 
         this.textureUl = shaderProgram.getUniformLocation("u_texture");
         this.transformUl = shaderProgram.getUniformLocation("u_transform");

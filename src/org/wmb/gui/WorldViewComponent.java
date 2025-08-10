@@ -5,6 +5,7 @@ import org.wmb.rendering.floor.FloorRenderer;
 import org.wmb.rendering.object.ObjectRenderer;
 import org.wmb.world.WorldObject;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class WorldViewComponent {
@@ -15,7 +16,8 @@ public class WorldViewComponent {
     private final Camera camera = new Camera(0.0f, 4.0f, 4.0f, 45.0f, 0.0f, 90.0f, 0.1f, 1024.0f);
     private int x, y, width, height;
 
-    public WorldViewComponent(int x, int y, int width, int height, ArrayList<WorldObject> objectList) {
+    public WorldViewComponent(int x, int y, int width, int height, ArrayList<WorldObject> objectList)
+        throws IOException {
         this.objectList = objectList;
         setBounds(x, y, width, height);
     }

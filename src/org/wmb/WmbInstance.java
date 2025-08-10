@@ -4,13 +4,12 @@ import org.lwjgl.glfw.Callbacks;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL30;
-import org.wmb.gui.WorldViewComponent;
 import org.wmb.rendering.*;
 import org.wmb.world.ObjectTransform;
-import org.wmb.world.WmbGui;
 import org.wmb.world.WorldObject;
 
 import java.awt.*;
+import java.io.IOException;
 import java.util.ArrayList;
 
 public final class WmbInstance {
@@ -39,7 +38,7 @@ public final class WmbInstance {
     private final AllocatedTexture texture;
     private WmbGui gui;
 
-    public WmbInstance() {
+    public WmbInstance() throws IOException {
         GLFW.glfwDefaultWindowHints();
         GLFW.glfwWindowHint(GLFW.GLFW_VISIBLE, GLFW.GLFW_FALSE);
         GLFW.glfwWindowHint(GLFW.GLFW_RESIZABLE, GLFW.GLFW_TRUE);
