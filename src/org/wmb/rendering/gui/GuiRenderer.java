@@ -2,9 +2,7 @@ package org.wmb.rendering.gui;
 
 import org.lwjgl.opengl.GL30;
 import org.wmb.ResourceLoader;
-import org.wmb.rendering.AllocatedShaderProgram;
-import org.wmb.rendering.AllocatedTexture;
-import org.wmb.rendering.AllocatedVertexData;
+import org.wmb.rendering.*;
 
 import java.io.IOException;
 
@@ -12,7 +10,7 @@ public final class GuiRenderer {
 
     private final AllocatedVertexData quadVertexData;
     private final AllocatedShaderProgram quadShaderProgram;
-    private final int colorUl, textureUl, texturedFlagUl;
+    private final int colorUl, textureUl, texturedFlagUl, maskColorFlagUl;
 
     public GuiRenderer() throws IOException {
         this.quadVertexData = new AllocatedVertexData(new float[] {
@@ -37,6 +35,7 @@ public final class GuiRenderer {
         this.colorUl = quadShaderProgram.getUniformLocation("u_color");
         this.textureUl = quadShaderProgram.getUniformLocation("u_texture");
         this.texturedFlagUl = quadShaderProgram.getUniformLocation("u_texturedFlag");
+        this.maskColorFlagUl = quadShaderProgram.getUniformLocation("u_maskColorFlag");
     }
 
     public void delete() {
@@ -53,18 +52,29 @@ public final class GuiRenderer {
         GL30.glDisable(GL30.GL_DEPTH_TEST);
     }
 
-    public void fillQuad(int x, int y, int width, int height, float r, float g, float b, float a) {
+    public void fillQuad(int x, int y, int width, int height, Color color) {
         GL30.glViewport(x, y, width, height);
-        GL30.glUniform4f(this.colorUl, r, g, b, a);
+        AllocatedShaderProgram.uniformColor(this.colorUl, color);
         GL30.glUniform1f(this.texturedFlagUl, 0.0f);
         GL30.glDrawElements(GL30.GL_TRIANGLES, this.quadVertexData.getVertexCount(),
                 GL30.GL_UNSIGNED_SHORT, 0);
     }
 
-    public void fillQuad(int x, int y, int width, int height, AllocatedTexture texture) {
+    public void fillQuad(int x, int y, int width, int height, ITexture texture) {
         GL30.glViewport(x, y, width, height);
         GL30.glBindTexture(GL30.GL_TEXTURE_2D, texture.getId());
         GL30.glUniform1f(this.texturedFlagUl, 1.0f);
+        GL30.glUniform1f(this.maskColorFlagUl, 0.0f);
+        GL30.glDrawElements(GL30.GL_TRIANGLES, this.quadVertexData.getVertexCount(),
+                GL30.GL_UNSIGNED_SHORT, 0);
+    }
+
+    public void fillQuad(int x, int y, int width, int height, ITexture texture, Color color) {
+        GL30.glViewport(x, y, width, height);
+        GL30.glBindTexture(GL30.GL_TEXTURE_2D, texture.getId());
+        AllocatedShaderProgram.uniformColor(this.colorUl, color);
+        GL30.glUniform1f(this.texturedFlagUl, 1.0f);
+        GL30.glUniform1f(this.maskColorFlagUl, 1.0f);
         GL30.glDrawElements(GL30.GL_TRIANGLES, this.quadVertexData.getVertexCount(),
                 GL30.GL_UNSIGNED_SHORT, 0);
     }

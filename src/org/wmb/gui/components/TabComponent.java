@@ -1,5 +1,6 @@
-package org.wmb.gui;
+package org.wmb.gui.components;
 
+import org.wmb.WmbGui;
 import org.wmb.rendering.gui.GuiRenderer;
 
 public class TabComponent implements IGuiComponent {
@@ -20,6 +21,6 @@ public class TabComponent implements IGuiComponent {
 
     @Override
     public void render(GuiRenderer guiRenderer) {
-        guiRenderer.fillQuad(this.x, this.y, this.width, this.height, 0.5f, 0.5f, 0.5f, 1.0f);
+        guiRenderer.fillQuad(this.x, this.y, this.width, this.height, WmbGui.BACKGROUND);
     }
 }

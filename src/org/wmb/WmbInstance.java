@@ -4,6 +4,7 @@ import org.lwjgl.glfw.Callbacks;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL30;
+import org.wmb.gui.Icon;
 import org.wmb.rendering.*;
 import org.wmb.world.ObjectTransform;
 import org.wmb.world.WorldObject;
@@ -87,6 +88,8 @@ public final class WmbInstance {
                 2, 3, 0
             });
         this.texture = new AllocatedTexture(TextureUtil.getDebugBufferedImage());
+
+        Icon.loadAll();
 
         this.objectList.add(new WorldObject(testData, texture,
             new ObjectTransform(0.0f, 1.0f, 0.0f, 45.0f, 0.0f, 45.0f)));

@@ -1,4 +1,4 @@
-package org.wmb.gui;
+package org.wmb.gui.components;
 
 import org.wmb.rendering.Camera;
 import org.wmb.rendering.floor.FloorRenderer;

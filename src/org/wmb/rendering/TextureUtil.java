@@ -1,6 +1,6 @@
 package org.wmb.rendering;
 
-import java.awt.*;
+import java.awt.Color;
 import java.awt.image.BufferedImage;
 
 public final class TextureUtil {

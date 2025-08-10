@@ -67,6 +67,10 @@ public final class AllocatedShaderProgram implements AllocatedData {
         GL30.glDeleteProgram(this.programId);
     }
 
+    public static void uniformColor(int location, Color color) {
+        GL30.glUniform4f(location, color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha());
+    }
+
     public static void uniformMat4(int location, Matrix4f matrix) {
         try (MemoryStack stack = MemoryStack.stackPush()) {
             // 4x4 Matrix -> 16 values

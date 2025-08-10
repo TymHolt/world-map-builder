@@ -6,7 +6,7 @@ import org.lwjgl.system.MemoryUtil;
 import java.awt.image.BufferedImage;
 import java.nio.ByteBuffer;
 
-public final class AllocatedTexture implements AllocatedData {
+public final class AllocatedTexture implements ITexture, AllocatedData {
 
     private final int textureId;
 

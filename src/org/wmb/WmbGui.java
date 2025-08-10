@@ -1,14 +1,18 @@
 package org.wmb;
 
-import org.wmb.gui.IconToggleComponent;
-import org.wmb.gui.TabComponent;
-import org.wmb.gui.WorldViewComponent;
-import org.wmb.rendering.AllocatedTexture;
+import org.wmb.gui.Icon;
+import org.wmb.gui.components.IconToggleComponent;
+import org.wmb.gui.components.TabComponent;
+import org.wmb.gui.components.WorldViewComponent;
+import org.wmb.rendering.Color;
 import org.wmb.rendering.gui.GuiRenderer;
 
 import java.io.IOException;
 
 public final class WmbGui {
+
+    public static final Color BACKGROUND = Color.GREY_DARK;
+    public static final Color FOREGROUND = Color.WHITE;
 
     private final GuiRenderer guiRenderer = new GuiRenderer();
     private final WorldViewComponent mainView;
@@ -18,10 +22,9 @@ public final class WmbGui {
     public WmbGui(int width, int height, WmbInstance instance) throws IOException {
         this.mainView = new WorldViewComponent(0, 0, 1, 1, instance.getObjectList());
         this.toolPanel = new TabComponent(0, 0, 1, 1);
-        this.toggleComponent = new IconToggleComponent(0, 0, 1, 1,
-            // TODO Memory leak
-            new AllocatedTexture(ResourceLoader.loadImage("/org/wmb/icons/icon_eye_solid.png")),
-            new AllocatedTexture(ResourceLoader.loadImage("/org/wmb/icons/icon_eye.png")));
+        this.toggleComponent = new IconToggleComponent(0, 0, 1, 1);
+        this.toggleComponent.setIconOn(Icon.EYE_SOLID);
+        this.toggleComponent.setIconOff(Icon.EYE);
 
         resize(width, height);
     }
