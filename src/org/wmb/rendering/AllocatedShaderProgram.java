@@ -9,6 +9,8 @@ public final class AllocatedShaderProgram implements AllocatedData {
     private final int programId;
 
     public AllocatedShaderProgram(String vsSource, String fsSource) {
+        AllocatedDataGuard.watch(this);
+
         this.programId = GL30.glCreateProgram();
 
         if (this.programId == 0)
@@ -65,6 +67,8 @@ public final class AllocatedShaderProgram implements AllocatedData {
     @Override
     public void delete() {
         GL30.glDeleteProgram(this.programId);
+
+        AllocatedDataGuard.forget(this);
     }
 
     public static void uniformColor(int location, Color color) {

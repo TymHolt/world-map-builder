@@ -44,11 +44,6 @@ public class WorldViewComponent {
         this.objectRenderer.end();
     }
 
-    public void delete() {
-        this.objectRenderer.delete();
-        this.floorRenderer.delete();
-    }
-
     public Camera getCamera() {
         return this.camera;
     }

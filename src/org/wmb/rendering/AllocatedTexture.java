@@ -11,6 +11,8 @@ public final class AllocatedTexture implements ITexture, AllocatedData {
     private final int textureId;
 
     public AllocatedTexture(BufferedImage image) {
+        AllocatedDataGuard.watch(this);
+
         int width = image.getWidth();
         int height = image.getHeight();
         int[] pixelRgbData = image.getRGB(0, 0, width, height, null, 0, width);
@@ -45,5 +47,7 @@ public final class AllocatedTexture implements ITexture, AllocatedData {
     @Override
     public void delete() {
         GL30.glDeleteTextures(this.textureId);
+
+        AllocatedDataGuard.forget(this);
     }
 }

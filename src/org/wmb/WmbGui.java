@@ -49,11 +49,6 @@ public final class WmbGui {
         this.guiRenderer.end();
     }
 
-    public void delete() {
-        this.mainView.delete();
-        this.guiRenderer.delete();
-    }
-
     public WorldViewComponent getMainView() {
         return this.mainView;
     }

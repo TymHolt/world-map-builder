@@ -35,9 +35,7 @@ public final class WmbInstance {
     private long lastUpdateTime = System.currentTimeMillis();
     private final KeyboardCameraController cameraController;
     private final ArrayList<WorldObject> objectList = new ArrayList<>();
-    private final AllocatedVertexData testData;
-    private final AllocatedTexture texture;
-    private WmbGui gui;
+    private final WmbGui gui;
 
     public WmbInstance() throws IOException {
         GLFW.glfwDefaultWindowHints();
@@ -73,7 +71,7 @@ public final class WmbInstance {
 
         this.cameraController = new KeyboardCameraController(this);
 
-        this.testData = new AllocatedVertexData(new float[] {
+        AllocatedVertexData testData = new AllocatedVertexData(new float[] {
                 -0.5f, 0.5f, 0.0f,
                 -0.5f, -0.5f, 0.0f,
                 0.5f, -0.5f, 0.0f,
@@ -87,7 +85,7 @@ public final class WmbInstance {
                 0, 1, 2,
                 2, 3, 0
             });
-        this.texture = new AllocatedTexture(TextureUtil.getDebugBufferedImage());
+        AllocatedTexture texture = new AllocatedTexture(TextureUtil.getDebugBufferedImage());
 
         Icon.loadAll();
 
@@ -148,9 +146,7 @@ public final class WmbInstance {
             Callbacks.glfwFreeCallbacks(windowId);
             GLFW.glfwDestroyWindow(this.windowId);
             WmbInstance.instances.remove(this);
-            this.gui.delete();
-            this.testData.delete();
-            this.texture.delete();
+            AllocatedDataGuard.deleteAll();
         }
     }
 }

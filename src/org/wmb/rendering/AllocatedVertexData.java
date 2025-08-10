@@ -13,6 +13,8 @@ public final class AllocatedVertexData implements AllocatedData {
     private final int vertexCount;
 
     public AllocatedVertexData(float[] positionData, float[] textureCoordData, short[] indexData) {
+        AllocatedDataGuard.watch(this);
+
         vaoId = GL30.glGenVertexArrays();
         GL30.glBindVertexArray(vaoId);
 
@@ -63,5 +65,7 @@ public final class AllocatedVertexData implements AllocatedData {
     public void delete() {
         GL30.glDeleteVertexArrays(vaoId);
         GL30.glDeleteBuffers(vboIds);
+
+        AllocatedDataGuard.forget(this);
     }
 }

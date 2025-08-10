@@ -24,10 +24,9 @@ public enum Icon implements ITexture {
         return texture != null ? texture.getId() : 0;
     }
 
-    public static void loadAll() throws IOException {
+    public static void loadAll() {
         for (Icon icon : Icon.values()) {
             try {
-                // TODO Memory leak
                 icon.texture = new AllocatedTexture(ResourceLoader.loadImage(icon.path));
             } catch(IOException exception) {
                 exception.printStackTrace();
