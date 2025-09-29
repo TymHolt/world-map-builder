@@ -23,8 +23,8 @@ public final class WmbGui {
         this.mainView = new WorldViewComponent(0, 0, 1, 1, instance.getObjectList());
         this.toolPanel = new TabComponent(0, 0, 1, 1);
         this.toggleComponent = new IconToggleComponent(0, 0, 1, 1);
-        this.toggleComponent.setIconOn(Icon.EYE_SOLID);
-        this.toggleComponent.setIconOff(Icon.EYE);
+        this.toggleComponent.setIconOn(instance.getIcons().getTexture(Icon.EYE_SOLID));
+        this.toggleComponent.setIconOff(instance.getIcons().getTexture(Icon.EYE));
 
         resize(width, height);
     }

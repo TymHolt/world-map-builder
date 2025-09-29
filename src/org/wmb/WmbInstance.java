@@ -5,6 +5,7 @@ import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL30;
 import org.wmb.gui.Icon;
+import org.wmb.gui.Icons;
 import org.wmb.rendering.*;
 import org.wmb.world.ObjectTransform;
 import org.wmb.world.WorldObject;
@@ -36,6 +37,7 @@ public final class WmbInstance {
     private final KeyboardCameraController cameraController;
     private final ArrayList<WorldObject> objectList = new ArrayList<>();
     private final WmbGui gui;
+    private final Icons icons;
 
     public WmbInstance() throws IOException {
         GLFW.glfwDefaultWindowHints();
@@ -87,7 +89,7 @@ public final class WmbInstance {
             });
         AllocatedTexture texture = new AllocatedTexture(TextureUtil.getDebugBufferedImage());
 
-        Icon.loadAll();
+        this.icons = new Icons();
 
         this.objectList.add(new WorldObject(testData, texture,
             new ObjectTransform(0.0f, 1.0f, 0.0f, 45.0f, 0.0f, 45.0f)));
@@ -115,6 +117,10 @@ public final class WmbInstance {
 
     public ArrayList<WorldObject> getObjectList() {
         return this.objectList;
+    }
+
+    public Icons getIcons() {
+        return this.icons;
     }
 
     private void update() {

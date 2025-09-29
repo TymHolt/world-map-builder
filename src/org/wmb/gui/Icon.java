@@ -6,31 +6,35 @@ import org.wmb.rendering.ITexture;
 
 import java.io.IOException;
 
-public enum Icon implements ITexture {
+public enum Icon {
 
-    // TODO This is only for one context
     EYE_SOLID("/org/wmb/icons/icon_eye_solid.png"),
     EYE("/org/wmb/icons/icon_eye.png");
 
     private final String path;
-    private AllocatedTexture texture;
+    private int enumIndex;
 
     Icon(String path) {
         this.path = path;
     }
 
-    @Override
-    public int getId() {
-        return texture != null ? texture.getId() : 0;
+    public AllocatedTexture loadAllocatedTexture() throws IOException {
+        return new AllocatedTexture(ResourceLoader.loadImage(this.path));
     }
 
-    public static void loadAll() {
-        for (Icon icon : Icon.values()) {
-            try {
-                icon.texture = new AllocatedTexture(ResourceLoader.loadImage(icon.path));
-            } catch(IOException exception) {
-                exception.printStackTrace();
-            }
-        }
+    public int getEnumIndex() {
+        return this.enumIndex;
+    }
+
+    public static int getEnumValueCount() {
+        return values().length;
+    }
+
+    static {
+        // Assign indices 0 - max value for access in arrays
+        int enumIndex = 0;
+
+        for (Icon icon : Icon.values())
+            icon.enumIndex = enumIndex++;
     }
 }
