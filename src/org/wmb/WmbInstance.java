@@ -6,6 +6,8 @@ import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL30;
 import org.wmb.gui.Icon;
 import org.wmb.gui.Icons;
+import org.wmb.gui.input.MouseButton;
+import org.wmb.gui.input.MouseButtonAction;
 import org.wmb.rendering.*;
 import org.wmb.world.ObjectTransform;
 import org.wmb.world.WorldObject;
@@ -96,6 +98,17 @@ public final class WmbInstance {
 
         this.gui = new WmbGui(this.windowSize.width, this.windowSize.height, this);
 
+        GLFW.glfwSetMouseButtonCallback(this.windowId, (window, button, action, mods) -> {
+            final MouseButton mouseButton = MouseButton.getByGlfwId(button);
+            final MouseButtonAction mouseButtonAction = MouseButtonAction.getByGlfwId(action);
+            final Point mousePosition = this.getMousePosition();
+
+            if (mouseButton == null || mouseButtonAction == null)
+                return;
+
+            this.gui.mouseButtonEvent(mouseButton, mouseButtonAction, mousePosition);
+        });
+
         WmbInstance.instances.add(this);
     }
 
@@ -109,6 +122,18 @@ public final class WmbInstance {
 
     public boolean isKeyPressed(int keyCode) {
         return GLFW.glfwGetKey(this.windowId, keyCode) == GLFW.GLFW_PRESS;
+    }
+
+    public Point getMousePosition() {
+        final double[] xPositionPointer = new double[1];
+        final double[] yPositionPointer = new double[1];
+        GLFW.glfwGetCursorPos(windowId, xPositionPointer, yPositionPointer);
+
+        return new Point((int) xPositionPointer[0], (int) yPositionPointer[0]);
+    }
+
+    public Dimension getWindowSize() {
+        return this.windowSize;
     }
 
     public Camera getCamera() {

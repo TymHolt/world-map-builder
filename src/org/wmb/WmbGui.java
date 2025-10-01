@@ -4,9 +4,12 @@ import org.wmb.gui.Icon;
 import org.wmb.gui.components.IconToggleComponent;
 import org.wmb.gui.components.TabComponent;
 import org.wmb.gui.components.WorldViewComponent;
+import org.wmb.gui.input.MouseButton;
+import org.wmb.gui.input.MouseButtonAction;
 import org.wmb.rendering.Color;
 import org.wmb.rendering.gui.GuiRenderer;
 
+import java.awt.*;
 import java.io.IOException;
 
 public final class WmbGui {
@@ -14,12 +17,14 @@ public final class WmbGui {
     public static final Color BACKGROUND = Color.GREY_DARK;
     public static final Color FOREGROUND = Color.WHITE;
 
-    private final GuiRenderer guiRenderer = new GuiRenderer();
+    private final GuiRenderer guiRenderer;
     private final WorldViewComponent mainView;
     private final TabComponent toolPanel;
     private final IconToggleComponent toggleComponent;
 
     public WmbGui(int width, int height, WmbInstance instance) throws IOException {
+        this.guiRenderer = new GuiRenderer(instance);
+
         this.mainView = new WorldViewComponent(0, 0, 1, 1, instance.getObjectList());
         this.toolPanel = new TabComponent(0, 0, 1, 1);
         this.toggleComponent = new IconToggleComponent(0, 0, 1, 1);
@@ -36,8 +41,11 @@ public final class WmbGui {
 
         final int padding = 8;
         final int tcSize = 32;
-        this.toggleComponent.setBounds(viewBorder - padding - tcSize, height - padding - tcSize,
-            tcSize, tcSize);
+        this.toggleComponent.setBounds(viewBorder - padding - tcSize, padding, tcSize, tcSize);
+    }
+
+    public void mouseButtonEvent(MouseButton button, MouseButtonAction action, Point position) {
+        this.toggleComponent.mouseButtonEvent(button, action, position);
     }
 
     public void render() {

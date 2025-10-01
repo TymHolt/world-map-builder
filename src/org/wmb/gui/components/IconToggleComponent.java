@@ -1,11 +1,15 @@
 package org.wmb.gui.components;
 
 import org.wmb.WmbGui;
+import org.wmb.gui.input.MouseButton;
+import org.wmb.gui.input.MouseButtonAction;
 import org.wmb.rendering.Color;
 import org.wmb.rendering.ITexture;
 import org.wmb.rendering.gui.GuiRenderer;
 
-public class IconToggleComponent implements IGuiComponent {
+import java.awt.*;
+
+public class IconToggleComponent implements IGuiComponent, IInputComponent {
 
     private int x, y, width, height;
     private boolean onState = false;
@@ -41,6 +45,15 @@ public class IconToggleComponent implements IGuiComponent {
             if (this.iconOff != null)
                 guiRenderer.fillQuad(this.x, this.y, this.width, this.height, this.iconOff, this.colorOff);
         }
+    }
+
+    @Override
+    public void mouseButtonEvent(MouseButton button, MouseButtonAction action, Point position) {
+        if (action != MouseButtonAction.PRESS || button != MouseButton.LEFT)
+            return;
+
+        if (x <= position.x && y <= position.y && x + width > position.x && y + height > position.y)
+            this.onState = !this.onState;
     }
 
     public void setOn(boolean onState) {
