@@ -1,7 +1,6 @@
 package org.wmb.world;
 
 import org.joml.Matrix4f;
-import org.wmb.debug.Assert;
 import org.wmb.rendering.AllocatedTexture;
 import org.wmb.rendering.AllocatedVertexData;
 import org.wmb.rendering.object.IRenderObject;
@@ -15,9 +14,9 @@ public final class WorldObject implements IRenderObject {
     public WorldObject(AllocatedVertexData model, AllocatedTexture material,
         ObjectTransform transform) {
 
-        Assert.argNotNull(model, "model");
+        /*Assert.argNotNull(model, "model");
         Assert.argNotNull(material, "material");
-        Assert.argNotNull(transform, "transform");
+        Assert.argNotNull(transform, "transform");*/
 
         this.model = model;
         this.material = material;

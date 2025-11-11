@@ -1,37 +1,82 @@
 package org.wmb;
 
-import org.lwjgl.Version;
-import org.lwjgl.glfw.GLFW;
-import org.lwjgl.glfw.GLFWErrorCallback;
-
-import java.io.IOException;
+import org.wmb.util.CallbackManager;
 
 public final class Main {
 
-    private static final long MAX_UPS = 30L;
+    public static void main(String[] args) {
+        try {
+            handleArguments(args);
 
-    public static void main(String[] args) throws IOException {
-        System.out.println("LWJGL Version: " + Version.getVersion());
-        GLFWErrorCallback.createPrint(System.err).set();
+            if (isDebugEnabled()) {
+                Log.debug("Debug enabled");
+                Log.debug("Running max UPS: " + Main.maxUps);
+            }
 
-        if (!GLFW.glfwInit())
-            throw new IllegalStateException("GLFW could not be initialized");
+            final WmbContext context = new WmbContext();
 
-        new WmbInstance();
+            while (context.isActive()) {
+                context.update();
+                enforceMaxUps();
+            }
 
-        while (WmbInstance.hasInstances()) {
-            WmbInstance.updateAllInstances();
+            Main.onExitCallbacks.executeAll();
+        } catch(Exception exception) {
+            Log.error("(Internal) " + exception.getMessage());
+            Log.debug(exception);
+        }
+    }
 
-            try {
-                Thread.sleep(1000L / MAX_UPS);
-            } catch (InterruptedException exception) {
-                // More error handling not needed
-                // Code will only run with higher updates per second
-                exception.printStackTrace();
+    private static void handleArguments(String[] arguments) {
+        for (String argument : arguments) {
+            switch (argument) {
+                case "-debug":
+                case "--debug":
+                case "-d":
+                    debugEnabled = true;
+                    break;
+
+                default:
+                    if (argument.startsWith("-ups")) {
+                        final String upsString = argument.substring("-ups".length());
+                        final Integer ups = stringToInt(upsString);
+
+                        if (ups == null || ups <= 0)
+                            throw new IllegalArgumentException("Not a valid UPS value: " + ups);
+
+                        Main.maxUps = ups;
+                        break;
+                    }
+
+                    Log.error("Unknown argument: " + argument);
+                    throw new IllegalArgumentException("Unknown argument");
             }
         }
+    }
 
-        GLFW.glfwTerminate();
-        GLFW.glfwSetErrorCallback(null).free();
+    private static boolean debugEnabled = false;
+
+    public static boolean isDebugEnabled() {
+        return debugEnabled;
+    }
+
+    private static final CallbackManager onExitCallbacks = new CallbackManager();
+
+    public static void executeOnExit(Runnable runnable) {
+        Main.onExitCallbacks.register(runnable);
+    }
+
+    private static int maxUps = 30;
+
+    private static void enforceMaxUps() throws InterruptedException {
+        Thread.sleep(1000 / Main.maxUps);
+    }
+
+    private static Integer stringToInt(String string) {
+        try {
+            return Integer.parseInt(string);
+        } catch(Exception exception) {
+            return null;
+        }
     }
 }
