@@ -1,4 +1,4 @@
-package org.wmb;
+package org.wmb.core;
 
 import org.lwjgl.glfw.Callbacks;
 import org.lwjgl.glfw.GLFW;
@@ -24,9 +24,8 @@ public final class Window {
     }
 
     private final long windowId;
-    private final Dimension windowSize;
 
-    public Window(int width, int height, String title) {
+    Window(int width, int height, String title) {
         if (width < 1 || height < 1)
             throw new IllegalArgumentException("Illegal dimension " + width + "x" + height);
 
@@ -34,23 +33,13 @@ public final class Window {
             title = "";
 
         setGlfwFlags();
-
-        this.windowSize = new Dimension(width, height);
         this.windowId = GLFW.glfwCreateWindow(width, height, title, 0, 0);
-
         centerWindow();
 
         GLFW.glfwMakeContextCurrent(this.windowId);
         GLFW.glfwSwapInterval(1);
         GLFW.glfwShowWindow(this.windowId);
         GL.createCapabilities();
-
-        GLFW.glfwSetFramebufferSizeCallback(this.windowId, (window, newWidth, newHeight) -> {
-            this.windowSize.width = width;
-            this.windowSize.height = height;
-
-            // TODO Handle event, WindowListener?
-        });
 
         GLFW.glfwSetMouseButtonCallback(this.windowId, (window, button, action, mods) -> {
             final MouseButton mouseButton = MouseButton.getByGlfwId(button);
@@ -64,20 +53,20 @@ public final class Window {
         });
     }
 
-    public void makeContextCurrent() {
+    void makeContextCurrent() {
         GLFW.glfwMakeContextCurrent(this.windowId);
     }
 
-    public void update() {
+    void update() {
         GLFW.glfwSwapBuffers(this.windowId);
         GLFW.glfwPollEvents();
     }
 
-    public boolean wasCloseRequested() {
+    boolean wasCloseRequested() {
         return GLFW.glfwWindowShouldClose(this.windowId);
     }
 
-    public void close() {
+    void close() {
         Callbacks.glfwFreeCallbacks(windowId);
         GLFW.glfwDestroyWindow(this.windowId);
     }
@@ -95,14 +84,18 @@ public final class Window {
     }
 
     public Dimension getSize() {
-        return new Dimension(this.windowSize);
+        final int[] widthPointer = new int[1];
+        final int[] heightPointer = new int[1];
+        GLFW.glfwGetFramebufferSize(windowId, widthPointer, heightPointer);
+        return new Dimension(widthPointer[0], heightPointer[0]);
     }
 
     private void centerWindow() {
         final Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        final Dimension windowSize = getSize();
         GLFW.glfwSetWindowPos(this.windowId,
-            (screenSize.width - this.windowSize.width) / 2,
-            (screenSize.height - this.windowSize.height) / 2);
+            (screenSize.width - windowSize.width) / 2,
+            (screenSize.height - windowSize.height) / 2);
     }
 
     private static void setGlfwFlags() {

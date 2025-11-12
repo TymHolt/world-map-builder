@@ -1,10 +1,17 @@
-package org.wmb;
+package org.wmb.core;
 
 import org.wmb.util.CallbackManager;
 
 public final class Main {
 
+    private static boolean mainCalled = false;
+
     public static void main(String[] args) {
+        if (Main.mainCalled)
+            throw new IllegalStateException("Main called again");
+
+        mainCalled = true;
+
         try {
             handleArguments(args);
 
@@ -13,10 +20,10 @@ public final class Main {
                 Log.debug("Running max UPS: " + Main.maxUps);
             }
 
-            final WmbContext context = new WmbContext();
-
-            while (context.isActive()) {
-                context.update();
+            // TODO Multiple context lead to JVM natives crash
+            new WmbContext();
+            while (WmbContext.activeContextExists()) {
+                WmbContext.updateAll();
                 enforceMaxUps();
             }
 
