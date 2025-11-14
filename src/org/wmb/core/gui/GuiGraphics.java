@@ -37,8 +37,8 @@ public final class GuiGraphics {
         });
 
         this.quadShaderProgram = new AllocatedShaderProgram(
-            ResourceLoader.loadText("/org/wmb/core/gui/wmb_graphics_quad_vs.glsl"),
-            ResourceLoader.loadText("/org/wmb/core/gui/wmb_graphics_quad_fs.glsl"));
+            ResourceLoader.loadText("/org/wmb/core/gui/gui_graphics_quad_vs.glsl"),
+            ResourceLoader.loadText("/org/wmb/core/gui/gui_graphics_quad_fs.glsl"));
 
         this.colorUl = quadShaderProgram.getUniformLocation("u_color");
         this.textureUl = quadShaderProgram.getUniformLocation("u_texture");

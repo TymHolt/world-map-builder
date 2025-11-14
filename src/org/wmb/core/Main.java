@@ -1,6 +1,6 @@
 package org.wmb.core;
 
-import org.wmb.util.CallbackManager;
+import org.wmb.common.util.CallbackManager;
 
 public final class Main {
 

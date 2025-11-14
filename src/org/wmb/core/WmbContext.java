@@ -1,6 +1,7 @@
 package org.wmb.core;
 
 import org.wmb.core.gui.MainGui;
+import org.wmb.common.gui.Window;
 
 import java.awt.*;
 import java.io.IOException;
@@ -9,14 +10,14 @@ import java.util.List;
 
 public final class WmbContext {
 
-    private final Window window;
+    private final org.wmb.common.gui.Window window;
     private final MainGui gui;
     private boolean active;
 
     WmbContext() throws IOException {
         this.active = true;
         final Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-        this.window = new Window(screenSize.width * 2 / 3, screenSize.height * 2 / 3,
+        this.window = new org.wmb.common.gui.Window(screenSize.width * 2 / 3, screenSize.height * 2 / 3,
             "World Map Builder");
 
         this.window.makeContextCurrent();
