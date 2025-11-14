@@ -90,6 +90,16 @@ public final class Window {
         return new Dimension(widthPointer[0], heightPointer[0]);
     }
 
+    public void setMinimumSize(int width, int height) {
+        GLFW.glfwSetWindowSizeLimits(this.windowId, width, height, GLFW.GLFW_DONT_CARE,
+            GLFW.GLFW_DONT_CARE);
+    }
+
+    public void removeMinimumSize() {
+        GLFW.glfwSetWindowSizeLimits(this.windowId, GLFW.GLFW_DONT_CARE, GLFW.GLFW_DONT_CARE,
+            GLFW.GLFW_DONT_CARE, GLFW.GLFW_DONT_CARE);
+    }
+
     private void centerWindow() {
         final Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         final Dimension windowSize = getSize();

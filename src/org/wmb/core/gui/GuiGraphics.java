@@ -1,7 +1,8 @@
-package org.wmb.core;
+package org.wmb.core.gui;
 
 import org.lwjgl.opengl.GL30;
 import org.wmb.ResourceLoader;
+import org.wmb.core.WmbContext;
 import org.wmb.rendering.AllocatedShaderProgram;
 import org.wmb.rendering.AllocatedVertexData;
 import org.wmb.rendering.Color;
@@ -10,14 +11,14 @@ import org.wmb.rendering.ITexture;
 import java.awt.*;
 import java.io.IOException;
 
-public final class WmbGraphics {
+public final class GuiGraphics {
 
     private final WmbContext context;
     private final AllocatedVertexData quadVertexData;
     private final AllocatedShaderProgram quadShaderProgram;
     private final int colorUl, textureUl, texturedFlagUl, maskColorFlagUl;
 
-    WmbGraphics(WmbContext context) throws IOException {
+    GuiGraphics(WmbContext context) throws IOException {
         this.context = context;
 
         this.quadVertexData = new AllocatedVertexData(new float[] {
@@ -36,8 +37,8 @@ public final class WmbGraphics {
         });
 
         this.quadShaderProgram = new AllocatedShaderProgram(
-            ResourceLoader.loadText("/org/wmb/core/wmb_graphics_quad_vs.glsl"),
-            ResourceLoader.loadText("/org/wmb/core/wmb_graphics_quad_fs.glsl"));
+            ResourceLoader.loadText("/org/wmb/core/gui/wmb_graphics_quad_vs.glsl"),
+            ResourceLoader.loadText("/org/wmb/core/gui/wmb_graphics_quad_fs.glsl"));
 
         this.colorUl = quadShaderProgram.getUniformLocation("u_color");
         this.textureUl = quadShaderProgram.getUniformLocation("u_texture");

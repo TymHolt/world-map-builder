@@ -1,4 +1,4 @@
-package org.wmb.core;
+package org.wmb.core.gui;
 
 import org.wmb.rendering.Color;
 

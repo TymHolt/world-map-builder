@@ -1,12 +1,12 @@
 package org.wmb.gui.component;
 
-import org.wmb.core.WmbGraphics;
+import org.wmb.core.gui.GuiGraphics;
 import org.wmb.rendering.Color;
 
 import java.awt.*;
 import java.util.Objects;
 
-public class Component {
+public abstract class Component {
 
     private final Rectangle bounds;
     private Color background;
@@ -27,9 +27,17 @@ public class Component {
         this.bounds.setBounds(x, y, width, height);
     }
 
+    public Rectangle getBounds() {
+        return this.bounds;
+    }
+
     public void setBackground(Color color) {
         Objects.requireNonNull(color, "Color is null");
         this.background = color;
+    }
+
+    public Color getBackground() {
+        return this.background;
     }
 
     public void setBorder(Border border) {
@@ -37,7 +45,13 @@ public class Component {
         this.border = new Border(border);
     }
 
-    public void draw(WmbGraphics graphics) {
+    public Border getBorder() {
+        return this.border;
+    }
+
+    public abstract Dimension getRequestedSize();
+
+    public void draw(GuiGraphics graphics) {
         Objects.requireNonNull(graphics, "Graphics is null");
         graphics.fillQuadColor(this.border.getInner(bounds), this.background);
         this.border.draw(graphics, this.bounds);

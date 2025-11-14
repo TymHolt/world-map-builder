@@ -1,8 +1,6 @@
 package org.wmb.core;
 
-import org.wmb.gui.component.Border;
-import org.wmb.gui.component.Component;
-import org.wmb.rendering.Color;
+import org.wmb.core.gui.MainGui;
 
 import java.awt.*;
 import java.io.IOException;
@@ -12,15 +10,18 @@ import java.util.List;
 public final class WmbContext {
 
     private final Window window;
-    private final WmbGraphics graphics;
+    private final MainGui gui;
     private boolean active;
 
     WmbContext() throws IOException {
         this.active = true;
         final Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-        this.window = new Window(screenSize.width / 2, screenSize.height / 2, "World Map Builder");
+        this.window = new Window(screenSize.width * 2 / 3, screenSize.height * 2 / 3,
+            "World Map Builder");
+
         this.window.makeContextCurrent();
-        this.graphics = new WmbGraphics(this);
+        this.gui = new MainGui(this);
+
         addContext(this);
     }
 
@@ -28,9 +29,8 @@ public final class WmbContext {
         return this.window;
     }
 
-    public WmbGraphics getGraphics() {
-        return this.graphics;
-    }
+    private int lastWidth = -1;
+    private int lastHeight = -1;
 
     private void update() {
         if (!this.active)
@@ -39,25 +39,21 @@ public final class WmbContext {
         if (this.window.wasCloseRequested()) {
             this.active = false;
             this.window.makeContextCurrent();
-            this.graphics.deleteResources();
+            this.gui.dispose();
             this.window.close();
             removeContext(this);
             return;
         }
 
         this.window.makeContextCurrent();
+        final Dimension windowSize = this.window.getSize();;
+        if (this.lastWidth != windowSize.width || this.lastHeight != windowSize.height) {
+            this.lastWidth = windowSize.width;
+            this.lastHeight = windowSize.height;
+            this.gui.resize(windowSize);
+        }
 
-        this.graphics.preparePipeline();
-
-        final Component component = new Component();
-        component.setBackground(Color.GREY);
-        component.setBounds(10, 10, 100, 100);
-        component.setBorder(new Border(3, Color.WHITE));
-
-        component.draw(this.graphics);
-
-        this.graphics.resetPipeline();
-
+        this.gui.draw();
         this.window.update();
     }
 

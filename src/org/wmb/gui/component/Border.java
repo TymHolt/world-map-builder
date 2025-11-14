@@ -1,6 +1,6 @@
 package org.wmb.gui.component;
 
-import org.wmb.core.WmbGraphics;
+import org.wmb.core.gui.GuiGraphics;
 import org.wmb.rendering.Color;
 
 import java.awt.*;
@@ -65,7 +65,7 @@ public class Border {
         return new Rectangle(x, y, width, height);
     }
 
-    public void draw(WmbGraphics graphics, Rectangle bounds) {
+    public void draw(GuiGraphics graphics, Rectangle bounds) {
         Objects.requireNonNull(graphics, "Graphics is null");
         Objects.requireNonNull(bounds, "Bounds is null");
 
@@ -73,11 +73,11 @@ public class Border {
             graphics.fillQuadColor(bounds.x, bounds.y, bounds.width, top, this.color);
 
         if (bottom > 0)
-            graphics.fillQuadColor(bounds.x, bounds.y + bounds.height - top, bounds.width, top,
-                this.color);
+            graphics.fillQuadColor(bounds.x, bounds.y + bounds.height - bottom, bounds.width,
+                bottom, this.color);
 
         if (left > 0)
-            graphics.fillQuadColor(bounds.x, bounds.y, right, bounds.height, this.color);
+            graphics.fillQuadColor(bounds.x, bounds.y, left, bounds.height, this.color);
 
         if (right > 0)
             graphics.fillQuadColor(bounds.x + bounds.width - right, bounds.y, right, bounds.height,
