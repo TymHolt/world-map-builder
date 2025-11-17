@@ -1,6 +1,10 @@
 package org.wmb.core.gui.component;
 
 import org.lwjgl.opengl.GL30;
+import org.wmb.common.gui.input.MouseButton;
+import org.wmb.common.gui.input.MouseButtonAction;
+import org.wmb.common.gui.input.MouseClickEvent;
+import org.wmb.common.gui.input.MouseMoveEvent;
 import org.wmb.core.gui.GuiGraphics;
 import org.wmb.editor.Scene3d;
 import org.wmb.editor.element.Element;
@@ -19,11 +23,15 @@ public final class SceneView3dComponent extends Component {
     private AllocatedFramebuffer framebuffer;
     private final Object3dElementRenderer object3dElementRenderer;
     private final Camera camera;
+    private boolean rotatingCamera;
+    private float fov;
 
     public SceneView3dComponent() throws IOException {
         this.framebuffer = new AllocatedFramebuffer(2, 2);
         this.object3dElementRenderer = new Object3dElementRenderer();
-        this.camera = new Camera(0.0f, 0.0f, 3.0f, 0.0f, 0.0f, 70.0f, 0.1f, 16.0f);
+        this.fov = 70.0f;
+        this.camera = new Camera(0.0f, 0.0f, 3.0f, 0.0f, 0.0f, this.fov, 0.1f, 16.0f);
+        this.rotatingCamera = false;
     }
 
     public void renderScene(Scene3d scene) {
@@ -78,13 +86,36 @@ public final class SceneView3dComponent extends Component {
         this.framebuffer = new AllocatedFramebuffer(width, height);
     }
 
-    @Override
-    public Dimension getRequestedSize() {
-        return new Dimension(1, 1);
-    }
-
     public void dispose() {
         this.object3dElementRenderer.delete();
         this.framebuffer.delete();
+    }
+
+    @Override
+    public void onMouseClick(MouseClickEvent event) {
+        if (event.button != MouseButton.MIDDLE)
+            return;
+
+        this.rotatingCamera = event.action == MouseButtonAction.PRESS;
+    }
+
+    @Override
+    public void onMouseMove(MouseMoveEvent event) {
+        if (!this.rotatingCamera)
+            return;
+
+        final int dx = event.xTo - event.xFrom;
+        final int dy = event.yTo - event.yFrom;
+        final Rectangle bounds = getBounds();
+        final float dxf = (float) dx / (float) bounds.width;
+        final float dyf = (float) dy / (float) bounds.height;
+
+        this.camera.setPitch(this.camera.getPitch() + (dyf * this.fov));
+        this.camera.setYaw(this.camera.getYaw() + (dxf * -this.fov));
+    }
+
+    @Override
+    public void onLooseFocus() {
+        this.rotatingCamera = false;
     }
 }

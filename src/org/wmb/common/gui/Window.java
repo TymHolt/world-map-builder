@@ -4,6 +4,8 @@ import org.lwjgl.glfw.Callbacks;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL;
+import org.wmb.common.gui.input.MouseClickEvent;
+import org.wmb.common.gui.input.MouseMoveEvent;
 import org.wmb.core.Main;
 import org.wmb.common.gui.input.MouseButton;
 import org.wmb.common.gui.input.MouseButtonAction;
@@ -25,6 +27,9 @@ public final class Window {
     }
 
     private final long windowId;
+    private WindowListener inputListener;
+    private int xFrom;
+    private int yFrom;
 
     public Window(int width, int height, String title) {
         if (width < 1 || height < 1)
@@ -47,10 +52,28 @@ public final class Window {
             final MouseButtonAction mouseButtonAction = MouseButtonAction.getByGlfwId(action);
             final Point mousePosition = this.getMousePosition();
 
-            if (mouseButton == null || mouseButtonAction == null)
+            if (mouseButton == null || mouseButtonAction == null || inputListener == null)
                 return;
 
-            // TODO Handle event, WindowListener?
+            final MouseClickEvent event = new MouseClickEvent(mouseButton, mouseButtonAction,
+                mousePosition.x, mousePosition.y);
+            this.inputListener.mouseClick(event);
+        });
+
+        final Point mousePosition = getMousePosition();
+        this.xFrom = mousePosition.x;
+        this.yFrom = mousePosition.y;
+
+        GLFW.glfwSetCursorPosCallback(this.windowId, (window, xToDouble, yToDouble) -> {
+            if (this.inputListener == null)
+                return;
+
+            final int xTo = (int) xToDouble;
+            final int yTo = (int) yToDouble;
+            final MouseMoveEvent event = new MouseMoveEvent(this.xFrom, this.yFrom, xTo, yTo);
+            this.xFrom = xTo;
+            this.yFrom = yTo;
+            this.inputListener.mouseMove(event);
         });
     }
 
@@ -99,6 +122,10 @@ public final class Window {
     public void removeMinimumSize() {
         GLFW.glfwSetWindowSizeLimits(this.windowId, GLFW.GLFW_DONT_CARE, GLFW.GLFW_DONT_CARE,
             GLFW.GLFW_DONT_CARE, GLFW.GLFW_DONT_CARE);
+    }
+
+    public void setInputListener(WindowListener inputListener) {
+        this.inputListener = inputListener;
     }
 
     private void centerWindow() {

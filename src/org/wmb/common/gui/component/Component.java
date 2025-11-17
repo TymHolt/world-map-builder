@@ -1,12 +1,14 @@
 package org.wmb.common.gui.component;
 
+import org.wmb.common.gui.input.MouseClickEvent;
+import org.wmb.common.gui.input.MouseMoveEvent;
 import org.wmb.core.gui.GuiGraphics;
 import org.wmb.rendering.Color;
 
 import java.awt.*;
 import java.util.Objects;
 
-public abstract class Component {
+public class Component {
 
     private final Rectangle bounds;
     private Color background;
@@ -49,11 +51,29 @@ public abstract class Component {
         return this.border;
     }
 
-    public abstract Dimension getRequestedSize();
+    public Dimension getRequestedSize() {
+        return new Dimension(1, 1);
+    }
 
     public void draw(GuiGraphics graphics) {
         Objects.requireNonNull(graphics, "Graphics is null");
         graphics.fillQuadColor(this.border.getInner(bounds), this.background);
         this.border.draw(graphics, this.bounds);
+    }
+
+    public void onMouseClick(MouseClickEvent event) {
+
+    }
+
+    public void onMouseMove(MouseMoveEvent event) {
+
+    }
+
+    public void onGainFocus() {
+
+    }
+
+    public void onLooseFocus() {
+
     }
 }

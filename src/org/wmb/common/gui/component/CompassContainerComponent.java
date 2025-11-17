@@ -1,12 +1,18 @@
 package org.wmb.common.gui.component;
 
+import org.wmb.common.gui.input.InputHandleHelper;
+import org.wmb.common.gui.input.MouseClickEvent;
+import org.wmb.common.gui.input.MouseMoveEvent;
 import org.wmb.core.gui.GuiGraphics;
 import org.wmb.rendering.Color;
 
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class CompassContainerComponent extends Component {
 
+    private final InputHandleHelper inputHelper;
     private Component north;
     private Component south;
     private Component west;
@@ -15,6 +21,17 @@ public class CompassContainerComponent extends Component {
 
     public CompassContainerComponent() {
         setBorder(new Border(0, Color.BLACK));
+        this.inputHelper = new InputHandleHelper();
+    }
+
+    private void updateInputHelper() {
+        final List<Component> components = new ArrayList<>();
+        components.add(this.north);
+        components.add(this.south);
+        components.add(this.west);
+        components.add(this.east);
+        components.add(this.center);
+        inputHelper.setComponents(components);
     }
 
     @Override
@@ -118,21 +135,46 @@ public class CompassContainerComponent extends Component {
 
     public void setNorth(Component component) {
         this.north = component;
+        updateInputHelper();
     }
 
     public void setSouth(Component component) {
         this.south = component;
+        updateInputHelper();
     }
 
     public void setWest(Component component) {
         this.west = component;
+        updateInputHelper();
     }
 
     public void setEast(Component component) {
         this.east = component;
+        updateInputHelper();
     }
 
     public void setCenter(Component component) {
         this.center = component;
+        updateInputHelper();
+    }
+
+    @Override
+    public void onMouseClick(MouseClickEvent event) {
+        this.inputHelper.handleMouseClick(event);
+    }
+
+    @Override
+    public void onMouseMove(MouseMoveEvent event) {
+        this.inputHelper.handleMouseMove(event);
+    }
+
+    @Override
+    public void onGainFocus() {
+        this.inputHelper.handleGainFocus();
+    }
+
+    @Override
+    public void onLooseFocus() {
+        this.inputHelper.handleLooseFocus();
     }
 }

@@ -1,5 +1,8 @@
 package org.wmb.core.gui;
 
+import org.wmb.common.gui.WindowListener;
+import org.wmb.common.gui.input.MouseClickEvent;
+import org.wmb.common.gui.input.MouseMoveEvent;
 import org.wmb.core.WmbContext;
 import org.wmb.core.gui.component.ElementInspectorComponent;
 import org.wmb.core.gui.component.SceneTreeComponent;
@@ -45,6 +48,19 @@ public final class MainGui {
 
         this.scene = new Scene3d();
         this.scene.getChildren().add(new Object3dElement(this.scene));
+
+        context.getWindow().setInputListener(new WindowListener() {
+
+            @Override
+            public void mouseClick(MouseClickEvent event) {
+                container.onMouseClick(event);
+            }
+
+            @Override
+            public void mouseMove(MouseMoveEvent event) {
+                container.onMouseMove(event);
+            }
+        });
     }
 
     public void resize(Dimension dimension) {
