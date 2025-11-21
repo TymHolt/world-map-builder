@@ -1,9 +1,7 @@
-package org.wmb.core.gui.component;
+package org.wmb.gui.component;
 
-import org.wmb.core.gui.GuiGraphics;
-import org.wmb.core.gui.Theme;
-import org.wmb.common.gui.component.Border;
-import org.wmb.common.gui.component.Component;
+import org.wmb.gui.GuiGraphics;
+import org.wmb.gui.Theme;
 
 import java.awt.*;
 

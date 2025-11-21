@@ -1,6 +1,6 @@
-package org.wmb.common.gui.input;
+package org.wmb.gui.input;
 
-import org.wmb.common.gui.component.Component;
+import org.wmb.gui.component.Component;
 
 import java.awt.*;
 import java.util.ArrayList;

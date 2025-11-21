@@ -1,6 +1,8 @@
-package org.wmb.core.gui;
+package org.wmb.gui;
 
 import org.wmb.rendering.Color;
+
+import java.awt.*;
 
 public final class Theme {
 
@@ -10,4 +12,7 @@ public final class Theme {
         new Color(230.0f / 255.0f, 230.0f / 255.0f, 230.0f / 255.0f, 1.0f);
     public static final Color BORDER =
         new Color(60.0f / 255.0f, 60.0f / 255.0f, 65.0f / 255.0f, 1.0f);
+    public static final Color HIGHLIGHT =
+        new Color(100.0f / 255.0f, 150.0f / 255.0f, 250.0f / 255.0f, 1.0f);
+    public static final Font font = new Font("", Font.PLAIN, 12);
 }

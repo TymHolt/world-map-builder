@@ -1,7 +1,9 @@
-package org.wmb.core;
+package org.wmb;
 
-import org.wmb.core.gui.MainGui;
-import org.wmb.common.gui.Window;
+import org.wmb.editor.Scene3d;
+import org.wmb.editor.element.Object3dElement.Object3dElement;
+import org.wmb.gui.MainGui;
+import org.wmb.gui.Window;
 
 import java.awt.*;
 import java.io.IOException;
@@ -10,17 +12,22 @@ import java.util.List;
 
 public final class WmbContext {
 
-    private final org.wmb.common.gui.Window window;
+    private Scene3d scene;
+    private final Window window;
     private final MainGui gui;
     private boolean active;
 
     WmbContext() throws IOException {
         this.active = true;
         final Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-        this.window = new org.wmb.common.gui.Window(screenSize.width * 2 / 3, screenSize.height * 2 / 3,
+        this.window = new Window(screenSize.width * 2 / 3, screenSize.height * 2 / 3,
             "World Map Builder");
 
         this.window.makeContextCurrent();
+
+        this.scene = new Scene3d();
+        this.scene.getChildren().add(new Object3dElement(this.scene));
+
         this.gui = new MainGui(this);
 
         addContext(this);
@@ -28,6 +35,10 @@ public final class WmbContext {
 
     public Window getWindow() {
         return this.window;
+    }
+
+    public Scene3d getScene() {
+        return this.scene;
     }
 
     private int lastWidth = -1;

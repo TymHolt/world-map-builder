@@ -54,6 +54,7 @@ public class Object3dElementRenderer {
         GL30.glUniform1i(this.textureUl, 0);
         GL30.glActiveTexture(GL30.GL_TEXTURE0);
         GL30.glEnable(GL30.GL_DEPTH_TEST);
+        GL30.glDisable(GL30.GL_BLEND);
     }
 
     public void uniformCamera(Camera camera, float aspect) {

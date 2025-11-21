@@ -1,7 +1,7 @@
-package org.wmb.common.gui;
+package org.wmb.gui;
 
-import org.wmb.common.gui.input.MouseClickEvent;
-import org.wmb.common.gui.input.MouseMoveEvent;
+import org.wmb.gui.input.MouseClickEvent;
+import org.wmb.gui.input.MouseMoveEvent;
 
 public interface WindowListener {
 

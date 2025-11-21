@@ -1,4 +1,4 @@
-package org.wmb.common.gui;
+package org.wmb.gui;
 
 import org.wmb.ResourceLoader;
 import org.wmb.rendering.AllocatedTexture;

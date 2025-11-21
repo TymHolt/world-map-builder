@@ -1,4 +1,4 @@
-package org.wmb.common.gui.input;
+package org.wmb.gui.input;
 
 import java.util.Objects;
 

@@ -1,16 +1,15 @@
-package org.wmb.core.gui.component;
+package org.wmb.gui.component;
 
 import org.lwjgl.opengl.GL30;
-import org.wmb.common.gui.input.MouseButton;
-import org.wmb.common.gui.input.MouseButtonAction;
-import org.wmb.common.gui.input.MouseClickEvent;
-import org.wmb.common.gui.input.MouseMoveEvent;
-import org.wmb.core.gui.GuiGraphics;
+import org.wmb.gui.input.MouseButton;
+import org.wmb.gui.input.MouseButtonAction;
+import org.wmb.gui.input.MouseClickEvent;
+import org.wmb.gui.input.MouseMoveEvent;
+import org.wmb.gui.GuiGraphics;
 import org.wmb.editor.Scene3d;
 import org.wmb.editor.element.Element;
 import org.wmb.editor.element.Object3dElement.Object3dElement;
 import org.wmb.editor.element.Object3dElement.Object3dElementRenderer;
-import org.wmb.common.gui.component.Component;
 import org.wmb.rendering.AllocatedFramebuffer;
 import org.wmb.rendering.Camera;
 

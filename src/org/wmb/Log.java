@@ -1,4 +1,4 @@
-package org.wmb.core;
+package org.wmb;
 
 public final class Log {
 

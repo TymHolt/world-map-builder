@@ -1,8 +1,9 @@
-package org.wmb.core.gui;
+package org.wmb.gui;
 
+import org.joml.Vector4f;
 import org.lwjgl.opengl.GL30;
 import org.wmb.ResourceLoader;
-import org.wmb.core.WmbContext;
+import org.wmb.WmbContext;
 import org.wmb.rendering.AllocatedShaderProgram;
 import org.wmb.rendering.AllocatedVertexData;
 import org.wmb.rendering.Color;
@@ -10,13 +11,15 @@ import org.wmb.rendering.ITexture;
 
 import java.awt.*;
 import java.io.IOException;
+import java.util.Objects;
 
 public final class GuiGraphics {
 
     private final WmbContext context;
     private final AllocatedVertexData quadVertexData;
     private final AllocatedShaderProgram quadShaderProgram;
-    private final int colorUl, textureUl, texturedFlagUl, maskColorFlagUl;
+    private final AllocatedFont font;
+    private final int colorUl, textureUl, texturedFlagUl, maskColorFlagUl, subTextureCoordUl;
 
     GuiGraphics(WmbContext context) throws IOException {
         this.context = context;
@@ -37,13 +40,16 @@ public final class GuiGraphics {
         });
 
         this.quadShaderProgram = new AllocatedShaderProgram(
-            ResourceLoader.loadText("/org/wmb/core/gui/gui_graphics_quad_vs.glsl"),
-            ResourceLoader.loadText("/org/wmb/core/gui/gui_graphics_quad_fs.glsl"));
+            ResourceLoader.loadText("/org/wmb/gui/gui_graphics_quad_vs.glsl"),
+            ResourceLoader.loadText("/org/wmb/gui/gui_graphics_quad_fs.glsl"));
+
+        this.font = new AllocatedFont(Theme.font, (char) 256);
 
         this.colorUl = quadShaderProgram.getUniformLocation("u_color");
         this.textureUl = quadShaderProgram.getUniformLocation("u_texture");
         this.texturedFlagUl = quadShaderProgram.getUniformLocation("u_texturedFlag");
         this.maskColorFlagUl = quadShaderProgram.getUniformLocation("u_maskColorFlag");
+        this.subTextureCoordUl = quadShaderProgram.getUniformLocation("u_subTextureCoord");
     }
 
     void preparePipeline() {
@@ -52,6 +58,8 @@ public final class GuiGraphics {
         GL30.glBindVertexArray(this.quadVertexData.getId());
         GL30.glEnableVertexAttribArray(0);
         GL30.glDisable(GL30.GL_DEPTH_TEST);
+        GL30.glBlendFunc(GL30.GL_SRC_ALPHA, GL30.GL_ONE_MINUS_SRC_ALPHA);
+        GL30.glEnable(GL30.GL_BLEND);
     }
 
     void resetPipeline() {
@@ -91,6 +99,7 @@ public final class GuiGraphics {
         GL30.glBindTexture(GL30.GL_TEXTURE_2D, texture.getId());
         GL30.glUniform1f(this.texturedFlagUl, 1.0f);
         GL30.glUniform1f(this.maskColorFlagUl, 0.0f);
+        GL30.glUniform4f(this.subTextureCoordUl, 0.0f, 0.0f, 1.0f, 1.0f);
         GL30.glDrawElements(GL30.GL_TRIANGLES, this.quadVertexData.getVertexCount(),
             GL30.GL_UNSIGNED_SHORT, 0);
     }
@@ -100,6 +109,7 @@ public final class GuiGraphics {
         GL30.glBindTexture(GL30.GL_TEXTURE_2D, texture.getId());
         GL30.glUniform1f(this.texturedFlagUl, 1.0f);
         GL30.glUniform1f(this.maskColorFlagUl, 0.0f);
+        GL30.glUniform4f(this.subTextureCoordUl, 0.0f, 0.0f, 1.0f, 1.0f);
         GL30.glDrawElements(GL30.GL_TRIANGLES, this.quadVertexData.getVertexCount(),
             GL30.GL_UNSIGNED_SHORT, 0);
     }
@@ -110,6 +120,7 @@ public final class GuiGraphics {
         AllocatedShaderProgram.uniformColor(this.colorUl, color);
         GL30.glUniform1f(this.texturedFlagUl, 1.0f);
         GL30.glUniform1f(this.maskColorFlagUl, 1.0f);
+        GL30.glUniform4f(this.subTextureCoordUl, 0.0f, 0.0f, 1.0f, 1.0f);
         GL30.glDrawElements(GL30.GL_TRIANGLES, this.quadVertexData.getVertexCount(),
             GL30.GL_UNSIGNED_SHORT, 0);
     }
@@ -120,8 +131,45 @@ public final class GuiGraphics {
         AllocatedShaderProgram.uniformColor(this.colorUl, color);
         GL30.glUniform1f(this.texturedFlagUl, 1.0f);
         GL30.glUniform1f(this.maskColorFlagUl, 1.0f);
+        GL30.glUniform4f(this.subTextureCoordUl, 0.0f, 0.0f, 1.0f, 1.0f);
         GL30.glDrawElements(GL30.GL_TRIANGLES, this.quadVertexData.getVertexCount(),
             GL30.GL_UNSIGNED_SHORT, 0);
+    }
+
+    public void fillText(String text, int x, int y, Color color) {
+        Objects.requireNonNull(color, "Color is null");
+
+        if (text == null)
+            text = "null";
+
+        GL30.glBindTexture(GL30.GL_TEXTURE_2D, this.font.getId());
+        AllocatedShaderProgram.uniformColor(this.colorUl, color);
+        GL30.glUniform1f(this.texturedFlagUl, 1.0f);
+        GL30.glUniform1f(this.maskColorFlagUl, 1.0f);
+
+        int currentX = x;
+        for (int index = 0; index < text.length(); index++) {
+            final char c = text.charAt(index);
+            final Dimension bounds = this.font.getCharSize(c);
+            correctViewport(currentX, y, bounds.width, bounds.height);
+
+            final Vector4f subTexCoords = this.font.getCharTexturePosition(c);
+            GL30.glUniform4f(this.subTextureCoordUl, subTexCoords.x, subTexCoords.y,
+                subTexCoords.z, subTexCoords.w);
+
+            GL30.glDrawElements(GL30.GL_TRIANGLES, this.quadVertexData.getVertexCount(),
+                GL30.GL_UNSIGNED_SHORT, 0);
+
+            currentX += bounds.width + this.font.getLeading();
+        }
+    }
+
+    public Dimension getTextSize(String text) {
+        return this.font.getStringSize(text);
+    }
+
+    public WmbContext getContext() {
+        return this.context;
     }
 
     private void correctViewport(int x, int y, int width, int height) {

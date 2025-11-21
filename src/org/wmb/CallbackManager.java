@@ -1,6 +1,4 @@
-package org.wmb.common.util;
-
-import org.wmb.core.Log;
+package org.wmb;
 
 import java.util.ArrayList;
 import java.util.List;

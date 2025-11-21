@@ -1,6 +1,6 @@
-package org.wmb.common.gui.component;
+package org.wmb.gui.component;
 
-import org.wmb.core.gui.GuiGraphics;
+import org.wmb.gui.GuiGraphics;
 import org.wmb.rendering.Color;
 
 import java.awt.*;

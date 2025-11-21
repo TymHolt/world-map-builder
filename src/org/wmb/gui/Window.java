@@ -1,14 +1,14 @@
-package org.wmb.common.gui;
+package org.wmb.gui;
 
 import org.lwjgl.glfw.Callbacks;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL;
-import org.wmb.common.gui.input.MouseClickEvent;
-import org.wmb.common.gui.input.MouseMoveEvent;
-import org.wmb.core.Main;
-import org.wmb.common.gui.input.MouseButton;
-import org.wmb.common.gui.input.MouseButtonAction;
+import org.wmb.gui.input.MouseClickEvent;
+import org.wmb.gui.input.MouseMoveEvent;
+import org.wmb.Main;
+import org.wmb.gui.input.MouseButton;
+import org.wmb.gui.input.MouseButtonAction;
 
 import java.awt.*;
 
