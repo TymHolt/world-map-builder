@@ -6,9 +6,9 @@ import org.wmb.gui.GuiGraphics;
 import org.wmb.gui.Theme;
 import org.wmb.gui.component.Component;
 import org.wmb.gui.icon.Icon;
+import org.wmb.gui.input.ClickAction;
 import org.wmb.gui.input.Cursor;
 import org.wmb.gui.input.MouseButton;
-import org.wmb.gui.input.MouseButtonAction;
 import org.wmb.gui.input.MouseClickEvent;
 
 import java.awt.*;
@@ -50,7 +50,7 @@ final class TreeViewComponent extends Component {
     public void onMouseClick(MouseClickEvent event) {
         super.onMouseClick(event);
 
-        if (event.action != MouseButtonAction.PRESS || event.button != MouseButton.LEFT)
+        if (event.action != ClickAction.PRESS || event.button != MouseButton.LEFT)
             return;
 
         final Rectangle innerBounds = getInnerBounds();

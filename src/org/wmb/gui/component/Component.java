@@ -4,6 +4,7 @@ import org.wmb.gui.input.Cursor;
 import org.wmb.gui.input.MouseClickEvent;
 import org.wmb.gui.input.MouseMoveEvent;
 import org.wmb.gui.GuiGraphics;
+import org.wmb.gui.input.MouseScrollEvent;
 import org.wmb.rendering.Color;
 
 import java.awt.*;
@@ -79,6 +80,10 @@ public abstract class Component {
     }
 
     public void onLooseFocus() {
+
+    }
+
+    public void onMouseScroll(MouseScrollEvent event) {
 
     }
 

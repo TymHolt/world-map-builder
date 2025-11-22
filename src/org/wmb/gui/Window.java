@@ -4,12 +4,9 @@ import org.lwjgl.glfw.Callbacks;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL;
-import org.wmb.gui.input.Cursor;
-import org.wmb.gui.input.MouseClickEvent;
-import org.wmb.gui.input.MouseMoveEvent;
+import org.wmb.gui.input.*;
 import org.wmb.Main;
-import org.wmb.gui.input.MouseButton;
-import org.wmb.gui.input.MouseButtonAction;
+import org.wmb.gui.input.Cursor;
 
 import java.awt.*;
 
@@ -50,14 +47,14 @@ public final class Window {
 
         GLFW.glfwSetMouseButtonCallback(this.windowId, (window, button, action, mods) -> {
             final MouseButton mouseButton = MouseButton.getByGlfwId(button);
-            final MouseButtonAction mouseButtonAction = MouseButtonAction.getByGlfwId(action);
-            final Point mousePosition = this.getMousePosition();
+            final ClickAction clickAction = ClickAction.getByGlfwId(action);
+            final Point mouse = this.getMousePosition();
 
-            if (mouseButton == null || mouseButtonAction == null || inputListener == null)
+            if (mouseButton == null || clickAction == null || inputListener == null)
                 return;
 
-            final MouseClickEvent event = new MouseClickEvent(mouseButton, mouseButtonAction,
-                mousePosition.x, mousePosition.y);
+            final MouseClickEvent event = new MouseClickEvent(mouseButton, clickAction,
+                mouse.x, mouse.y);
             this.inputListener.mouseClick(event);
         });
 
@@ -75,6 +72,16 @@ public final class Window {
             this.xFrom = xTo;
             this.yFrom = yTo;
             this.inputListener.mouseMove(event);
+        });
+
+        GLFW.glfwSetScrollCallback(this.windowId, (window, xoffset, yoffset) -> {
+            if (inputListener == null)
+                return;
+
+            final Point mouse = this.getMousePosition();
+            final MouseScrollEvent event = new MouseScrollEvent(ScrollDirection.fromValue(yoffset),
+                mouse.x, mouse.y);
+            this.inputListener.mouseScroll(event);
         });
     }
 
@@ -106,9 +113,8 @@ public final class Window {
         return new Point((int) xPositionPointer[0], (int) yPositionPointer[0]);
     }
 
-    // TODO Add custom Key class for QWERTY layout
-    public boolean isKeyPressed(int keyCode) {
-        return GLFW.glfwGetKey(this.windowId, keyCode) == GLFW.GLFW_PRESS;
+    public boolean isKeyPressed(KeyButton button) {
+        return GLFW.glfwGetKey(this.windowId, button.getGlfwId()) == GLFW.GLFW_PRESS;
     }
 
     public Dimension getSize() {

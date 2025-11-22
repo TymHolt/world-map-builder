@@ -5,9 +5,10 @@ import org.wmb.gui.input.MouseMoveEvent;
 import org.wmb.WmbContext;
 import org.wmb.gui.component.elementinspector.ElementInspectorComponent;
 import org.wmb.gui.component.scenetree.SceneTreeComponent;
-import org.wmb.gui.component.SceneView3dComponent;
+import org.wmb.gui.component.sceneview3d.SceneView3dComponent;
 import org.wmb.gui.component.CompassContainerComponent;
 import org.wmb.gui.component.MenuBarComponent;
+import org.wmb.gui.input.MouseScrollEvent;
 
 import java.awt.*;
 import java.io.IOException;
@@ -39,7 +40,7 @@ public final class MainGui {
         final ElementInspectorComponent elementInspector = new ElementInspectorComponent();
         this.container.setEast(elementInspector);
 
-        this.sceneViewComponent = new SceneView3dComponent();
+        this.sceneViewComponent = new SceneView3dComponent(this.context);
         this.container.setCenter(this.sceneViewComponent);
 
         this.context.getWindow().setInputListener(new WindowListener() {
@@ -54,8 +55,12 @@ public final class MainGui {
                 container.onMouseMove(event);
 
                 final Window window = context.getWindow();
-                final Point mouse = window.getMousePosition();
-                window.setCursor(container.getCursor(mouse.x, mouse.y));
+                window.setCursor(container.getCursor(event.xTo, event.yTo));
+            }
+
+            @Override
+            public void mouseScroll(MouseScrollEvent event) {
+                container.onMouseScroll(event);
             }
         });
     }

@@ -117,7 +117,13 @@ public final class Camera {
 
     public Matrix4f getLookYawRotationMatrix() {
         return new Matrix4f().identity()
-                .rotate((float) Math.toRadians(-yaw), 0.0f, 1.0f, 0.0f);
+                .rotate((float) Math.toRadians(-this.yaw), 0.0f, 1.0f, 0.0f);
+    }
+
+    public Matrix4f getLookRotationMatrix() {
+        return new Matrix4f().identity()
+            .rotate((float) Math.toRadians(-this.yaw), 0.0f, 1.0f, 0.0f)
+            .rotate((float) Math.toRadians(-this.pitch), 1.0f, 0.0f, 0.0f);
     }
 
     public Matrix4f getViewMatrix() {

@@ -1,10 +1,8 @@
 package org.wmb.gui.component;
 
-import org.wmb.gui.input.Cursor;
-import org.wmb.gui.input.InputHandleHelper;
-import org.wmb.gui.input.MouseClickEvent;
-import org.wmb.gui.input.MouseMoveEvent;
+import org.wmb.gui.input.*;
 import org.wmb.gui.GuiGraphics;
+import org.wmb.gui.input.Cursor;
 import org.wmb.rendering.Color;
 
 import java.awt.*;
@@ -183,5 +181,10 @@ public class CompassContainerComponent extends Component {
     @Override
     public void onLooseFocus() {
         this.inputHelper.handleLooseFocus();
+    }
+
+    @Override
+    public void onMouseScroll(MouseScrollEvent event) {
+        this.inputHelper.handleMouseScroll(event);
     }
 }

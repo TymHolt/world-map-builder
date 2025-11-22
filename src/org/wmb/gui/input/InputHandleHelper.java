@@ -82,6 +82,18 @@ public final class InputHandleHelper {
         this.focusedComponent = null;
     }
 
+    public void handleMouseScroll(MouseScrollEvent event) {
+        for (Component component : this.components) {
+            if (component == null)
+                continue;
+
+            if (component.getBounds().contains(event.x, event.y)) {
+                component.onMouseScroll(event);
+                return;
+            }
+        }
+    }
+
     public Cursor handleGetCursor(int mouseX, int mouseY) {
         for (Component component : this.components) {
             if (component == null)

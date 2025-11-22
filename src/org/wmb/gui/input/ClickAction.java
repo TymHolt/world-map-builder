@@ -4,27 +4,27 @@ import org.lwjgl.glfw.GLFW;
 
 import java.util.HashMap;
 
-public enum MouseButtonAction {
+public enum ClickAction {
 
     PRESS(GLFW.GLFW_PRESS),
     RELEASE(GLFW.GLFW_RELEASE);
 
-    private static final HashMap<Integer, MouseButtonAction> glfwMapping;
+    private static final HashMap<Integer, ClickAction> glfwMapping;
 
     static {
         glfwMapping = new HashMap<>();
 
-        for (MouseButtonAction mouseButtonAction : values())
-            glfwMapping.put(mouseButtonAction.glfwId, mouseButtonAction);
+        for (ClickAction clickAction : values())
+            glfwMapping.put(clickAction.glfwId, clickAction);
     }
 
-    public static MouseButtonAction getByGlfwId(int glfwId) {
+    public static ClickAction getByGlfwId(int glfwId) {
         return glfwMapping.get(glfwId);
     }
 
     private final int glfwId;
 
-    MouseButtonAction(int glfwId) {
+    ClickAction(int glfwId) {
         this.glfwId = glfwId;
     }
 
