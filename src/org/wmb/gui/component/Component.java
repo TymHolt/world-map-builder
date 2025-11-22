@@ -18,7 +18,7 @@ public abstract class Component {
     public Component() {
         this.bounds = new Rectangle(0, 0, 1, 1);
         this.background = Color.BLACK;
-        this.border = new Border();
+        this.border = Border.none();
     }
 
     public void setBounds(Rectangle bounds) {
@@ -50,6 +50,10 @@ public abstract class Component {
 
     public Border getBorder() {
         return this.border;
+    }
+
+    public Rectangle getInnerBounds() {
+        return this.border.getInner(this.bounds);
     }
 
     public Dimension getRequestedSize() {

@@ -21,7 +21,8 @@ public final class GuiGraphics {
     private int lastHeight;
     private final AllocatedVertexData quadVertexData;
     private final AllocatedShaderProgram quadShaderProgram;
-    private final AllocatedFont font;
+    private final AllocatedFont fontPlain;
+    private final AllocatedFont fontBold;
     private final AllocatedIcons icons;
     private final int colorUl, textureUl, texturedFlagUl, maskColorFlagUl, subTextureCoordUl;
     private final int antiAliasLevel;
@@ -57,7 +58,8 @@ public final class GuiGraphics {
             ResourceLoader.loadText("/org/wmb/gui/gui_graphics_quad_vs.glsl"),
             ResourceLoader.loadText("/org/wmb/gui/gui_graphics_quad_fs.glsl"));
 
-        this.font = new AllocatedFont(Theme.font, (char) 256);
+        this.fontPlain = new AllocatedFont(Theme.FONT_PLAIN, (char) 256);
+        this.fontBold = new AllocatedFont(Theme.FONT_BOLD, (char) 256);
         this.icons = new AllocatedIcons();
 
         this.colorUl = quadShaderProgram.getUniformLocation("u_color");
@@ -117,7 +119,8 @@ public final class GuiGraphics {
     void deleteResources() {
         this.quadVertexData.delete();
         this.quadShaderProgram.delete();
-        this.font.delete();
+        this.fontPlain.delete();
+        this.fontBold.delete();
         this.icons.deleteAll();
     }
 
@@ -207,12 +210,18 @@ public final class GuiGraphics {
     }
 
     public void fillText(String text, int x, int y, Color color) {
+        fillText(text, x, y, color, false);
+    }
+
+    public void fillText(String text, int x, int y, Color color, boolean bold) {
         Objects.requireNonNull(color, "Color is null");
 
         if (text == null)
             text = "null";
 
-        GL30.glBindTexture(GL30.GL_TEXTURE_2D, this.font.getId());
+        final AllocatedFont font = bold ? this.fontBold : this.fontPlain;
+
+        GL30.glBindTexture(GL30.GL_TEXTURE_2D, font.getId());
         AllocatedShaderProgram.uniformColor(this.colorUl, color);
         GL30.glUniform1f(this.texturedFlagUl, 1.0f);
         GL30.glUniform1f(this.maskColorFlagUl, 1.0f);
@@ -220,22 +229,29 @@ public final class GuiGraphics {
         int currentX = x;
         for (int index = 0; index < text.length(); index++) {
             final char c = text.charAt(index);
-            final Dimension bounds = this.font.getCharSize(c);
+            final Dimension bounds = font.getCharSize(c);
             correctViewport(currentX, y, bounds.width, bounds.height);
 
-            final Vector4f subTexCoords = this.font.getCharTexturePosition(c);
+            final Vector4f subTexCoords = font.getCharTexturePosition(c);
             GL30.glUniform4f(this.subTextureCoordUl, subTexCoords.x, subTexCoords.y,
                 subTexCoords.z, subTexCoords.w);
 
             GL30.glDrawElements(GL30.GL_TRIANGLES, this.quadVertexData.getVertexCount(),
                 GL30.GL_UNSIGNED_SHORT, 0);
 
-            currentX += bounds.width + this.font.getLeading();
+            currentX += bounds.width + font.getLeading();
         }
     }
 
     public Dimension getTextSize(String text) {
-        return this.font.getStringSize(text);
+        return getTextSize(text, false);
+    }
+
+    public Dimension getTextSize(String text, boolean bold) {
+        if (bold)
+            return this.fontBold.getStringSize(text);
+        else
+            return this.fontPlain.getStringSize(text);
     }
 
     private void correctViewport(int x, int y, int width, int height) {

@@ -3,7 +3,7 @@ package org.wmb.gui;
 import org.wmb.gui.input.MouseClickEvent;
 import org.wmb.gui.input.MouseMoveEvent;
 import org.wmb.WmbContext;
-import org.wmb.gui.component.ElementInspectorComponent;
+import org.wmb.gui.component.elementinspector.ElementInspectorComponent;
 import org.wmb.gui.component.scenetree.SceneTreeComponent;
 import org.wmb.gui.component.SceneView3dComponent;
 import org.wmb.gui.component.CompassContainerComponent;
@@ -68,7 +68,14 @@ public final class MainGui {
         this.context.getWindow().setMinimumSize(minSize.width, minSize.height);
     }
 
+    private long count = -1L;
+
     public void draw() {
+        // Some components compute parts of their bounds in their draw() method
+        // This will ensure the bounds get recalculated from time to time
+        if (count++ % 100 == 0)
+            this.container.setBounds(this.container.getBounds());
+
         this.sceneViewComponent.renderScene(this.context.getScene());
 
         this.graphics.preparePipeline();

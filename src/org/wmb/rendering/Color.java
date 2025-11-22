@@ -2,6 +2,7 @@ package org.wmb.rendering;
 
 public final class Color {
 
+    public static final Color TRANSPARENT = new Color(0.0f, 0.0f, 0.0f, 0.0f);
     public static final Color BLACK = new Color(0.0f, 0.0f, 0.0f, 1.0f);
     public static final Color WHITE = new Color(1.0f, 1.0f, 1.0f, 1.0f);
     public static final Color GREY_DARK = new Color(0.34f, 0.34f, 0.34f, 1.0f);

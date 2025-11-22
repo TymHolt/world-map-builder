@@ -70,8 +70,7 @@ public final class SceneView3dComponent extends Component {
 
     @Override
     public void setBounds(Rectangle bounds) {
-        super.setBounds(bounds);
-        resizeFramebuffer(bounds.width, bounds.height);
+        setBounds(bounds.x, bounds.y, bounds.width, bounds.height);
     }
 
     @Override
@@ -109,7 +108,7 @@ public final class SceneView3dComponent extends Component {
         final float dxf = (float) dx / (float) bounds.width;
         final float dyf = (float) dy / (float) bounds.height;
 
-        this.camera.setPitch(this.camera.getPitch() + (dyf * this.fov));
+        this.camera.setPitch(this.camera.getPitch() + (dyf * -this.fov));
         this.camera.setYaw(this.camera.getYaw() + (dxf * -this.fov));
     }
 

@@ -49,7 +49,7 @@ public class AllocatedFont implements ITexture, AllocatedData {
                 charInfo.x, charInfo.y, charInfo.width, charInfo.height, u, v, uWidth, vHeight);
         }
 
-        this.texture = new AllocatedTexture(bitmap, TextureFilter.LINEAR);
+        this.texture = new AllocatedTexture(bitmap, TextureFilter.NEAREST);
     }
 
     public Vector4f getCharTexturePosition(char c) {

@@ -37,7 +37,6 @@ public class CompassContainerComponent extends Component {
 
     @Override
     public Dimension getRequestedSize() {
-
         Dimension northSize = new Dimension(0, 0);
         if (this.north != null)
             northSize = this.north.getRequestedSize();
@@ -69,13 +68,15 @@ public class CompassContainerComponent extends Component {
     @Override
     public void setBounds(int x, int y, int width, int height) {
         super.setBounds(x, y, width, height);
-        recalculateBounds(x, y, width, height);
+        final Rectangle innerBounds = getInnerBounds();
+        recalculateBounds(innerBounds.x, innerBounds.y, innerBounds.width, innerBounds.height);
     }
 
     @Override
     public void setBounds(Rectangle bounds) {
         super.setBounds(bounds);
-        recalculateBounds(bounds.x, bounds.y, bounds.width, bounds.height);
+        final Rectangle innerBounds = getInnerBounds();
+        recalculateBounds(innerBounds.x, innerBounds.y, innerBounds.width, innerBounds.height);
     }
 
     @Override

@@ -83,4 +83,8 @@ public class Border {
             graphics.fillQuadColor(bounds.x + bounds.width - right, bounds.y, right, bounds.height,
                 this.color);
     }
+
+    public static Border none() {
+        return new Border();
+    }
 }

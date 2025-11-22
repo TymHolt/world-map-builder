@@ -23,7 +23,7 @@ public enum Icon {
     }
 
     public AllocatedTexture loadAllocatedTexture() throws IOException {
-        return new AllocatedTexture(ResourceLoader.loadImage(this.path), TextureFilter.LINEAR);
+        return new AllocatedTexture(ResourceLoader.loadImage(this.path), TextureFilter.NEAREST);
     }
 
     public int getEnumIndex() {
