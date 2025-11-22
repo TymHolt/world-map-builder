@@ -1,6 +1,7 @@
 package org.wmb;
 
 import org.wmb.editor.Scene3d;
+import org.wmb.editor.element.Element;
 import org.wmb.editor.element.Object3dElement.Object3dElement;
 import org.wmb.gui.MainGui;
 import org.wmb.gui.Window;
@@ -13,6 +14,7 @@ import java.util.List;
 public final class WmbContext {
 
     private Scene3d scene;
+    private Element selectedElement;
     private final Window window;
     private final MainGui gui;
     private boolean active;
@@ -39,6 +41,14 @@ public final class WmbContext {
 
     public Scene3d getScene() {
         return this.scene;
+    }
+
+    public void setSelectedElement(Element element) {
+        this.selectedElement = element;
+    }
+
+    public Element getSelectedElement() {
+        return this.selectedElement;
     }
 
     private int lastWidth = -1;

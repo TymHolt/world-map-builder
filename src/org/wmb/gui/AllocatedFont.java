@@ -6,6 +6,7 @@ import org.joml.Vector4f;
 import org.wmb.rendering.AllocatedData;
 import org.wmb.rendering.AllocatedTexture;
 import org.wmb.rendering.ITexture;
+import org.wmb.rendering.TextureFilter;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -23,7 +24,8 @@ public class AllocatedFont implements ITexture, AllocatedData {
     private final int leading;
 
     public AllocatedFont(Font font, char charCount) {
-        final BitmapFontGenerator bitmapFontGenerator = new BitmapFontGenerator(font, charCount);
+        final BitmapFontGenerator bitmapFontGenerator = new BitmapFontGenerator(font, charCount,
+            true);
         final HashMap<Character, CharInfo> absoluteBounds = bitmapFontGenerator.generateAll();
         final BufferedImage bitmap = bitmapFontGenerator.getImage();
         this.leading = bitmapFontGenerator.getLeading();
@@ -44,7 +46,7 @@ public class AllocatedFont implements ITexture, AllocatedData {
                 charInfo.x, charInfo.y, charInfo.width, charInfo.height, u, v, uWidth, vHeight);
         }
 
-        this.texture = new AllocatedTexture(bitmap);
+        this.texture = new AllocatedTexture(bitmap, TextureFilter.LINEAR);
     }
 
     public Vector4f getCharTexturePosition(char c) {

@@ -1,5 +1,7 @@
 package org.wmb.editor.element;
 
+import org.wmb.gui.icon.Icon;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -35,5 +37,9 @@ public abstract class Element {
 
     public List<Element> getChildren() {
         return this.children;
+    }
+
+    public Icon getIcon() {
+        return Icon.FRAME;
     }
 }

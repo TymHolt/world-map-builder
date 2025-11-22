@@ -4,6 +4,8 @@ import org.joml.Vector4f;
 import org.lwjgl.opengl.GL30;
 import org.wmb.ResourceLoader;
 import org.wmb.WmbContext;
+import org.wmb.gui.icon.AllocatedIcons;
+import org.wmb.gui.icon.Icon;
 import org.wmb.rendering.AllocatedShaderProgram;
 import org.wmb.rendering.AllocatedVertexData;
 import org.wmb.rendering.Color;
@@ -19,6 +21,7 @@ public final class GuiGraphics {
     private final AllocatedVertexData quadVertexData;
     private final AllocatedShaderProgram quadShaderProgram;
     private final AllocatedFont font;
+    private final AllocatedIcons icons;
     private final int colorUl, textureUl, texturedFlagUl, maskColorFlagUl, subTextureCoordUl;
 
     GuiGraphics(WmbContext context) throws IOException {
@@ -44,6 +47,7 @@ public final class GuiGraphics {
             ResourceLoader.loadText("/org/wmb/gui/gui_graphics_quad_fs.glsl"));
 
         this.font = new AllocatedFont(Theme.font, (char) 256);
+        this.icons = new AllocatedIcons();
 
         this.colorUl = quadShaderProgram.getUniformLocation("u_color");
         this.textureUl = quadShaderProgram.getUniformLocation("u_texture");
@@ -60,9 +64,12 @@ public final class GuiGraphics {
         GL30.glDisable(GL30.GL_DEPTH_TEST);
         GL30.glBlendFunc(GL30.GL_SRC_ALPHA, GL30.GL_ONE_MINUS_SRC_ALPHA);
         GL30.glEnable(GL30.GL_BLEND);
+        GL30.glEnable(GL30.GL_MULTISAMPLE);
     }
 
     void resetPipeline() {
+        GL30.glDisable(GL30.GL_BLEND);
+        GL30.glDisable(GL30.GL_MULTISAMPLE);
         GL30.glDisableVertexAttribArray(0);
         GL30.glBindVertexArray(0);
         GL30.glUseProgram(0);
@@ -71,6 +78,8 @@ public final class GuiGraphics {
     void deleteResources() {
         this.quadVertexData.delete();
         this.quadShaderProgram.delete();
+        this.font.delete();
+        this.icons.deleteAll();
     }
 
     public void clear() {
@@ -128,6 +137,28 @@ public final class GuiGraphics {
     public void fillQuadMask(Rectangle bounds, ITexture texture, Color color) {
         correctViewport(bounds.x, bounds.y, bounds.width, bounds.height);
         GL30.glBindTexture(GL30.GL_TEXTURE_2D, texture.getId());
+        AllocatedShaderProgram.uniformColor(this.colorUl, color);
+        GL30.glUniform1f(this.texturedFlagUl, 1.0f);
+        GL30.glUniform1f(this.maskColorFlagUl, 1.0f);
+        GL30.glUniform4f(this.subTextureCoordUl, 0.0f, 0.0f, 1.0f, 1.0f);
+        GL30.glDrawElements(GL30.GL_TRIANGLES, this.quadVertexData.getVertexCount(),
+            GL30.GL_UNSIGNED_SHORT, 0);
+    }
+
+    public void fillQuadIcon(int x, int y, int width, int height, Icon icon, Color color) {
+        correctViewport(x, y, width, height);
+        GL30.glBindTexture(GL30.GL_TEXTURE_2D, this.icons.getTexture(icon).getId());
+        AllocatedShaderProgram.uniformColor(this.colorUl, color);
+        GL30.glUniform1f(this.texturedFlagUl, 1.0f);
+        GL30.glUniform1f(this.maskColorFlagUl, 1.0f);
+        GL30.glUniform4f(this.subTextureCoordUl, 0.0f, 0.0f, 1.0f, 1.0f);
+        GL30.glDrawElements(GL30.GL_TRIANGLES, this.quadVertexData.getVertexCount(),
+            GL30.GL_UNSIGNED_SHORT, 0);
+    }
+
+    public void fillQuadIcon(Rectangle bounds, Icon icon, Color color) {
+        correctViewport(bounds.x, bounds.y, bounds.width, bounds.height);
+        GL30.glBindTexture(GL30.GL_TEXTURE_2D, this.icons.getTexture(icon).getId());
         AllocatedShaderProgram.uniformColor(this.colorUl, color);
         GL30.glUniform1f(this.texturedFlagUl, 1.0f);
         GL30.glUniform1f(this.maskColorFlagUl, 1.0f);

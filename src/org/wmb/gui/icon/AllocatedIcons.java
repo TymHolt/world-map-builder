@@ -1,14 +1,14 @@
-package org.wmb.gui;
+package org.wmb.gui.icon;
 
 import org.wmb.rendering.AllocatedTexture;
 
 import java.io.IOException;
 
-public final class Icons {
+public final class AllocatedIcons {
 
     private final AllocatedTexture[] allocatedTextures;
 
-    public Icons() throws IOException {
+    public AllocatedIcons() throws IOException {
         this.allocatedTextures = new AllocatedTexture[Icon.getEnumValueCount()];
 
         try {

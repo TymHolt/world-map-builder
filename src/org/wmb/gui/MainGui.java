@@ -4,7 +4,7 @@ import org.wmb.gui.input.MouseClickEvent;
 import org.wmb.gui.input.MouseMoveEvent;
 import org.wmb.WmbContext;
 import org.wmb.gui.component.ElementInspectorComponent;
-import org.wmb.gui.component.SceneTreeComponent;
+import org.wmb.gui.component.scenetree.SceneTreeComponent;
 import org.wmb.gui.component.SceneView3dComponent;
 import org.wmb.gui.component.CompassContainerComponent;
 import org.wmb.gui.component.MenuBarComponent;
@@ -24,7 +24,7 @@ public final class MainGui {
         Objects.requireNonNull(context, "Context is null");
 
         this.context = context;
-        this.graphics = new GuiGraphics(context);
+        this.graphics = new GuiGraphics(this.context);
 
         this.container = new CompassContainerComponent();
 
@@ -33,7 +33,7 @@ public final class MainGui {
         menuBar.getBorder().setColor(Theme.BORDER);
         this.container.setNorth(menuBar);
 
-        final SceneTreeComponent sceneTree = new SceneTreeComponent(context.getScene());
+        final SceneTreeComponent sceneTree = new SceneTreeComponent(this.context);
         this.container.setWest(sceneTree);
 
         final ElementInspectorComponent elementInspector = new ElementInspectorComponent();
@@ -42,7 +42,7 @@ public final class MainGui {
         this.sceneViewComponent = new SceneView3dComponent();
         this.container.setCenter(this.sceneViewComponent);
 
-        context.getWindow().setInputListener(new WindowListener() {
+        this.context.getWindow().setInputListener(new WindowListener() {
 
             @Override
             public void mouseClick(MouseClickEvent event) {
