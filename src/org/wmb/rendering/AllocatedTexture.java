@@ -21,16 +21,18 @@ public final class AllocatedTexture implements ITexture, AllocatedData {
 
         AllocatedDataGuard.watch(this);
 
-        int width = image.getWidth();
-        int height = image.getHeight();
-        int[] pixelRgbData = image.getRGB(0, 0, width, height, null, 0, width);
-        ByteBuffer pixelDataBuffer = MemoryUtil.memAlloc(pixelRgbData.length * 4);
+        final int width = image.getWidth();
+        final int height = image.getHeight();
+        final ByteBuffer pixelDataBuffer = MemoryUtil.memAlloc(width * height * 4);
 
-        for (int pixelRgb : pixelRgbData) {
-            pixelDataBuffer.put((byte) ((pixelRgb >> 16) & 0xFF));
-            pixelDataBuffer.put((byte) ((pixelRgb >> 8) & 0xFF));
-            pixelDataBuffer.put((byte) (pixelRgb & 0xFF));
-            pixelDataBuffer.put((byte) ((pixelRgb >> 24) & 0xFF));
+        for (int y = height - 1; y >= 0; y--) {
+            for (int x = 0; x < width; x++) {
+                final int pixelRgba = image.getRGB(x, y);
+                pixelDataBuffer.put((byte) ((pixelRgba >> 16) & 0xFF));
+                pixelDataBuffer.put((byte) ((pixelRgba >> 8) & 0xFF));
+                pixelDataBuffer.put((byte) (pixelRgba & 0xFF));
+                pixelDataBuffer.put((byte) ((pixelRgba >> 24) & 0xFF));
+            }
         }
 
         pixelDataBuffer.flip();

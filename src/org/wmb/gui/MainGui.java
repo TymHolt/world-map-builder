@@ -24,7 +24,7 @@ public final class MainGui {
         Objects.requireNonNull(context, "Context is null");
 
         this.context = context;
-        this.graphics = new GuiGraphics(this.context);
+        this.graphics = new GuiGraphics(this.context, 2);
 
         this.container = new CompassContainerComponent();
 
@@ -52,6 +52,10 @@ public final class MainGui {
             @Override
             public void mouseMove(MouseMoveEvent event) {
                 container.onMouseMove(event);
+
+                final Window window = context.getWindow();
+                final Point mouse = window.getMousePosition();
+                window.setCursor(container.getCursor(mouse.x, mouse.y));
             }
         });
     }

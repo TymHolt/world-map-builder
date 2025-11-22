@@ -18,5 +18,5 @@ public final class Theme {
         new Color(100.0f / 255.0f, 150.0f / 255.0f, 250.0f / 255.0f, 1.0f);
     public static final Color ELEMENT_ICON =
         new Color(238.0f / 255.0f, 75.0f / 255.0f, 43.0f / 255.0f, 1.0f);
-    public static final Font font = new Font("Liberation Mono", Font.PLAIN, 16);
+    public static final Font font = new Font("Liberation Mono", Font.PLAIN, 35);
 }

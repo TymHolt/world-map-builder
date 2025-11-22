@@ -8,6 +8,7 @@ import org.wmb.gui.GuiGraphics;
 import org.wmb.gui.component.Border;
 import org.wmb.gui.component.Component;
 import org.wmb.gui.icon.Icon;
+import org.wmb.gui.input.Cursor;
 import org.wmb.gui.input.MouseButton;
 import org.wmb.gui.input.MouseButtonAction;
 import org.wmb.gui.input.MouseClickEvent;
@@ -79,6 +80,19 @@ public final class SceneTreeComponent extends Component {
             this.sceneTree.switchCollapsed(treeNode.element);
         else
             this.context.setSelectedElement(treeNode.element);
+    }
+
+    @Override
+    public Cursor getCursor(int mouseX, int mouseY) {
+        final Rectangle innerBounds = getBorder().getInner(getBounds());
+        final int innerY = mouseY - innerBounds.y;
+        final int elementClickedIndex = innerY / this.elementHeight;
+        final List<TreeNode> tree = this.sceneTree.getTree();
+
+        if (elementClickedIndex >= tree.size())
+            return Cursor.DEFAULT;
+
+        return Cursor.HAND;
     }
 
     @Override

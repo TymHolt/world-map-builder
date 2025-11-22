@@ -23,7 +23,7 @@ public final class SceneView3dComponent extends Component {
     private final Object3dElementRenderer object3dElementRenderer;
     private final Camera camera;
     private boolean rotatingCamera;
-    private float fov;
+    private final float fov;
 
     public SceneView3dComponent() throws IOException {
         this.framebuffer = new AllocatedFramebuffer(2, 2);

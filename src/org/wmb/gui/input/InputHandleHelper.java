@@ -81,4 +81,16 @@ public final class InputHandleHelper {
         this.focusedComponent.onLooseFocus();
         this.focusedComponent = null;
     }
+
+    public Cursor handleGetCursor(int mouseX, int mouseY) {
+        for (Component component : this.components) {
+            if (component == null)
+                continue;
+
+            if (component.getBounds().contains(mouseX, mouseY))
+                return component.getCursor(mouseX, mouseY);
+        }
+
+        return Cursor.DEFAULT;
+    }
 }

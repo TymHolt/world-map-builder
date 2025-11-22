@@ -19,6 +19,8 @@ public class AllocatedFont implements ITexture, AllocatedData {
 
     }
 
+    private static final int antiAliasReduction = 2;
+
     private final CharBounds[] charBounds;
     private final AllocatedTexture texture;
     private final int leading;
@@ -28,7 +30,7 @@ public class AllocatedFont implements ITexture, AllocatedData {
             true);
         final HashMap<Character, CharInfo> absoluteBounds = bitmapFontGenerator.generateAll();
         final BufferedImage bitmap = bitmapFontGenerator.getImage();
-        this.leading = bitmapFontGenerator.getLeading();
+        this.leading = bitmapFontGenerator.getLeading() / antiAliasReduction;
         bitmapFontGenerator.dispose();
 
         final int width = bitmap.getWidth();
@@ -40,7 +42,8 @@ public class AllocatedFont implements ITexture, AllocatedData {
             final float uWidth = (float) charInfo.width / (float) width;
             final float vHeight = (float) charInfo.height / (float) height;
             final float u = (float) charInfo.x / (float) width;
-            final float v = (float) charInfo.y / (float) height;
+            final int bottomY = charInfo.y + charInfo.height;
+            final float v = 1.0f - ((float) bottomY / (float) height);
 
             this.charBounds[index] = new CharBounds(
                 charInfo.x, charInfo.y, charInfo.width, charInfo.height, u, v, uWidth, vHeight);
@@ -64,7 +67,8 @@ public class AllocatedFont implements ITexture, AllocatedData {
             return null;
 
         final CharBounds bounds = this.charBounds[c];
-        return new Dimension(bounds.width, bounds.height);
+        return new Dimension(bounds.width / antiAliasReduction,
+            bounds.height / antiAliasReduction);
     }
 
     public Dimension getStringSize(String string) {

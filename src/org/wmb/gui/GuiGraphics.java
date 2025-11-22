@@ -6,10 +6,8 @@ import org.wmb.ResourceLoader;
 import org.wmb.WmbContext;
 import org.wmb.gui.icon.AllocatedIcons;
 import org.wmb.gui.icon.Icon;
-import org.wmb.rendering.AllocatedShaderProgram;
-import org.wmb.rendering.AllocatedVertexData;
+import org.wmb.rendering.*;
 import org.wmb.rendering.Color;
-import org.wmb.rendering.ITexture;
 
 import java.awt.*;
 import java.io.IOException;
@@ -18,14 +16,27 @@ import java.util.Objects;
 public final class GuiGraphics {
 
     private final WmbContext context;
+    private AllocatedFramebuffer framebuffer;
+    private int lastWidth;
+    private int lastHeight;
     private final AllocatedVertexData quadVertexData;
     private final AllocatedShaderProgram quadShaderProgram;
     private final AllocatedFont font;
     private final AllocatedIcons icons;
     private final int colorUl, textureUl, texturedFlagUl, maskColorFlagUl, subTextureCoordUl;
+    private final int antiAliasLevel;
 
-    GuiGraphics(WmbContext context) throws IOException {
+    GuiGraphics(WmbContext context, int antiAliasLevel) throws IOException {
+        Objects.requireNonNull(context, "Context is null");
         this.context = context;
+
+        if (antiAliasLevel < 1)
+            throw new IllegalArgumentException("Antialias level must be at leas 1");
+        this.antiAliasLevel = antiAliasLevel;
+
+        this.framebuffer = new AllocatedFramebuffer(2, 2);
+        this.lastWidth = -1;
+        this.lastHeight = -1;
 
         this.quadVertexData = new AllocatedVertexData(new float[] {
             -1.0f, 1.0f, 0.0f,
@@ -33,10 +44,10 @@ public final class GuiGraphics {
             1.0f, -1.0f, 0.0f,
             1.0f, 1.0f, 0.0f
         }, new float[] {
-            0.0f, 0.0f,
             0.0f, 1.0f,
-            1.0f, 1.0f,
-            1.0f, 0.0f
+            0.0f, 0.0f,
+            1.0f, 0.0f,
+            1.0f, 1.0f
         }, new short[] {
             0, 1, 2,
             2, 3, 0
@@ -61,18 +72,46 @@ public final class GuiGraphics {
         GL30.glUniform1i(this.textureUl, 0);
         GL30.glBindVertexArray(this.quadVertexData.getId());
         GL30.glEnableVertexAttribArray(0);
+        GL30.glEnableVertexAttribArray(1);
         GL30.glDisable(GL30.GL_DEPTH_TEST);
         GL30.glBlendFunc(GL30.GL_SRC_ALPHA, GL30.GL_ONE_MINUS_SRC_ALPHA);
         GL30.glEnable(GL30.GL_BLEND);
         GL30.glEnable(GL30.GL_MULTISAMPLE);
+
+        final Dimension windowSize = this.context.getWindow().getSize();
+        if (windowSize.width != this.lastWidth || windowSize.height != this.lastHeight) {
+            resizeFramebuffer(windowSize.width * this.antiAliasLevel,
+                windowSize.height * this.antiAliasLevel);
+            this.lastWidth = windowSize.width;
+            this.lastHeight = windowSize.height;
+        }
+
+        GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, this.framebuffer.getFboId());
     }
 
     void resetPipeline() {
+        GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, 0);
+
+        final Dimension windowSize = this.context.getWindow().getSize();
+        GL30.glViewport(0, 0, windowSize.width, windowSize.height);
+        GL30.glBindTexture(GL30.GL_TEXTURE_2D, this.framebuffer.getId());
+        GL30.glUniform1f(this.texturedFlagUl, 1.0f);
+        GL30.glUniform1f(this.maskColorFlagUl, 0.0f);
+        GL30.glUniform4f(this.subTextureCoordUl, 0.0f, 0.0f, 1.0f, 1.0f);
+        GL30.glDrawElements(GL30.GL_TRIANGLES, this.quadVertexData.getVertexCount(),
+            GL30.GL_UNSIGNED_SHORT, 0);
+
         GL30.glDisable(GL30.GL_BLEND);
         GL30.glDisable(GL30.GL_MULTISAMPLE);
         GL30.glDisableVertexAttribArray(0);
+        GL30.glDisableVertexAttribArray(1);
         GL30.glBindVertexArray(0);
         GL30.glUseProgram(0);
+    }
+
+    private void resizeFramebuffer(int width, int height) {
+        this.framebuffer.delete();
+        this.framebuffer = new AllocatedFramebuffer(width, height);
     }
 
     void deleteResources() {
@@ -199,12 +238,12 @@ public final class GuiGraphics {
         return this.font.getStringSize(text);
     }
 
-    public WmbContext getContext() {
-        return this.context;
-    }
-
     private void correctViewport(int x, int y, int width, int height) {
-        final int windowHeight = this.context.getWindow().getSize().height;
+        x *= this.antiAliasLevel;
+        y *= this.antiAliasLevel;
+        width *= this.antiAliasLevel;
+        height *= this.antiAliasLevel;
+        final int windowHeight = this.lastHeight * this.antiAliasLevel;
         GL30.glViewport(x, windowHeight - (y + height), width, height);
     }
 }

@@ -1,5 +1,6 @@
 package org.wmb.gui.component;
 
+import org.wmb.gui.input.Cursor;
 import org.wmb.gui.input.InputHandleHelper;
 import org.wmb.gui.input.MouseClickEvent;
 import org.wmb.gui.input.MouseMoveEvent;
@@ -75,6 +76,11 @@ public class CompassContainerComponent extends Component {
     public void setBounds(Rectangle bounds) {
         super.setBounds(bounds);
         recalculateBounds(bounds.x, bounds.y, bounds.width, bounds.height);
+    }
+
+    @Override
+    public Cursor getCursor(int mouseX, int mouseY) {
+        return this.inputHelper.handleGetCursor(mouseX, mouseY);
     }
 
     private void recalculateBounds(int x, int y, int width, int height) {

@@ -1,5 +1,6 @@
 package org.wmb.gui.component;
 
+import org.wmb.gui.input.Cursor;
 import org.wmb.gui.input.MouseClickEvent;
 import org.wmb.gui.input.MouseMoveEvent;
 import org.wmb.gui.GuiGraphics;
@@ -8,7 +9,7 @@ import org.wmb.rendering.Color;
 import java.awt.*;
 import java.util.Objects;
 
-public class Component {
+public abstract class Component {
 
     private final Rectangle bounds;
     private Color background;
@@ -75,5 +76,9 @@ public class Component {
 
     public void onLooseFocus() {
 
+    }
+
+    public Cursor getCursor(int mouseX, int mouseY) {
+        return Cursor.DEFAULT;
     }
 }

@@ -4,6 +4,7 @@ import org.lwjgl.glfw.Callbacks;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL;
+import org.wmb.gui.input.Cursor;
 import org.wmb.gui.input.MouseClickEvent;
 import org.wmb.gui.input.MouseMoveEvent;
 import org.wmb.Main;
@@ -91,6 +92,9 @@ public final class Window {
     }
 
     public void close() {
+        if (this.currentCursorId != 0L)
+            GLFW.glfwDestroyCursor(this.currentCursorId);
+
         Callbacks.glfwFreeCallbacks(windowId);
         GLFW.glfwDestroyWindow(this.windowId);
     }
@@ -126,6 +130,29 @@ public final class Window {
 
     public void setInputListener(WindowListener inputListener) {
         this.inputListener = inputListener;
+    }
+
+    private Cursor currentCursor = Cursor.DEFAULT;
+    private long currentCursorId = 0L;
+
+    public void setCursor(Cursor cursor) {
+        if (cursor == null)
+            cursor = Cursor.DEFAULT;
+
+        if (this.currentCursor == cursor)
+            return;
+
+        this.currentCursor = cursor;
+
+        if (cursor != Cursor.DEFAULT) {
+            if (this.currentCursorId != 0L)
+                GLFW.glfwDestroyCursor(this.currentCursorId);
+
+            this.currentCursorId = GLFW.glfwCreateStandardCursor(cursor.getGlfwId());
+        } else
+            this.currentCursorId = 0L;
+
+        GLFW.glfwSetCursor(this.windowId, this.currentCursorId);
     }
 
     private void centerWindow() {
