@@ -1,9 +1,10 @@
 package org.wmb.gui;
 
-import org.joml.Vector4f;
 import org.lwjgl.opengl.GL30;
 import org.wmb.ResourceLoader;
 import org.wmb.WmbContext;
+import org.wmb.gui.font.AllocatedFont;
+import org.wmb.gui.font.AllocatedGlyph;
 import org.wmb.gui.icon.AllocatedIcons;
 import org.wmb.gui.icon.Icon;
 import org.wmb.rendering.*;
@@ -219,27 +220,27 @@ public final class GuiGraphics {
         if (text == null)
             text = "null";
 
-        final AllocatedFont font = bold ? this.fontBold : this.fontPlain;
-
-        GL30.glBindTexture(GL30.GL_TEXTURE_2D, font.getId());
         AllocatedShaderProgram.uniformColor(this.colorUl, color);
         GL30.glUniform1f(this.texturedFlagUl, 1.0f);
         GL30.glUniform1f(this.maskColorFlagUl, 1.0f);
+        GL30.glUniform4f(this.subTextureCoordUl, 0.0f, 0.0f, 1.0f, 1.0f);
+
+        final AllocatedFont font = bold ? this.fontBold : this.fontPlain;
 
         int currentX = x;
-        for (int index = 0; index < text.length(); index++) {
+        final int textLength = text.length();
+        for (int index = 0; index < textLength; index++) {
             final char c = text.charAt(index);
-            final Dimension bounds = font.getCharSize(c);
-            correctViewport(currentX, y, bounds.width, bounds.height);
+            final AllocatedGlyph glyph = font.getGlyph(c);
+            if (glyph == null)
+                continue;
 
-            final Vector4f subTexCoords = font.getCharTexturePosition(c);
-            GL30.glUniform4f(this.subTextureCoordUl, subTexCoords.x, subTexCoords.y,
-                subTexCoords.z, subTexCoords.w);
-
+            correctViewport(currentX, y, glyph.width, glyph.height);
+            GL30.glBindTexture(GL30.GL_TEXTURE_2D, glyph.getId());
             GL30.glDrawElements(GL30.GL_TRIANGLES, this.quadVertexData.getVertexCount(),
                 GL30.GL_UNSIGNED_SHORT, 0);
 
-            currentX += bounds.width + font.getLeading();
+            currentX += glyph.width + font.getLeading();
         }
     }
 

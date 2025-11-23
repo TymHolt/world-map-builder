@@ -13,7 +13,7 @@ out vec4 o_color;
 void main() {
     vec2 texCoord = vec2(u_subTextureCoord.x, u_subTextureCoord.y) + (p_texCoord * vec2(u_subTextureCoord.z, u_subTextureCoord.w));
     vec4 textureColor = texture(u_texture, texCoord);
-    textureColor = textureColor * (1.0 - u_maskColorFlag) + (textureColor.r * u_color) * u_maskColorFlag;
+    textureColor = textureColor * (1.0 - u_maskColorFlag) + vec4(u_color.rgb, textureColor.r) * u_maskColorFlag;
 
     o_color = textureColor * u_texturedFlag + u_color * (1.0 - u_texturedFlag);
 }
