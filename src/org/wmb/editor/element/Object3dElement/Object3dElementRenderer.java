@@ -11,7 +11,7 @@ public class Object3dElementRenderer {
     private final AllocatedShaderProgram shaderProgram;
     private final int textureUl, transformUl, viewUl, projectionUl;
 
-    private final AllocatedVertexData testVertexData;
+    private final AllocatedMeshData testMeshData;
     private final AllocatedTexture testTexture;
 
     public Object3dElementRenderer() throws IOException {
@@ -24,7 +24,7 @@ public class Object3dElementRenderer {
         this.viewUl = shaderProgram.getUniformLocation("u_view");
         this.projectionUl = shaderProgram.getUniformLocation("u_projection");
 
-        this.testVertexData = new AllocatedVertexData(new float[] {
+        this.testMeshData = new AllocatedMeshData(new float[] {
             -0.5f, 0.5f, 0.0f,
             -0.5f, -0.5f, 0.0f,
             0.5f, -0.5f, 0.0f,
@@ -44,7 +44,7 @@ public class Object3dElementRenderer {
 
     public void delete() {
         this.shaderProgram.delete();
-        this.testVertexData.delete();
+        this.testMeshData.delete();
         this.testTexture.delete();
     }
 
@@ -58,22 +58,18 @@ public class Object3dElementRenderer {
     }
 
     public void uniformCamera(Camera camera, float aspect) {
-        AllocatedShaderProgram.uniformMat4(viewUl, camera.getViewMatrix());
-        AllocatedShaderProgram.uniformMat4(projectionUl, camera.getProjectionMatrix(aspect));
+        AllocatedShaderProgram.uniformMat4(this.viewUl, camera.getViewMatrix());
+        AllocatedShaderProgram.uniformMat4(this.projectionUl, camera.getProjectionMatrix(aspect));
     }
 
     public void render(Object3dElement element) {
         GL30.glBindTexture(GL30.GL_TEXTURE_2D, this.testTexture.getId());
-        GL30.glBindVertexArray(this.testVertexData.getId());
-        GL30.glEnableVertexAttribArray(0);
-        GL30.glEnableVertexAttribArray(1);
+        GL30.glBindVertexArray(this.testMeshData.getId());
 
         AllocatedShaderProgram.uniformMat4(this.transformUl, element.getTransform().getAsMatrix());
-        GL30.glDrawElements(GL30.GL_TRIANGLES, this.testVertexData.getVertexCount(),
+        GL30.glDrawElements(GL30.GL_TRIANGLES, this.testMeshData.vertexCount,
             GL30.GL_UNSIGNED_SHORT, 0);
 
-        GL30.glDisableVertexAttribArray(0);
-        GL30.glDisableVertexAttribArray(1);
         GL30.glBindVertexArray(0);
     }
 

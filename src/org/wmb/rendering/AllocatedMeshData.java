@@ -5,32 +5,38 @@ import org.lwjgl.system.MemoryUtil;
 
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
+import java.util.Objects;
 
-public final class AllocatedVertexData implements AllocatedData {
+public final class AllocatedMeshData {
 
     private final int vaoId;
     private final int[] vboIds;
-    private final int vertexCount;
+    public final int vertexCount;
 
-    public AllocatedVertexData(float[] positionData, float[] textureCoordData, short[] indexData) {
-        AllocatedDataGuard.watch(this);
+    public AllocatedMeshData(float[] positionData, float[] texturePositionData,
+        short[] indexData) {
+        Objects.requireNonNull(positionData, "Position data is null");
+        Objects.requireNonNull(texturePositionData, "Texture position data is null");
+        Objects.requireNonNull(indexData, "Index data is null");
 
-        vaoId = GL30.glGenVertexArrays();
+        this.vaoId = GL30.glGenVertexArrays();
         GL30.glBindVertexArray(vaoId);
 
-        vboIds = new int[] {
+        this.vboIds = new int[] {
             createVbo(0, 3, positionData),
-            createVbo(1, 2, textureCoordData),
+            createVbo(1, 2, texturePositionData),
             createEbo(indexData)
         };
 
+        GL30.glEnableVertexAttribArray(0);
+        GL30.glEnableVertexAttribArray(1);
         this.vertexCount = indexData.length;
 
         GL30.glBindVertexArray(0);
     }
 
     private static int createVbo(int attribIndex, int vertexSize, float[] data) {
-        int vboId = GL30.glGenBuffers();
+        final int vboId = GL30.glGenBuffers();
         GL30.glBindBuffer(GL30.GL_ARRAY_BUFFER, vboId);
 
         FloatBuffer dataBuffer = MemoryUtil.memAllocFloat(data.length).put(data).flip();
@@ -52,20 +58,12 @@ public final class AllocatedVertexData implements AllocatedData {
         return eboId;
     }
 
-    @Override
     public int getId() {
-        return vaoId;
+        return this.vaoId;
     }
 
-    public int getVertexCount() {
-        return vertexCount;
-    }
-
-    @Override
     public void delete() {
-        GL30.glDeleteVertexArrays(vaoId);
-        GL30.glDeleteBuffers(vboIds);
-
-        AllocatedDataGuard.forget(this);
+        GL30.glDeleteVertexArrays(this.vaoId);
+        GL30.glDeleteBuffers(this.vboIds);
     }
 }

@@ -2,7 +2,7 @@ package org.wmb.rendering;
 
 import org.lwjgl.opengl.GL30;
 
-public final class AllocatedFramebuffer implements ITexture, AllocatedData {
+public final class AllocatedFramebuffer implements ITexture {
 
     private final int fboId;
     private final int textureId;
@@ -11,8 +11,6 @@ public final class AllocatedFramebuffer implements ITexture, AllocatedData {
     public AllocatedFramebuffer(int width, int height) {
         if (width < 1 || height < 1)
             throw new IllegalArgumentException("Illegal dimension: " + width + "x" + height);
-
-        AllocatedDataGuard.watch(this);
 
         this.fboId = GL30.glGenFramebuffers();
         GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, fboId);
@@ -49,12 +47,9 @@ public final class AllocatedFramebuffer implements ITexture, AllocatedData {
         return this.textureId;
     }
 
-    @Override
     public void delete() {
         GL30.glDeleteTextures(this.textureId);
         GL30.glDeleteRenderbuffers(this.rboId);
         GL30.glDeleteFramebuffers(this.fboId);
-
-        AllocatedDataGuard.forget(this);
     }
 }

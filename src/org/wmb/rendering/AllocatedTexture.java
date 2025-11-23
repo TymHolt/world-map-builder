@@ -7,7 +7,7 @@ import java.awt.image.BufferedImage;
 import java.nio.ByteBuffer;
 import java.util.Objects;
 
-public final class AllocatedTexture implements ITexture, AllocatedData {
+public final class AllocatedTexture implements ITexture {
 
     private final int textureId;
 
@@ -18,8 +18,6 @@ public final class AllocatedTexture implements ITexture, AllocatedData {
     public AllocatedTexture(BufferedImage image, TextureFilter filter) {
         Objects.requireNonNull(image, "Image is null");
         Objects.requireNonNull(filter, "Filter is null");
-
-        AllocatedDataGuard.watch(this);
 
         final int width = image.getWidth();
         final int height = image.getHeight();
@@ -54,10 +52,7 @@ public final class AllocatedTexture implements ITexture, AllocatedData {
         return this.textureId;
     }
 
-    @Override
     public void delete() {
         GL30.glDeleteTextures(this.textureId);
-
-        AllocatedDataGuard.forget(this);
     }
 }

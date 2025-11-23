@@ -1,19 +1,22 @@
 #version 330 core
 
-in vec2 p_texCoord;
+in vec2 p_texture_pos;
 
 uniform vec4 u_color;
 uniform sampler2D u_texture;
-uniform vec4 u_subTextureCoord;
-uniform float u_texturedFlag;
-uniform float u_maskColorFlag;
+uniform float u_textured_flag;
+uniform float u_mask_color_factor;
 
-out vec4 o_color;
+out vec4 o_pixel_color;
 
-void main() {
-    vec2 texCoord = vec2(u_subTextureCoord.x, u_subTextureCoord.y) + (p_texCoord * vec2(u_subTextureCoord.z, u_subTextureCoord.w));
-    vec4 textureColor = texture(u_texture, texCoord);
-    textureColor = textureColor * (1.0 - u_maskColorFlag) + vec4(u_color.rgb, textureColor.r) * u_maskColorFlag;
+void main()
+{
+    vec4 texture_color_raw = texture(u_texture, p_texture_pos);
+    vec4 texture_color_factored = texture_color_raw * (1.0 - u_mask_color_factor);
+    vec4 mask_color_factored = vec4(u_color.rgb, texture_color_raw.r) * u_mask_color_factor;
+    vec4 texture_color_masked = (texture_color_factored + mask_color_factored);
 
-    o_color = textureColor * u_texturedFlag + u_color * (1.0 - u_texturedFlag);
+    vec4 texture_color_flagged = texture_color_masked * u_textured_flag;
+    vec4 color_flagged = u_color * (1.0 - u_textured_flag);
+    o_pixel_color = texture_color_flagged + color_flagged;
 }

@@ -14,6 +14,7 @@ import org.wmb.editor.element.Object3dElement.Object3dElement;
 import org.wmb.editor.element.Object3dElement.Object3dElementRenderer;
 import org.wmb.rendering.AllocatedFramebuffer;
 import org.wmb.rendering.Camera;
+import org.wmb.rendering.Color;
 
 import java.awt.*;
 import java.io.IOException;
@@ -23,6 +24,7 @@ public final class SceneView3dComponent extends Component {
 
     private WmbContext context;
     private AllocatedFramebuffer framebuffer;
+    private final GridLineRenderer gridLineRenderer;
     private final Object3dElementRenderer object3dElementRenderer;
     private final Camera camera;
     private boolean rotatingCamera;
@@ -34,8 +36,9 @@ public final class SceneView3dComponent extends Component {
         this.context = context;
         this.framebuffer = new AllocatedFramebuffer(2, 2);
         this.object3dElementRenderer = new Object3dElementRenderer();
+        this.gridLineRenderer = new GridLineRenderer(8);
         this.fov = 70.0f;
-        this.camera = new Camera(0.0f, 0.0f, 3.0f, 0.0f, 0.0f, this.fov, 0.1f, 16.0f);
+        this.camera = new Camera(0.0f, 8.0f, 8.0f, 45.0f, 0.0f, this.fov, 0.1f, 128.0f);
         this.rotatingCamera = false;
     }
 
@@ -49,9 +52,11 @@ public final class SceneView3dComponent extends Component {
 
         handleUpdateInput();
 
+        final float aspect = (float) (bounds.getWidth() / bounds.getHeight());
+        this.gridLineRenderer.render(0, 0, bounds.width, bounds.height, this.camera, aspect,
+            Color.GREY);
         this.object3dElementRenderer.preparePipeline(0, 0, bounds.width, bounds.height);
-        this.object3dElementRenderer.uniformCamera(this.camera,
-            (float) (bounds.getWidth() / bounds.getHeight()));
+        this.object3dElementRenderer.uniformCamera(this.camera, aspect);
         recursiveRender(scene);
         this.object3dElementRenderer.resetPipeline();
 
@@ -130,6 +135,7 @@ public final class SceneView3dComponent extends Component {
 
     public void dispose() {
         this.object3dElementRenderer.delete();
+        this.gridLineRenderer.delete();
         this.framebuffer.delete();
     }
 

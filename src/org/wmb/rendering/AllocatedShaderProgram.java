@@ -4,15 +4,17 @@ import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL30;
 import org.lwjgl.system.MemoryStack;
 
-public final class AllocatedShaderProgram implements AllocatedData {
+import java.util.Objects;
+
+public final class AllocatedShaderProgram {
 
     private final int programId;
 
     public AllocatedShaderProgram(String vsSource, String fsSource) {
-        AllocatedDataGuard.watch(this);
+        Objects.requireNonNull(vsSource, "Vertex shader source is null");
+        Objects.requireNonNull(fsSource, "Fragment shader source is null");
 
         this.programId = GL30.glCreateProgram();
-
         if (this.programId == 0)
             throw new IllegalStateException("Program could not be created by OpenGL");
 
@@ -59,16 +61,12 @@ public final class AllocatedShaderProgram implements AllocatedData {
         return GL30.glGetUniformLocation(this.programId, name);
     }
 
-    @Override
     public int getId() {
         return this.programId;
     }
 
-    @Override
     public void delete() {
         GL30.glDeleteProgram(this.programId);
-
-        AllocatedDataGuard.forget(this);
     }
 
     public static void uniformColor(int location, Color color) {
