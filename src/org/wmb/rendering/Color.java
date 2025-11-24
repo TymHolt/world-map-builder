@@ -8,6 +8,9 @@ public final class Color {
     public static final Color GREY_DARK = new Color(0.34f, 0.34f, 0.34f, 1.0f);
     public static final Color GREY= new Color(0.5f, 0.5f, 0.5f, 1.0f);
     public static final Color GREY_LIGHT = new Color(0.67f, 0.67f, 0.67f, 1.0f);
+    public static final Color RED = new Color(1.0f, 0.0f, 0.0f, 1.0f);
+    public static final Color GREEN = new Color(0.0f, 1.0f, 0.0f, 1.0f);
+    public static final Color BLUE = new Color(0.0f, 0.0f, 1.0f, 1.0f);
 
     private final float red, green, blue, alpha;
 

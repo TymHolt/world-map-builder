@@ -1,5 +1,6 @@
 package org.wmb.editor.element;
 
+import org.wmb.gui.component.elementinspector.Inspector;
 import org.wmb.gui.icon.Icon;
 
 import java.util.ArrayList;
@@ -42,4 +43,6 @@ public abstract class Element {
     public Icon getIcon() {
         return Icon.FRAME;
     }
+
+    public abstract Inspector getInspector();
 }

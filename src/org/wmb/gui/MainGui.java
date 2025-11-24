@@ -1,5 +1,6 @@
 package org.wmb.gui;
 
+import org.wmb.editor.element.Element;
 import org.wmb.gui.input.MouseClickEvent;
 import org.wmb.gui.input.MouseMoveEvent;
 import org.wmb.WmbContext;
@@ -20,6 +21,7 @@ public final class MainGui {
     private final GuiGraphics graphics;
     private final CompassContainerComponent container;
     private final SceneView3dComponent sceneViewComponent;
+    private final ElementInspectorComponent elementInspector;
 
     public MainGui(WmbContext context) throws IOException {
         Objects.requireNonNull(context, "Context is null");
@@ -37,8 +39,8 @@ public final class MainGui {
         final SceneTreeComponent sceneTree = new SceneTreeComponent(this.context);
         this.container.setWest(sceneTree);
 
-        final ElementInspectorComponent elementInspector = new ElementInspectorComponent();
-        this.container.setEast(elementInspector);
+        this.elementInspector = new ElementInspectorComponent();
+        this.container.setEast(this.elementInspector);
 
         this.sceneViewComponent = new SceneView3dComponent(this.context);
         this.container.setCenter(this.sceneViewComponent);
@@ -71,6 +73,11 @@ public final class MainGui {
 
         final Dimension minSize = this.container.getRequestedSize();
         this.context.getWindow().setMinimumSize(minSize.width, minSize.height);
+    }
+
+    public void notifyElementSelected(Element element) {
+        Objects.requireNonNull(element, "Element is null");
+        this.elementInspector.setInspector(element.getInspector());
     }
 
     private long count = -1L;
