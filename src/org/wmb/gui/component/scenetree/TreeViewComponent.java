@@ -100,8 +100,7 @@ final class TreeViewComponent extends Component {
         if (innerBounds.contains(mouse))
             mouseY = mouse.y;
 
-        // TODO This is a hack, should be more robust to get max text height
-        this.elementHeight = graphics.getTextSize(" ").height;
+        this.elementHeight = Theme.FONT_PLAIN.textHeight;
         for (TreeNode treeNode : this.sceneTree.getTree()) {
             final Rectangle lineBounds = new Rectangle(innerBounds.x, y, innerBounds.width,
                 elementHeight);
@@ -131,7 +130,7 @@ final class TreeViewComponent extends Component {
                 treeNode.element.getIcon(), Theme.ELEMENT_ICON);
             x += iconSize;
 
-            graphics.fillText(treeNode.element.getName(), x, y, Theme.FOREGROUND);
+            graphics.fillText(treeNode.element.getName(), x, y, Theme.FOREGROUND, Theme.FONT_PLAIN);
             y = nextY;
         }
     }

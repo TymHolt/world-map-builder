@@ -5,6 +5,7 @@ import org.wmb.ResourceLoader;
 import org.wmb.WmbContext;
 import org.wmb.gui.font.AllocatedFont;
 import org.wmb.gui.font.AllocatedGlyph;
+import org.wmb.gui.font.FontDefinition;
 import org.wmb.gui.icon.AllocatedIcons;
 import org.wmb.gui.icon.Icon;
 import org.wmb.rendering.*;
@@ -12,19 +13,38 @@ import org.wmb.rendering.Color;
 
 import java.awt.*;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Objects;
 
 public final class GuiGraphics {
+
+    private static class CachedFont {
+
+        final AllocatedFont allocatedFont;
+        private long lastUsedTime;
+
+        CachedFont(AllocatedFont allocatedFont) {
+            this.allocatedFont = allocatedFont;
+            rememberUse();
+        }
+
+        void rememberUse() {
+            this.lastUsedTime = System.currentTimeMillis();
+        }
+
+        long timeSinceUse() {
+            return System.currentTimeMillis() - this.lastUsedTime;
+        }
+    }
 
     private final WmbContext context;
     private final int antiAliasLevel;
     private AllocatedFramebuffer framebuffer;
     private int lastWidth;
     private int lastHeight;
+    private final HashMap<FontDefinition, CachedFont> cachedFonts;
     private final AllocatedMeshData quadMeshData;
     private final AllocatedShaderProgram quadShaderProgram;
-    private final AllocatedFont fontPlain;
-    private final AllocatedFont fontBold;
     private final AllocatedIcons icons;
     private final int colorUl;
     private final int textureUl;
@@ -39,6 +59,7 @@ public final class GuiGraphics {
             throw new IllegalArgumentException("Antialias level must be at leas 1");
         this.antiAliasLevel = antiAliasLevel;
 
+        this.cachedFonts = new HashMap<>();
         this.framebuffer = new AllocatedFramebuffer(2, 2);
         this.lastWidth = -1;
         this.lastHeight = -1;
@@ -62,8 +83,6 @@ public final class GuiGraphics {
             ResourceLoader.loadText("/org/wmb/gui/gui_graphics_quad_vs.glsl"),
             ResourceLoader.loadText("/org/wmb/gui/gui_graphics_quad_fs.glsl"));
 
-        this.fontPlain = new AllocatedFont(Theme.FONT_PLAIN, (char) 256);
-        this.fontBold = new AllocatedFont(Theme.FONT_BOLD, (char) 256);
         this.icons = new AllocatedIcons();
 
         this.colorUl = quadShaderProgram.getUniformLocation("u_color");
@@ -92,6 +111,8 @@ public final class GuiGraphics {
         GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, this.framebuffer.getFboId());
     }
 
+    private static final long resourceKeepTime = 60L * 1000L; // 1 minute
+
     void resetPipeline() {
         GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, 0);
 
@@ -107,6 +128,16 @@ public final class GuiGraphics {
         GL30.glDisable(GL30.GL_MULTISAMPLE);
         GL30.glBindVertexArray(0);
         GL30.glUseProgram(0);
+
+        for (FontDefinition definition : this.cachedFonts.keySet()) {
+            final CachedFont font = this.cachedFonts.get(definition);
+
+            if (font.timeSinceUse() > resourceKeepTime) {
+                this.cachedFonts.remove(definition);
+                font.allocatedFont.delete();
+                break; // Only deallocate one resource per frame
+            }
+        }
     }
 
     private void resizeFramebuffer(int width, int height) {
@@ -117,11 +148,12 @@ public final class GuiGraphics {
     void deleteResources() {
         this.quadMeshData.delete();
         this.quadShaderProgram.delete();
-        this.fontPlain.delete();
-        this.fontBold.delete();
         this.icons.deleteAll();
-    }
 
+        for (FontDefinition definition : this.cachedFonts.keySet())
+            this.cachedFonts.get(definition).allocatedFont.delete();
+        this.cachedFonts.clear();
+    }
     public void clear() {
         GL30.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         GL30.glClear(GL30.GL_COLOR_BUFFER_BIT);
@@ -201,12 +233,9 @@ public final class GuiGraphics {
             GL30.GL_UNSIGNED_SHORT, 0);
     }
 
-    public void fillText(String text, int x, int y, Color color) {
-        fillText(text, x, y, color, false);
-    }
-
-    public void fillText(String text, int x, int y, Color color, boolean bold) {
+    public void fillText(String text, int x, int y, Color color, FontDefinition fontDefinition) {
         Objects.requireNonNull(color, "Color is null");
+        Objects.requireNonNull(fontDefinition, "Font is null");
 
         if (text == null)
             text = "null";
@@ -215,13 +244,21 @@ public final class GuiGraphics {
         GL30.glUniform1f(this.texturedFlagUl, 1.0f);
         GL30.glUniform1f(this.maskColorFactorUl, 1.0f);
 
-        final AllocatedFont font = bold ? this.fontBold : this.fontPlain;
+        final AllocatedFont allocatedFont;
+        if (this.cachedFonts.containsKey(fontDefinition)) {
+            final CachedFont cachedFont = this.cachedFonts.get(fontDefinition);
+            allocatedFont = cachedFont.allocatedFont;
+            cachedFont.rememberUse();
+        } else {
+            allocatedFont = fontDefinition.allocate();
+            this.cachedFonts.put(fontDefinition, new CachedFont(allocatedFont));
+        }
 
         int currentX = x;
         final int textLength = text.length();
         for (int index = 0; index < textLength; index++) {
             final char c = text.charAt(index);
-            final AllocatedGlyph glyph = font.getGlyph(c);
+            final AllocatedGlyph glyph = allocatedFont.getGlyph(c);
             if (glyph == null)
                 continue;
 
@@ -230,19 +267,8 @@ public final class GuiGraphics {
             GL30.glDrawElements(GL30.GL_TRIANGLES, this.quadMeshData.vertexCount,
                 GL30.GL_UNSIGNED_SHORT, 0);
 
-            currentX += glyph.width + font.getLeading();
+            currentX += glyph.width + allocatedFont.getLeading();
         }
-    }
-
-    public Dimension getTextSize(String text) {
-        return getTextSize(text, false);
-    }
-
-    public Dimension getTextSize(String text, boolean bold) {
-        if (bold)
-            return this.fontBold.getStringSize(text);
-        else
-            return this.fontPlain.getStringSize(text);
     }
 
     private void correctViewport(int x, int y, int width, int height) {

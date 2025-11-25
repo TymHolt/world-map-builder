@@ -13,7 +13,7 @@ public final class ElementInspectorComponent extends CompassContainerComponent {
     public ElementInspectorComponent() {
         super();
         setBackground(Theme.BACKGROUND);
-        setNorth(new Label("Element Inspector", Align.CENTER, true));
+        setNorth(new Label("Element Inspector", Align.CENTER, Theme.FONT_BOLD));
         this.inspectorViewComponent = new InspectorViewComponent();
         setCenter(this.inspectorViewComponent);
 

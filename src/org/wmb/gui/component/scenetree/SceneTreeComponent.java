@@ -12,7 +12,7 @@ public final class SceneTreeComponent extends CompassContainerComponent {
     public SceneTreeComponent(WmbContext context) {
         super();
         setBackground(Theme.BACKGROUND);
-        setNorth(new Label("Scene Tree", Align.CENTER, true));
+        setNorth(new Label("Scene Tree", Align.CENTER, Theme.FONT_BOLD));
         setCenter(new TreeViewComponent(context));
 
         final Border border = new Border(3, Theme.BORDER);

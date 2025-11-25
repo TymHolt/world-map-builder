@@ -9,7 +9,12 @@ import java.io.IOException;
 public class Object3dElementRenderer {
 
     private final AllocatedShaderProgram shaderProgram;
-    private final int textureUl, transformUl, viewUl, projectionUl;
+    private final int textureUl;
+    private final int transformUl;
+    private final int viewUl;
+    private final int projectionUl;
+    private final int highlightColorUl;
+    private final int highlightFactorUl;
 
     private final AllocatedMeshData testMeshData;
     private final AllocatedTexture testTexture;
@@ -23,6 +28,8 @@ public class Object3dElementRenderer {
         this.transformUl = shaderProgram.getUniformLocation("u_transform");
         this.viewUl = shaderProgram.getUniformLocation("u_view");
         this.projectionUl = shaderProgram.getUniformLocation("u_projection");
+        this.highlightColorUl = shaderProgram.getUniformLocation("u_highlight_color");
+        this.highlightFactorUl = shaderProgram.getUniformLocation("u_highlight_factor");
 
         this.testMeshData = new AllocatedMeshData(new float[] {
             -0.5f, 0.5f, 0.0f,
@@ -62,11 +69,14 @@ public class Object3dElementRenderer {
         AllocatedShaderProgram.uniformMat4(this.projectionUl, camera.getProjectionMatrix(aspect));
     }
 
-    public void render(Object3dElement element) {
+    public void render(Object3dElement element, Color highlight, float factor) {
         GL30.glBindTexture(GL30.GL_TEXTURE_2D, this.testTexture.getId());
         GL30.glBindVertexArray(this.testMeshData.getId());
 
         AllocatedShaderProgram.uniformMat4(this.transformUl, element.getTransform().getAsMatrix());
+        AllocatedShaderProgram.uniformColor(this.highlightColorUl, highlight);
+        GL30.glUniform1f(this.highlightFactorUl, factor);
+
         GL30.glDrawElements(GL30.GL_TRIANGLES, this.testMeshData.vertexCount,
             GL30.GL_UNSIGNED_SHORT, 0);
 

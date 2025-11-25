@@ -67,8 +67,10 @@ public final class SceneView3dComponent extends Component {
         if (element == null)
             return;
 
-        if (element instanceof Object3dElement)
-            this.object3dElementRenderer.render((Object3dElement) element);
+        if (element instanceof Object3dElement) {
+            final float factor = this.context.getSelectedElement() == element ? 0.2f : 0.0f;
+            this.object3dElementRenderer.render((Object3dElement) element, Color.WHITE, factor);
+        }
 
         for (Element child : element.getChildren())
             recursiveRender(child);

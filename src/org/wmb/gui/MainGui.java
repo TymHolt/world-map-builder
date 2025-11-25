@@ -78,6 +78,11 @@ public final class MainGui {
     public void notifyElementSelected(Element element) {
         Objects.requireNonNull(element, "Element is null");
         this.elementInspector.setInspector(element.getInspector());
+        recalculateLayout();
+    }
+
+    public void recalculateLayout() {
+        this.container.setBounds(this.container.getBounds());
     }
 
     private long count = -1L;
@@ -86,7 +91,7 @@ public final class MainGui {
         // Some components compute parts of their bounds in their draw() method
         // This will ensure the bounds get recalculated from time to time
         if (count++ % 100 == 0)
-            this.container.setBounds(this.container.getBounds());
+            recalculateLayout();
 
         this.sceneViewComponent.renderScene(this.context.getScene());
 

@@ -1,8 +1,6 @@
 package org.wmb.gui.font;
 
 import org.bfg.generate.BitmapFont;
-import org.bfg.generate.BitmapFontGenerator;
-import org.bfg.generate.GlyphRange;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -13,14 +11,10 @@ public class AllocatedFont {
     private final AllocatedGlyph[] glyphs;
     private final int leading;
 
-    public AllocatedFont(Font font, int charCount) {
-        Objects.requireNonNull(font, "Font is null");
+    AllocatedFont(BitmapFont bitmapFont) {
+        Objects.requireNonNull(bitmapFont, "Font is null");
 
-        if (charCount < 1)
-            throw new IllegalArgumentException("Char count is less than 1");
-
-        final GlyphRange range = new GlyphRange((char) (charCount - 1)); // Range inclusive
-        final BitmapFont bitmapFont = BitmapFontGenerator.generate(font, range, true);
+        final char charCount = (char) bitmapFont.getRange().getCount();
         this.leading = bitmapFont.getLeading();
         this.glyphs = new AllocatedGlyph[charCount];
         for (char c = 0; c < charCount; c++) {

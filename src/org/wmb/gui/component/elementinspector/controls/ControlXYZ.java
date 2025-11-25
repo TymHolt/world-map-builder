@@ -1,6 +1,7 @@
 package org.wmb.gui.component.elementinspector.controls;
 
 import org.wmb.gui.GuiGraphics;
+import org.wmb.gui.Theme;
 import org.wmb.gui.component.Align;
 import org.wmb.gui.component.Component;
 import org.wmb.gui.component.Label;
@@ -23,17 +24,17 @@ public final class ControlXYZ extends Component {
     public ControlXYZ(String title) {
         setBackground(Color.TRANSPARENT);
 
-        this.label = new Label(title, Align.LEFT, false);
+        this.label = new Label(title, Align.LEFT, Theme.FONT_PLAIN);
 
-        this.labelX = new Label("X", Align.LEFT, true);
+        this.labelX = new Label("X", Align.LEFT, Theme.FONT_BOLD);
         this.labelX.setBackground(Color.RED);
         this.fieldX = new TextField();
 
-        this.labelY = new Label("Y", Align.LEFT, true);
+        this.labelY = new Label("Y", Align.LEFT, Theme.FONT_BOLD);
         this.labelY.setBackground(Color.GREEN);
         this.fieldY = new TextField();
 
-        this.labelZ = new Label("Z", Align.LEFT, true);
+        this.labelZ = new Label("Z", Align.LEFT, Theme.FONT_BOLD);
         this.labelZ.setBackground(Color.BLUE);
         this.fieldZ = new TextField();
 

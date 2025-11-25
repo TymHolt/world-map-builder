@@ -47,25 +47,25 @@ public final class TextField extends Component {
 
     @Override
     public Dimension getRequestedSize() {
-        return this.lastTextSize;
+        return Theme.FONT_PLAIN.getTextSize(this.text);
     }
 
     @Override
     public void draw(GuiGraphics graphics) {
         super.draw(graphics);
 
-        final Dimension textSize = graphics.getTextSize(this.text, false);
+        final Dimension textSize = Theme.FONT_PLAIN.getTextSize(this.text);
         this.lastTextSize = textSize;
         final Rectangle innerBounds = getBorder().getInner(getBounds());
         final int x = innerBounds.x;
         final int y = innerBounds.y + ((innerBounds.height - textSize.height) / 2);
 
         switch (align) {
-            case LEFT -> graphics.fillText(this.text, x, y, this.foreground, false);
+            case LEFT -> graphics.fillText(this.text, x, y, this.foreground, Theme.FONT_PLAIN);
             case RIGHT -> graphics.fillText(this.text, x + (innerBounds.width - textSize.width),
-                y, this.foreground, false);
+                y, this.foreground, Theme.FONT_PLAIN);
             case CENTER -> graphics.fillText(this.text,
-                x + (innerBounds.width - textSize.width) / 2, y, this.foreground, false);
+                x + (innerBounds.width - textSize.width) / 2, y, this.foreground, Theme.FONT_PLAIN);
         }
     }
 
