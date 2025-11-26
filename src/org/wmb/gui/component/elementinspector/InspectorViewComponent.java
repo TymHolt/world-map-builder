@@ -3,6 +3,8 @@ package org.wmb.gui.component.elementinspector;
 import org.wmb.gui.GuiGraphics;
 import org.wmb.gui.Theme;
 import org.wmb.gui.component.Component;
+import org.wmb.gui.input.Cursor;
+import org.wmb.gui.input.InputHandleHelper;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -11,10 +13,12 @@ import java.util.Objects;
 
 public class InspectorViewComponent extends Component {
 
+    private final InputHandleHelper inputHelper;
     private final List<Component> controlsList;
 
     public InspectorViewComponent() {
         setBackground(Theme.BACKGROUND);
+        this.inputHelper = new InputHandleHelper();
         this.controlsList = new ArrayList<>();
     }
 
@@ -44,6 +48,11 @@ public class InspectorViewComponent extends Component {
         }
     }
 
+    @Override
+    public Cursor getCursor(int mouseX, int mouseY) {
+        return this.inputHelper.handleGetCursor(mouseX, mouseY);
+    }
+
     public void setInspector(Inspector inspector) {
         Objects.requireNonNull(inspector, "Inspector is null");
         this.controlsList.clear();
@@ -53,5 +62,6 @@ public class InspectorViewComponent extends Component {
     public void addControl(Component component) {
         Objects.requireNonNull(component, "Component is null");
         this.controlsList.add(component);
+        this.inputHelper.setComponents(this.controlsList);
     }
 }

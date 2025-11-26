@@ -4,6 +4,7 @@ import org.wmb.gui.component.Component;
 
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public final class InputHandleHelper {
@@ -12,7 +13,7 @@ public final class InputHandleHelper {
     private Component focusedComponent;
 
     public InputHandleHelper() {
-        setComponents(null);
+        setComponents(new Component[0]);
     }
 
     public void setComponents(List<Component> components) {
@@ -22,6 +23,21 @@ public final class InputHandleHelper {
         this.components = components;
 
         if (!components.contains(this.focusedComponent)) {
+            if (this.focusedComponent != null)
+                this.focusedComponent.onLooseFocus();
+
+            this.focusedComponent = null;
+        }
+    }
+
+    public void setComponents(Component[] components) {
+        if (components == null)
+            components = new Component[0];
+
+        this.components = new ArrayList<>();
+        this.components.addAll(Arrays.asList(components));
+
+        if (!this.components.contains(this.focusedComponent)) {
             if (this.focusedComponent != null)
                 this.focusedComponent.onLooseFocus();
 

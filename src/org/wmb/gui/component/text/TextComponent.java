@@ -1,31 +1,35 @@
-package org.wmb.gui.component;
+package org.wmb.gui.component.text;
 
 import org.wmb.gui.GuiGraphics;
 import org.wmb.gui.Theme;
-import org.wmb.gui.input.Cursor;
+import org.wmb.gui.component.Align;
+import org.wmb.gui.component.Border;
+import org.wmb.gui.component.Component;
+import org.wmb.gui.font.FontDefinition;
 import org.wmb.rendering.Color;
 
-import java.awt.*;
+import java.awt.Dimension;
+import java.awt.Rectangle;
 import java.util.Objects;
 
-public final class TextField extends Component {
+public abstract class TextComponent extends Component {
 
     private Align align;
     private String text;
     private Color foreground;
-    private Dimension lastTextSize;
+    private FontDefinition font;
 
-    public TextField() {
-        this("", Align.CENTER);
+    public TextComponent(String text) {
+        this(text, Align.CENTER);
     }
 
-    public TextField(String text, Align align) {
+    public TextComponent(String text, Align align) {
         setText(text);
         setAlign(align);
         setBackground(Theme.BACKGROUND);
         setForeground(Theme.FOREGROUND);
-        this.lastTextSize = new Dimension(1, 1);
-        setBorder(new Border(1, Theme.BORDER));
+        setFont(Theme.FONT_PLAIN);
+        setBorder(new Border());
     }
 
     public void setText(String text) {
@@ -35,9 +39,17 @@ public final class TextField extends Component {
         this.text = text;
     }
 
+    public String getText() {
+        return this.text;
+    }
+
     public void setForeground(Color color) {
         Objects.requireNonNull(color, "Color is null");
         this.foreground = color;
+    }
+
+    public Color getForeground() {
+        return this.foreground;
     }
 
     public void setAlign(Align align) {
@@ -45,32 +57,39 @@ public final class TextField extends Component {
         this.align = align;
     }
 
+    public Align getAlign() {
+        return this.align;
+    }
+
+    public void setFont(FontDefinition font) {
+        Objects.requireNonNull(font, "Font is null");
+        this.font = font;
+    }
+
+    public FontDefinition getFont() {
+        return this.font;
+    }
+
     @Override
     public Dimension getRequestedSize() {
-        return Theme.FONT_PLAIN.getTextSize(this.text);
+        return this.font.getTextSize(this.text);
     }
 
     @Override
     public void draw(GuiGraphics graphics) {
         super.draw(graphics);
 
-        final Dimension textSize = Theme.FONT_PLAIN.getTextSize(this.text);
-        this.lastTextSize = textSize;
+        final Dimension textSize = this.font.getTextSize(this.text);
         final Rectangle innerBounds = getBorder().getInner(getBounds());
         final int x = innerBounds.x;
         final int y = innerBounds.y + ((innerBounds.height - textSize.height) / 2);
 
         switch (align) {
-            case LEFT -> graphics.fillText(this.text, x, y, this.foreground, Theme.FONT_PLAIN);
+            case LEFT -> graphics.fillText(this.text, x, y, this.foreground, this.font);
             case RIGHT -> graphics.fillText(this.text, x + (innerBounds.width - textSize.width),
-                y, this.foreground, Theme.FONT_PLAIN);
+                y, this.foreground, this.font);
             case CENTER -> graphics.fillText(this.text,
-                x + (innerBounds.width - textSize.width) / 2, y, this.foreground, Theme.FONT_PLAIN);
+                x + (innerBounds.width - textSize.width) / 2, y, this.foreground, this.font);
         }
-    }
-
-    @Override
-    public Cursor getCursor(int mouseX, int mouseY) {
-        return Cursor.HAND;
     }
 }

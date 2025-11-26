@@ -5,13 +5,16 @@ import org.wmb.gui.Theme;
 import org.wmb.gui.component.Align;
 import org.wmb.gui.component.Component;
 import org.wmb.gui.component.Label;
-import org.wmb.gui.component.TextField;
+import org.wmb.gui.component.text.TextField;
+import org.wmb.gui.input.Cursor;
+import org.wmb.gui.input.InputHandleHelper;
 import org.wmb.rendering.Color;
 
 import java.awt.*;
 
 public final class ControlXYZ extends Component {
 
+    private final InputHandleHelper inputHelper;
     private final Label label;
     private final Label labelX;
     private final Label labelY;
@@ -23,6 +26,7 @@ public final class ControlXYZ extends Component {
 
     public ControlXYZ(String title) {
         setBackground(Color.TRANSPARENT);
+        this.inputHelper = new InputHandleHelper();
 
         this.label = new Label(title, Align.LEFT, Theme.FONT_PLAIN);
 
@@ -47,6 +51,8 @@ public final class ControlXYZ extends Component {
             this.labelZ,
             this.fieldZ
         };
+
+        this.inputHelper.setComponents(this.components);
     }
 
     private static final int padding = 2;
@@ -106,5 +112,10 @@ public final class ControlXYZ extends Component {
 
         for (Component component : this.components)
             component.draw(graphics);
+    }
+
+    @Override
+    public Cursor getCursor(int mouseX, int mouseY) {
+        return this.inputHelper.handleGetCursor(mouseX, mouseY);
     }
 }
