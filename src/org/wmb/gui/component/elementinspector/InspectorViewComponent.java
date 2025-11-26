@@ -3,6 +3,7 @@ package org.wmb.gui.component.elementinspector;
 import org.wmb.gui.GuiGraphics;
 import org.wmb.gui.Theme;
 import org.wmb.gui.component.Component;
+import org.wmb.gui.component.VerticalPadding;
 import org.wmb.gui.input.Cursor;
 import org.wmb.gui.input.InputHandleHelper;
 
@@ -63,5 +64,9 @@ public class InspectorViewComponent extends Component {
         Objects.requireNonNull(component, "Component is null");
         this.controlsList.add(component);
         this.inputHelper.setComponents(this.controlsList);
+    }
+
+    public void addPadding() {
+        addControl(new VerticalPadding(5));
     }
 }

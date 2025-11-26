@@ -12,7 +12,7 @@ import org.wmb.rendering.Color;
 
 import java.awt.*;
 
-public final class ControlXYZ extends Component {
+public final class ControlXYZ extends ControlComponent {
 
     private final InputHandleHelper inputHelper;
     private final Label label;
@@ -25,7 +25,7 @@ public final class ControlXYZ extends Component {
     private final Component[] components;
 
     public ControlXYZ(String title) {
-        setBackground(Color.TRANSPARENT);
+        super();
         this.inputHelper = new InputHandleHelper();
 
         this.label = new Label(title, Align.LEFT, Theme.FONT_PLAIN);
@@ -53,6 +53,30 @@ public final class ControlXYZ extends Component {
         };
 
         this.inputHelper.setComponents(this.components);
+    }
+
+    public void setX(float x) {
+        this.fieldX.setText(Float.toString(x));
+    }
+
+    public float getX() {
+        return Float.parseFloat(this.fieldX.getText());
+    }
+
+    public void setY(float y) {
+        this.fieldY.setText(Float.toString(y));
+    }
+
+    public float getY() {
+        return Float.parseFloat(this.fieldY.getText());
+    }
+
+    public void setZ(float z) {
+        this.fieldZ.setText(Float.toString(z));
+    }
+
+    public float getZ() {
+        return Float.parseFloat(this.fieldZ.getText());
     }
 
     private static final int padding = 2;
