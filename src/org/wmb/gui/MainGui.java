@@ -7,7 +7,7 @@ import org.wmb.WmbContext;
 import org.wmb.gui.component.elementinspector.ElementInspectorComponent;
 import org.wmb.gui.component.scenetree.SceneTreeComponent;
 import org.wmb.gui.component.sceneview3d.SceneView3dComponent;
-import org.wmb.gui.component.CompassContainerComponent;
+import org.wmb.gui.component.container.CompassContainerComponent;
 import org.wmb.gui.component.MenuBarComponent;
 import org.wmb.gui.input.MouseScrollEvent;
 import org.wmb.rendering.OpenGLStateException;

@@ -23,8 +23,4 @@ public enum Icon {
     public BufferedImage loadImage() throws IOException {
         return ResourceLoader.loadImage(this.path);
     }
-
-    /*public AllocatedTexture loadAllocatedTexture() throws IOException {
-        return new AllocatedTexture(ResourceLoader.loadImage(this.path), TextureFilter.NEAREST);
-    }*/
 }

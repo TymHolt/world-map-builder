@@ -4,7 +4,7 @@ import org.wmb.WmbContext;
 import org.wmb.gui.Theme;
 import org.wmb.gui.component.Align;
 import org.wmb.gui.component.Border;
-import org.wmb.gui.component.CompassContainerComponent;
+import org.wmb.gui.component.container.CompassContainerComponent;
 import org.wmb.gui.component.Label;
 
 public final class SceneTreeComponent extends CompassContainerComponent {

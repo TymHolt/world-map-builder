@@ -13,6 +13,8 @@ public final class Theme {
         new Color(60.0f / 255.0f, 63.0f / 255.0f, 70.0f / 255.0f, 1.0f);
     public static final Color FOREGROUND =
         new Color(230.0f / 255.0f, 230.0f / 255.0f, 230.0f / 255.0f, 1.0f);
+    public static final Color FOREGROUND_DARK =
+        new Color(120.0f / 255.0f, 120.0f / 255.0f, 120.0f / 255.0f, 1.0f);
     public static final Color BORDER =
         new Color(60.0f / 255.0f, 60.0f / 255.0f, 65.0f / 255.0f, 1.0f);
     public static final Color HIGHLIGHT =

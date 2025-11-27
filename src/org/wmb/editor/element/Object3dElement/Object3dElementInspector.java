@@ -1,5 +1,6 @@
 package org.wmb.editor.element.Object3dElement;
 
+import org.wmb.gui.component.VerticalPadding;
 import org.wmb.gui.component.elementinspector.Inspector;
 import org.wmb.gui.component.elementinspector.InspectorViewComponent;
 import org.wmb.gui.component.elementinspector.controls.ControlXYZ;
@@ -22,11 +23,11 @@ public final class Object3dElementInspector implements Inspector {
 
     @Override
     public void init(InspectorViewComponent inspectorView) {
-        inspectorView.addPadding();
-        inspectorView.addControl(this.nameControl);
-        inspectorView.addPadding();
-        inspectorView.addControl(this.positionControl);
-        inspectorView.addPadding();
+        inspectorView.addComponent(new VerticalPadding(5));
+        inspectorView.addComponent(this.nameControl);
+        inspectorView.addComponent(new VerticalPadding(5));
+        inspectorView.addComponent(this.positionControl);
+        inspectorView.addComponent(new VerticalPadding(5));
         read();
     }
 

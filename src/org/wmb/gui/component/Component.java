@@ -24,7 +24,7 @@ public abstract class Component {
 
     public void setBounds(Rectangle bounds) {
         Objects.requireNonNull(bounds, "Bounds is null");
-        this.bounds.setBounds(bounds);
+        setBounds(bounds.x, bounds.y, bounds.width, bounds.height);
     }
 
     public void setBounds(int x, int y, int width, int height) {

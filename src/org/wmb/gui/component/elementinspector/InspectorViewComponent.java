@@ -1,26 +1,17 @@
 package org.wmb.gui.component.elementinspector;
 
-import org.wmb.gui.GuiGraphics;
 import org.wmb.gui.Theme;
 import org.wmb.gui.component.Component;
-import org.wmb.gui.component.VerticalPadding;
-import org.wmb.gui.input.Cursor;
-import org.wmb.gui.input.InputHandleHelper;
+import org.wmb.gui.component.container.ContainerComponent;
 
-import java.awt.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.awt.Dimension;
+import java.awt.Toolkit;
 import java.util.Objects;
 
-public class InspectorViewComponent extends Component {
-
-    private final InputHandleHelper inputHelper;
-    private final List<Component> controlsList;
+public class InspectorViewComponent extends ContainerComponent {
 
     public InspectorViewComponent() {
         setBackground(Theme.BACKGROUND);
-        this.inputHelper = new InputHandleHelper();
-        this.controlsList = new ArrayList<>();
     }
 
     @Override
@@ -30,43 +21,20 @@ public class InspectorViewComponent extends Component {
     }
 
     @Override
-    public void draw(GuiGraphics graphics) {
-        super.draw(graphics);
-
-        for (Component component : this.controlsList)
-            component.draw(graphics);
-    }
-
-    @Override
     public void setBounds(int x, int y, int width, int height) {
         super.setBounds(x, y, width, height);
 
         int currentY = y;
-        for (Component component : this.controlsList) {
+        for (Component component : getComponentList()) {
             final Dimension requestedSize = component.getRequestedSize();
             component.setBounds(x, currentY, width, requestedSize.height);
             currentY += requestedSize.height;
         }
     }
 
-    @Override
-    public Cursor getCursor(int mouseX, int mouseY) {
-        return this.inputHelper.handleGetCursor(mouseX, mouseY);
-    }
-
     public void setInspector(Inspector inspector) {
         Objects.requireNonNull(inspector, "Inspector is null");
-        this.controlsList.clear();
+        clearComponents();
         inspector.init(this);
-    }
-
-    public void addControl(Component component) {
-        Objects.requireNonNull(component, "Component is null");
-        this.controlsList.add(component);
-        this.inputHelper.setComponents(this.controlsList);
-    }
-
-    public void addPadding() {
-        addControl(new VerticalPadding(5));
     }
 }

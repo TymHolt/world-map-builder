@@ -19,10 +19,6 @@ public abstract class TextComponent extends Component {
     private Color foreground;
     private FontDefinition font;
 
-    public TextComponent(String text) {
-        this(text, Align.CENTER);
-    }
-
     public TextComponent(String text, Align align) {
         setText(text);
         setAlign(align);

@@ -1,20 +1,16 @@
 package org.wmb.gui.component.elementinspector.controls;
 
-import org.wmb.gui.GuiGraphics;
 import org.wmb.gui.Theme;
 import org.wmb.gui.component.Align;
-import org.wmb.gui.component.Component;
 import org.wmb.gui.component.Label;
+import org.wmb.gui.component.container.ContainerComponent;
 import org.wmb.gui.component.text.TextField;
-import org.wmb.gui.input.Cursor;
-import org.wmb.gui.input.InputHandleHelper;
 import org.wmb.rendering.Color;
 
 import java.awt.*;
 
-public final class ControlXYZ extends ControlComponent {
+public final class ControlXYZ extends ContainerComponent {
 
-    private final InputHandleHelper inputHelper;
     private final Label label;
     private final Label labelX;
     private final Label labelY;
@@ -22,37 +18,29 @@ public final class ControlXYZ extends ControlComponent {
     private final TextField fieldX;
     private final TextField fieldY;
     private final TextField fieldZ;
-    private final Component[] components;
 
     public ControlXYZ(String title) {
         super();
-        this.inputHelper = new InputHandleHelper();
-
         this.label = new Label(title, Align.LEFT, Theme.FONT_PLAIN);
+        addComponent(label);
 
         this.labelX = new Label("X", Align.LEFT, Theme.FONT_BOLD);
         this.labelX.setBackground(Color.RED);
         this.fieldX = new TextField();
+        addComponent(labelX);
+        addComponent(fieldX);
 
         this.labelY = new Label("Y", Align.LEFT, Theme.FONT_BOLD);
         this.labelY.setBackground(Color.GREEN);
         this.fieldY = new TextField();
+        addComponent(labelY);
+        addComponent(fieldY);
 
         this.labelZ = new Label("Z", Align.LEFT, Theme.FONT_BOLD);
         this.labelZ.setBackground(Color.BLUE);
         this.fieldZ = new TextField();
-
-        this.components = new Component[] {
-            this.label,
-            this.labelX,
-            this.fieldX,
-            this.labelY,
-            this.fieldY,
-            this.labelZ,
-            this.fieldZ
-        };
-
-        this.inputHelper.setComponents(this.components);
+        addComponent(labelZ);
+        addComponent(fieldZ);
     }
 
     public void setX(float x) {
@@ -128,18 +116,5 @@ public final class ControlXYZ extends ControlComponent {
         this.labelZ.setBounds(currentX, currentY, labelWidth, allHeight);
         currentX += labelWidth + padding;
         this.fieldZ.setBounds(currentX, currentY, fieldWidth, allHeight);
-    }
-
-    @Override
-    public void draw(GuiGraphics graphics) {
-        super.draw(graphics);
-
-        for (Component component : this.components)
-            component.draw(graphics);
-    }
-
-    @Override
-    public Cursor getCursor(int mouseX, int mouseY) {
-        return this.inputHelper.handleGetCursor(mouseX, mouseY);
     }
 }
