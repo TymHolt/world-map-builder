@@ -10,6 +10,7 @@ import org.wmb.gui.component.sceneview3d.SceneView3dComponent;
 import org.wmb.gui.component.CompassContainerComponent;
 import org.wmb.gui.component.MenuBarComponent;
 import org.wmb.gui.input.MouseScrollEvent;
+import org.wmb.rendering.OpenGLStateException;
 
 import java.awt.*;
 import java.io.IOException;
@@ -25,11 +26,23 @@ public final class MainGui {
 
     public MainGui(WmbContext context) throws IOException {
         Objects.requireNonNull(context, "Context is null");
-
         this.context = context;
-        this.graphics = new GuiGraphics(this.context, 2);
+
+        try {
+            this.graphics = new GuiGraphics(this.context, 2);
+        } catch (IOException exception) {
+            throw new IOException("(GuiGraphics) " + exception.getMessage());
+        }
+
+        try {
+            this.sceneViewComponent = new SceneView3dComponent(this.context);
+        } catch (IOException exception) {
+            this.graphics.delete();
+            throw new IOException("(SceneViewComponent) " + exception.getMessage());
+        }
 
         this.container = new CompassContainerComponent();
+        this.container.setCenter(this.sceneViewComponent);
 
         final MenuBarComponent menuBar = new MenuBarComponent();
         menuBar.setBackground(Theme.BACKGROUND);
@@ -41,9 +54,6 @@ public final class MainGui {
 
         this.elementInspector = new ElementInspectorComponent();
         this.container.setEast(this.elementInspector);
-
-        this.sceneViewComponent = new SceneView3dComponent(this.context);
-        this.container.setCenter(this.sceneViewComponent);
 
         this.context.getWindow().setInputListener(new WindowListener() {
 
@@ -87,7 +97,7 @@ public final class MainGui {
 
     private long count = -1L;
 
-    public void draw() {
+    public void draw() throws OpenGLStateException {
         // Some components compute parts of their bounds in their draw() method
         // This will ensure the bounds get recalculated from time to time
         if (count++ % 100 == 0)
@@ -95,14 +105,19 @@ public final class MainGui {
 
         this.sceneViewComponent.renderScene(this.context.getScene());
 
-        this.graphics.preparePipeline();
+        try {
+            this.graphics.preparePipeline();
+        } catch (OpenGLStateException exception) {
+            throw new OpenGLStateException("(Prepare GuiGraphics)" + exception.getMessage());
+        }
+
         this.graphics.clear();
         this.container.draw(graphics);
         this.graphics.resetPipeline();
     }
 
-    public void dispose() {
-        this.sceneViewComponent.dispose();
-        this.graphics.deleteResources();
+    public void delete() {
+        this.sceneViewComponent.delete();
+        this.graphics.delete();
     }
 }

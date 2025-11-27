@@ -1,5 +1,7 @@
 package org.wmb;
 
+import javax.swing.JOptionPane;
+
 public final class Main {
 
     private static boolean mainCalled = false;
@@ -24,12 +26,14 @@ public final class Main {
                 WmbContext.updateAll();
                 enforceMaxUps();
             }
-
-            Main.onExitCallbacks.executeAll();
         } catch(Exception exception) {
             Log.error("(Internal) " + exception.getMessage());
             Log.debug(exception);
+            JOptionPane.showMessageDialog(null, exception.getMessage(), "Internal Exception",
+                JOptionPane.ERROR_MESSAGE);
         }
+
+        Main.onExitCallbacks.executeAll();
     }
 
     private static void handleArguments(String[] arguments) {

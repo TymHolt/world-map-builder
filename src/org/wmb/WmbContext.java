@@ -5,6 +5,7 @@ import org.wmb.editor.element.Element;
 import org.wmb.editor.element.Object3dElement.Object3dElement;
 import org.wmb.gui.MainGui;
 import org.wmb.gui.Window;
+import org.wmb.rendering.OpenGLStateException;
 
 import java.awt.*;
 import java.io.IOException;
@@ -24,13 +25,17 @@ public final class WmbContext {
         final Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         this.window = new Window(screenSize.width * 2 / 3, screenSize.height * 2 / 3,
             "World Map Builder");
-
         this.window.makeContextCurrent();
 
         this.scene = new Scene3d();
         this.scene.getChildren().add(new Object3dElement(this.scene));
 
-        this.gui = new MainGui(this);
+        try {
+            this.gui = new MainGui(this);
+        } catch (IOException exception) {
+            this.window.close();
+            throw new IOException("(MainGui) " + exception.getMessage());
+        }
 
         addContext(this);
     }
@@ -62,7 +67,7 @@ public final class WmbContext {
         if (this.window.wasCloseRequested()) {
             this.active = false;
             this.window.makeContextCurrent();
-            this.gui.dispose();
+            this.gui.delete();
             this.window.close();
             removeContext(this);
             return;
@@ -76,7 +81,17 @@ public final class WmbContext {
             this.gui.resize(windowSize);
         }
 
-        this.gui.draw();
+        try {
+            this.gui.draw();
+        } catch (OpenGLStateException exception) {
+            this.active = false;
+            this.window.makeContextCurrent();
+            this.gui.delete();
+            this.window.close();
+            removeContext(this);
+            throw new RuntimeException(exception);
+        }
+
         this.window.update();
     }
 

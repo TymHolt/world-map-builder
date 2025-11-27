@@ -3,6 +3,7 @@ package org.wmb.gui.component.sceneview3d;
 import org.joml.Matrix4f;
 import org.joml.Vector4f;
 import org.lwjgl.opengl.GL30;
+import org.wmb.Log;
 import org.wmb.WmbContext;
 import org.wmb.gui.Window;
 import org.wmb.gui.component.Component;
@@ -15,6 +16,7 @@ import org.wmb.editor.element.Object3dElement.Object3dElementRenderer;
 import org.wmb.rendering.AllocatedFramebuffer;
 import org.wmb.rendering.Camera;
 import org.wmb.rendering.Color;
+import org.wmb.rendering.OpenGLStateException;
 
 import java.awt.*;
 import java.io.IOException;
@@ -22,8 +24,10 @@ import java.util.Objects;
 
 public final class SceneView3dComponent extends Component {
 
-    private WmbContext context;
+    private final WmbContext context;
     private AllocatedFramebuffer framebuffer;
+    private int lastWidth;
+    private int lastHeight;
     private final GridLineRenderer gridLineRenderer;
     private final Object3dElementRenderer object3dElementRenderer;
     private final Camera camera;
@@ -32,20 +36,52 @@ public final class SceneView3dComponent extends Component {
 
     public SceneView3dComponent(WmbContext context) throws IOException {
         Objects.requireNonNull(context, "Context is null");
-
         this.context = context;
-        this.framebuffer = new AllocatedFramebuffer(2, 2);
-        this.object3dElementRenderer = new Object3dElementRenderer();
-        this.gridLineRenderer = new GridLineRenderer(8);
+
+        try {
+            this.framebuffer = new AllocatedFramebuffer(2, 2);
+        } catch (OpenGLStateException exception) {
+            throw new OpenGLStateException("(Framebuffer) " + exception.getMessage());
+        }
+
+        try {
+            this.object3dElementRenderer = new Object3dElementRenderer();
+        } catch (OpenGLStateException exception) {
+            this.framebuffer.delete();
+            throw new OpenGLStateException("(Object3dElementRenderer) " + exception.getMessage());
+        }
+
+        try {
+            this.gridLineRenderer = new GridLineRenderer(8);
+        } catch (IOException exception) {
+            this.framebuffer.delete();
+            this.object3dElementRenderer.delete();
+            throw new IOException("(GridLineRenderer) " + exception.getMessage());
+        }
+
         this.fov = 70.0f;
         this.camera = new Camera(0.0f, 8.0f, 8.0f, 45.0f, 0.0f, this.fov, 0.1f, 128.0f);
         this.rotatingCamera = false;
+        this.lastWidth = -1;
+        this.lastHeight = -1;
     }
 
     public void renderScene(Scene3d scene) {
+        final Rectangle bounds = getInnerBounds();
+        if (bounds.width != this.lastWidth || bounds.height != this.lastHeight) {
+            try {
+                resizeFramebuffer(bounds.width, bounds.height);
+            } catch (OpenGLStateException exception) {
+                Log.debug("New framebuffer size: " + bounds.width + "x" + bounds.height);
+                throw new RuntimeException("(Prepare GuiGraphics)" + exception);
+            }
+
+            this.lastWidth = bounds.width;
+            this.lastHeight = bounds.height;
+        }
+
         GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, this.framebuffer.getFboId());
 
-        final Rectangle bounds = getBounds();
         GL30.glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         GL30.glClear(GL30.GL_COLOR_BUFFER_BIT | GL30.GL_DEPTH_BUFFER_BIT);
         GL30.glEnable(GL30.GL_DEPTH_TEST);
@@ -114,31 +150,20 @@ public final class SceneView3dComponent extends Component {
 
     @Override
     public void draw(GuiGraphics graphics) {
-        Objects.requireNonNull(graphics, "Graphics is null");
-
         graphics.fillQuadTexture(getBounds(), this.framebuffer);
     }
 
-    @Override
-    public void setBounds(Rectangle bounds) {
-        setBounds(bounds.x, bounds.y, bounds.width, bounds.height);
-    }
-
-    @Override
-    public void setBounds(int x, int y, int width, int height) {
-        super.setBounds(x, y, width, height);
-        resizeFramebuffer(width, height);
-    }
-
-    private void resizeFramebuffer(int width, int height) {
+    private void resizeFramebuffer(int width, int height) throws OpenGLStateException {
+        // In case the allocation fails we delete the old framebuffer afterward
+        final AllocatedFramebuffer newFramebuffer = new AllocatedFramebuffer(width, height);
         this.framebuffer.delete();
-        this.framebuffer = new AllocatedFramebuffer(width, height);
+        this.framebuffer = newFramebuffer;
     }
 
-    public void dispose() {
+    public void delete() {
+        this.framebuffer.delete();
         this.object3dElementRenderer.delete();
         this.gridLineRenderer.delete();
-        this.framebuffer.delete();
     }
 
     @Override

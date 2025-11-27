@@ -11,11 +11,11 @@ public final class AllocatedTexture implements ITexture {
 
     private final int textureId;
 
-    public AllocatedTexture(BufferedImage image) {
+    public AllocatedTexture(BufferedImage image) throws OpenGLStateException {
         this(image, TextureFilter.NEAREST);
     }
 
-    public AllocatedTexture(BufferedImage image, TextureFilter filter) {
+    public AllocatedTexture(BufferedImage image, TextureFilter filter) throws OpenGLStateException {
         Objects.requireNonNull(image, "Image is null");
         Objects.requireNonNull(filter, "Filter is null");
 
@@ -36,8 +36,8 @@ public final class AllocatedTexture implements ITexture {
         pixelDataBuffer.flip();
 
         this.textureId = GL30.glGenTextures();
-        if (this.textureId == 0)
-            throw new IllegalStateException("OpenGL texture could not be created");
+        if (this.textureId < 1)
+            throw new OpenGLStateException("Texture creation failed");
 
         GL30.glBindTexture(GL30.GL_TEXTURE_2D, this.textureId);
         GL30.glPixelStorei(GL30.GL_UNPACK_ALIGNMENT, 1);

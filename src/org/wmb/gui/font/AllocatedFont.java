@@ -1,6 +1,7 @@
 package org.wmb.gui.font;
 
 import org.bfg.generate.BitmapFont;
+import org.wmb.rendering.OpenGLStateException;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -11,7 +12,7 @@ public class AllocatedFont {
     private final AllocatedGlyph[] glyphs;
     private final int leading;
 
-    AllocatedFont(BitmapFont bitmapFont) {
+    AllocatedFont(BitmapFont bitmapFont) throws OpenGLStateException {
         Objects.requireNonNull(bitmapFont, "Font is null");
 
         final char charCount = (char) bitmapFont.getRange().getCount();
@@ -19,7 +20,17 @@ public class AllocatedFont {
         this.glyphs = new AllocatedGlyph[charCount];
         for (char c = 0; c < charCount; c++) {
             final BufferedImage glyphImage = bitmapFont.extrudeGlyph(c);
-            this.glyphs[c] = new AllocatedGlyph(glyphImage);
+
+            try {
+                this.glyphs[c] = new AllocatedGlyph(glyphImage);
+            } catch (OpenGLStateException exception) {
+                // Delete all already allocated glyphs
+                for (AllocatedGlyph glyph : this.glyphs)
+                    if (glyph != null)
+                        glyph.delete();
+
+                throw new OpenGLStateException("(Glyph) " + exception.getMessage());
+            }
         }
     }
 
@@ -28,24 +39,6 @@ public class AllocatedFont {
             return null;
 
         return this.glyphs[c];
-    }
-
-    public Dimension getStringSize(String string) {
-        if (string == null)
-            string = "null";
-
-        int width = 0;
-        int height = 0;
-        for (int index = 0; index < string.length(); index++) {
-            final AllocatedGlyph glyph = this.glyphs[string.charAt(index)];
-            if (glyph == null)
-                continue;
-
-            width += glyph.width + this.leading;
-            height = Math.max(height, glyph.height);
-        }
-
-        return new Dimension(width, height);
     }
 
     public int getLeading() {

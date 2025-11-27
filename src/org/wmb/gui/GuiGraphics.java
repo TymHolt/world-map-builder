@@ -1,7 +1,7 @@
 package org.wmb.gui;
 
 import org.lwjgl.opengl.GL30;
-import org.wmb.ResourceLoader;
+import org.wmb.Log;
 import org.wmb.WmbContext;
 import org.wmb.gui.font.AllocatedFont;
 import org.wmb.gui.font.AllocatedGlyph;
@@ -11,9 +11,12 @@ import org.wmb.gui.icon.Icon;
 import org.wmb.rendering.*;
 import org.wmb.rendering.Color;
 
-import java.awt.*;
+import java.awt.Dimension;
+import java.awt.Rectangle;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Objects;
 
 public final class GuiGraphics {
@@ -43,6 +46,7 @@ public final class GuiGraphics {
     private int lastWidth;
     private int lastHeight;
     private final HashMap<FontDefinition, CachedFont> cachedFonts;
+    private final List<FontDefinition> fontAllocationQueue;
     private final AllocatedMeshData quadMeshData;
     private final AllocatedShaderProgram quadShaderProgram;
     private final AllocatedIcons icons;
@@ -59,39 +63,97 @@ public final class GuiGraphics {
             throw new IllegalArgumentException("Antialias level must be at leas 1");
         this.antiAliasLevel = antiAliasLevel;
 
+        try {
+            this.quadShaderProgram = AllocatedShaderProgram.fromResources(
+                "/org/wmb/gui/gui_graphics_quad_vs.glsl",
+                "/org/wmb/gui/gui_graphics_quad_fs.glsl"
+            );
+        } catch (IOException exception) {
+            throw new IOException("(QuadShaderProgram) " + exception.getMessage());
+        }
+
+        try {
+            this.colorUl = quadShaderProgram.getUniformLocation("u_color");
+            this.textureUl = quadShaderProgram.getUniformLocation("u_texture");
+            this.texturedFlagUl = quadShaderProgram.getUniformLocation("u_textured_flag");
+            this.maskColorFactorUl = quadShaderProgram.getUniformLocation("u_mask_color_factor");
+        } catch (OpenGLStateException exception) {
+            this.quadShaderProgram.delete();
+            throw new OpenGLStateException("(QuadShaderProgram) " + exception.getMessage());
+        }
+
+        try {
+            this.icons = new AllocatedIcons();
+        } catch (IOException exception) {
+            this.quadShaderProgram.delete();
+            throw new IOException("(Icons) " + exception.getMessage());
+        }
+
+        try {
+            this.quadMeshData = new AllocatedMeshData(new float[]{
+                -1.0f, 1.0f, 0.0f,
+                -1.0f, -1.0f, 0.0f,
+                1.0f, -1.0f, 0.0f,
+                1.0f, 1.0f, 0.0f
+            }, new float[]{
+                0.0f, 1.0f,
+                0.0f, 0.0f,
+                1.0f, 0.0f,
+                1.0f, 1.0f
+            }, new short[]{
+                0, 1, 2,
+                2, 3, 0
+            });
+        } catch(OpenGLStateException exception) {
+            this.quadShaderProgram.delete();
+            this.icons.delete();
+            throw new OpenGLStateException("(QuadMeshData) " + exception.getMessage());
+        }
+
+        try {
+            this.framebuffer = new AllocatedFramebuffer(2, 2);
+        } catch (OpenGLStateException exception) {
+            this.quadShaderProgram.delete();
+            this.icons.delete();
+            this.quadMeshData.delete();
+            throw new OpenGLStateException("(Framebuffer) " + exception.getMessage());
+        }
+
         this.cachedFonts = new HashMap<>();
-        this.framebuffer = new AllocatedFramebuffer(2, 2);
+        this.fontAllocationQueue = new ArrayList<>();
         this.lastWidth = -1;
         this.lastHeight = -1;
-
-        this.quadMeshData = new AllocatedMeshData(new float[] {
-            -1.0f, 1.0f, 0.0f,
-            -1.0f, -1.0f, 0.0f,
-            1.0f, -1.0f, 0.0f,
-            1.0f, 1.0f, 0.0f
-        }, new float[] {
-            0.0f, 1.0f,
-            0.0f, 0.0f,
-            1.0f, 0.0f,
-            1.0f, 1.0f
-        }, new short[] {
-            0, 1, 2,
-            2, 3, 0
-        });
-
-        this.quadShaderProgram = new AllocatedShaderProgram(
-            ResourceLoader.loadText("/org/wmb/gui/gui_graphics_quad_vs.glsl"),
-            ResourceLoader.loadText("/org/wmb/gui/gui_graphics_quad_fs.glsl"));
-
-        this.icons = new AllocatedIcons();
-
-        this.colorUl = quadShaderProgram.getUniformLocation("u_color");
-        this.textureUl = quadShaderProgram.getUniformLocation("u_texture");
-        this.texturedFlagUl = quadShaderProgram.getUniformLocation("u_textured_flag");
-        this.maskColorFactorUl = quadShaderProgram.getUniformLocation("u_mask_color_factor");
     }
 
-    void preparePipeline() {
+    void preparePipeline() throws OpenGLStateException {
+        final Dimension windowSize = this.context.getWindow().getSize();
+        if (windowSize.width != this.lastWidth || windowSize.height != this.lastHeight) {
+            final int framebufferWidth = windowSize.width * this.antiAliasLevel;
+            final int framebufferHeight = windowSize.height * this.antiAliasLevel;
+            try {
+                resizeFramebuffer(framebufferWidth, framebufferHeight);
+            } catch (OpenGLStateException exception) {
+                Log.debug("New framebuffer size: " + framebufferWidth + "x" + framebufferHeight);
+                throw new OpenGLStateException("(Framebuffer resize)" + exception);
+            }
+
+            this.lastWidth = windowSize.width;
+            this.lastHeight = windowSize.height;
+        }
+
+        try {
+            for (FontDefinition fontDefinition : this.fontAllocationQueue) {
+                final AllocatedFont allocatedFont = fontDefinition.allocate();
+                this.cachedFonts.put(fontDefinition, new CachedFont(allocatedFont));
+            }
+        } catch (OpenGLStateException exception) {
+            throw new OpenGLStateException("(Font allocation)" + exception);
+        }
+
+        this.fontAllocationQueue.clear();
+
+        GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, this.framebuffer.getFboId());
+
         GL30.glUseProgram(this.quadShaderProgram.getId());
         GL30.glUniform1i(this.textureUl, 0);
         GL30.glBindVertexArray(this.quadMeshData.getId());
@@ -99,16 +161,6 @@ public final class GuiGraphics {
         GL30.glBlendFunc(GL30.GL_SRC_ALPHA, GL30.GL_ONE_MINUS_SRC_ALPHA);
         GL30.glEnable(GL30.GL_BLEND);
         GL30.glEnable(GL30.GL_MULTISAMPLE);
-
-        final Dimension windowSize = this.context.getWindow().getSize();
-        if (windowSize.width != this.lastWidth || windowSize.height != this.lastHeight) {
-            resizeFramebuffer(windowSize.width * this.antiAliasLevel,
-                windowSize.height * this.antiAliasLevel);
-            this.lastWidth = windowSize.width;
-            this.lastHeight = windowSize.height;
-        }
-
-        GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, this.framebuffer.getFboId());
     }
 
     private static final long resourceKeepTime = 60L * 1000L; // 1 minute
@@ -140,20 +192,24 @@ public final class GuiGraphics {
         }
     }
 
-    private void resizeFramebuffer(int width, int height) {
+    private void resizeFramebuffer(int width, int height) throws OpenGLStateException {
+        // In case the allocation fails we delete the old framebuffer afterward
+        final AllocatedFramebuffer newFramebuffer = new AllocatedFramebuffer(width, height);
         this.framebuffer.delete();
-        this.framebuffer = new AllocatedFramebuffer(width, height);
+        this.framebuffer = newFramebuffer;
     }
 
-    void deleteResources() {
-        this.quadMeshData.delete();
+    void delete() {
         this.quadShaderProgram.delete();
-        this.icons.deleteAll();
+        this.icons.delete();
+        this.quadMeshData.delete();
+        this.framebuffer.delete();
 
         for (FontDefinition definition : this.cachedFonts.keySet())
             this.cachedFonts.get(definition).allocatedFont.delete();
         this.cachedFonts.clear();
     }
+
     public void clear() {
         GL30.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         GL30.glClear(GL30.GL_COLOR_BUFFER_BIT);
@@ -215,7 +271,7 @@ public final class GuiGraphics {
 
     public void fillQuadIcon(int x, int y, int width, int height, Icon icon, Color color) {
         correctViewport(x, y, width, height);
-        GL30.glBindTexture(GL30.GL_TEXTURE_2D, this.icons.getTexture(icon).getId());
+        GL30.glBindTexture(GL30.GL_TEXTURE_2D, this.icons.getIconTexture(icon).getId());
         AllocatedShaderProgram.uniformColor(this.colorUl, color);
         GL30.glUniform1f(this.texturedFlagUl, 1.0f);
         GL30.glUniform1f(this.maskColorFactorUl, 1.0f);
@@ -225,7 +281,7 @@ public final class GuiGraphics {
 
     public void fillQuadIcon(Rectangle bounds, Icon icon, Color color) {
         correctViewport(bounds.x, bounds.y, bounds.width, bounds.height);
-        GL30.glBindTexture(GL30.GL_TEXTURE_2D, this.icons.getTexture(icon).getId());
+        GL30.glBindTexture(GL30.GL_TEXTURE_2D, this.icons.getIconTexture(icon).getId());
         AllocatedShaderProgram.uniformColor(this.colorUl, color);
         GL30.glUniform1f(this.texturedFlagUl, 1.0f);
         GL30.glUniform1f(this.maskColorFactorUl, 1.0f);
@@ -250,8 +306,9 @@ public final class GuiGraphics {
             allocatedFont = cachedFont.allocatedFont;
             cachedFont.rememberUse();
         } else {
-            allocatedFont = fontDefinition.allocate();
-            this.cachedFonts.put(fontDefinition, new CachedFont(allocatedFont));
+            if (!this.fontAllocationQueue.contains(fontDefinition))
+                this.fontAllocationQueue.add(fontDefinition);
+            return;
         }
 
         int currentX = x;

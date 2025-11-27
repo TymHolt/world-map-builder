@@ -1,9 +1,8 @@
 package org.wmb.gui.icon;
 
 import org.wmb.ResourceLoader;
-import org.wmb.rendering.AllocatedTexture;
-import org.wmb.rendering.TextureFilter;
 
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 
 public enum Icon {
@@ -16,29 +15,16 @@ public enum Icon {
     FRAME("/org/wmb/gui/icon/raw/frame.png");
 
     private final String path;
-    private int enumIndex;
 
     Icon(String path) {
         this.path = path;
     }
 
-    public AllocatedTexture loadAllocatedTexture() throws IOException {
+    public BufferedImage loadImage() throws IOException {
+        return ResourceLoader.loadImage(this.path);
+    }
+
+    /*public AllocatedTexture loadAllocatedTexture() throws IOException {
         return new AllocatedTexture(ResourceLoader.loadImage(this.path), TextureFilter.NEAREST);
-    }
-
-    public int getEnumIndex() {
-        return this.enumIndex;
-    }
-
-    public static int getEnumValueCount() {
-        return values().length;
-    }
-
-    static {
-        // Assign indices 0 - max value for access in arrays
-        int enumIndex = 0;
-
-        for (Icon icon : Icon.values())
-            icon.enumIndex = enumIndex++;
-    }
+    }*/
 }

@@ -4,6 +4,7 @@ import org.bfg.generate.BitmapFont;
 import org.bfg.generate.BitmapFontGenerator;
 import org.bfg.generate.GlyphInfo;
 import org.bfg.generate.GlyphRange;
+import org.wmb.rendering.OpenGLStateException;
 
 import java.awt.*;
 import java.util.Objects;
@@ -47,7 +48,7 @@ public final class FontDefinition {
         return new Dimension(width, height);
     }
 
-    public AllocatedFont allocate() {
+    public AllocatedFont allocate() throws OpenGLStateException {
         return new AllocatedFont(this.bitmapFont);
     }
 }

@@ -1,11 +1,11 @@
 package org.wmb.gui.component.sceneview3d;
 
 import org.lwjgl.opengl.GL30;
-import org.wmb.ResourceLoader;
 import org.wmb.rendering.AllocatedLineData;
 import org.wmb.rendering.AllocatedShaderProgram;
 import org.wmb.rendering.Camera;
 import org.wmb.rendering.Color;
+import org.wmb.rendering.OpenGLStateException;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -23,6 +23,33 @@ final class GridLineRenderer {
         if (size < 1)
             throw new IllegalArgumentException("Size is less than 1");
 
+        try {
+            this.gridLineShaderProgram = AllocatedShaderProgram.fromResources(
+                "/org/wmb/gui/component/sceneview3d/grid_line_vs.glsl",
+                "/org/wmb/gui/component/sceneview3d/grid_line_fs.glsl"
+            );
+        } catch (IOException exception) {
+            throw new IOException("(GridLineShaderProgram) " + exception.getMessage());
+        }
+
+        try {
+            this.projectionUl = this.gridLineShaderProgram.getUniformLocation("u_projection");
+            this.viewUl = this.gridLineShaderProgram.getUniformLocation("u_view");
+            this.colorUl = this.gridLineShaderProgram.getUniformLocation("u_color");
+        } catch (OpenGLStateException exception) {
+            this.gridLineShaderProgram.delete();
+            throw new OpenGLStateException("(GridLineShaderProgram) " + exception.getMessage());
+        }
+
+        try {
+            this.lineData = new AllocatedLineData(generateLineData(size));
+        } catch (OpenGLStateException exception) {
+            this.gridLineShaderProgram.delete();
+            throw new OpenGLStateException("(Line Data) " + exception.getMessage());
+        }
+    }
+
+    private static float[] generateLineData(int size) {
         final List<Float> dataList = new ArrayList<>();
         for (int count = -size; count <= size; count++) {
             dataList.add((float) count);
@@ -44,14 +71,8 @@ final class GridLineRenderer {
         int index = 0;
         for (Float value : dataList)
             data[index++] = value;
-        this.lineData = new AllocatedLineData(data);
 
-        this.gridLineShaderProgram = new AllocatedShaderProgram(
-            ResourceLoader.loadText("/org/wmb/gui/component/sceneview3d/grid_line_vs.glsl"),
-            ResourceLoader.loadText("/org/wmb/gui/component/sceneview3d/grid_line_fs.glsl"));
-        this.projectionUl = this.gridLineShaderProgram.getUniformLocation("u_projection");
-        this.viewUl = this.gridLineShaderProgram.getUniformLocation("u_view");
-        this.colorUl = this.gridLineShaderProgram.getUniformLocation("u_color");
+        return data;
     }
 
     void render(int x, int y, int width, int height, Camera camera, float aspect, Color color) {
