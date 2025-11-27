@@ -1,49 +1,64 @@
 package org.wmb.editor.element.Object3dElement;
 
 import org.wmb.gui.component.VerticalPadding;
-import org.wmb.gui.component.elementinspector.Inspector;
+import org.wmb.gui.component.elementinspector.BasicInspector;
 import org.wmb.gui.component.elementinspector.InspectorViewComponent;
 import org.wmb.gui.component.elementinspector.controls.ControlXYZ;
-import org.wmb.gui.component.elementinspector.controls.TextControl;
+import org.wmb.rendering.math.ObjectPosition;
+import org.wmb.rendering.math.ObjectRotation;
+import org.wmb.rendering.math.ObjectTransform;
 
-import java.util.Objects;
-
-public final class Object3dElementInspector implements Inspector {
+public final class Object3dElementInspector extends BasicInspector {
 
     private final Object3dElement element;
-    private final TextControl nameControl;
     private final ControlXYZ positionControl;
+    private final ControlXYZ rotationControl;
 
     Object3dElementInspector(Object3dElement element) {
-        Objects.requireNonNull(element, "Element is null");
+        super(element);
         this.element = element;
-        this.nameControl = new TextControl("Name");
         this.positionControl = new ControlXYZ("Position");
+        this.rotationControl = new ControlXYZ("Rotation");
     }
 
     @Override
     public void init(InspectorViewComponent inspectorView) {
-        inspectorView.addComponent(new VerticalPadding(5));
-        inspectorView.addComponent(this.nameControl);
+        super.init(inspectorView);
         inspectorView.addComponent(new VerticalPadding(5));
         inspectorView.addComponent(this.positionControl);
         inspectorView.addComponent(new VerticalPadding(5));
-        read();
+        inspectorView.addComponent(this.rotationControl);
     }
 
     @Override
     public void read() {
-        this.nameControl.setText(this.element.getName());
-        this.positionControl.setX(this.element.getTransform().getPosition().getX());
-        this.positionControl.setY(this.element.getTransform().getPosition().getY());
-        this.positionControl.setZ(this.element.getTransform().getPosition().getZ());
+        super.read();
+
+        final ObjectTransform transform = this.element.getTransform();
+        final ObjectPosition position = transform.getPosition();
+        this.positionControl.setX(position.getX());
+        this.positionControl.setY(position.getY());
+        this.positionControl.setZ(position.getZ());
+
+        final ObjectRotation rotation = transform.getRotation();
+        this.rotationControl.setX(rotation.getPitch());
+        this.rotationControl.setY(rotation.getYaw());
+        this.rotationControl.setZ(rotation.getRoll());
     }
 
     @Override
     public void write() {
-        this.element.setName(this.nameControl.getText());
-        this.element.getTransform().getPosition().setX(this.positionControl.getX());
-        this.element.getTransform().getPosition().setY(this.positionControl.getY());
-        this.element.getTransform().getPosition().setZ(this.positionControl.getZ());
+        super.write();
+
+        final ObjectTransform transform = this.element.getTransform();
+        final ObjectPosition position = transform.getPosition();
+        position.setX(this.positionControl.getX());
+        position.setY(this.positionControl.getY());
+        position.setZ(this.positionControl.getZ());
+
+        final ObjectRotation rotation = transform.getRotation();
+        rotation.setPitch(this.rotationControl.getX());
+        rotation.setYaw(this.rotationControl.getY());
+        rotation.setRoll(this.rotationControl.getZ());
     }
 }

@@ -46,7 +46,10 @@ public enum KeyButton {
     UP(GLFW.GLFW_KEY_UP),
     DOWN(GLFW.GLFW_KEY_DOWN),
     LEFT(GLFW.GLFW_KEY_LEFT),
-    RIGHT(GLFW.GLFW_KEY_RIGHT);
+    RIGHT(GLFW.GLFW_KEY_RIGHT),
+    BACKSPACE(GLFW.GLFW_KEY_BACKSPACE),
+    DELETE(GLFW.GLFW_KEY_DELETE),
+    ENTER(GLFW.GLFW_KEY_ENTER);
 
     private static final HashMap<Integer, KeyButton> glfwMapping;
 

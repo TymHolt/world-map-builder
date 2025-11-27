@@ -2,9 +2,9 @@ package org.wmb.gui.component.elementinspector.controls;
 
 import org.wmb.gui.Theme;
 import org.wmb.gui.component.Align;
-import org.wmb.gui.component.Label;
+import org.wmb.gui.component.text.FloatField;
+import org.wmb.gui.component.text.Label;
 import org.wmb.gui.component.container.ContainerComponent;
-import org.wmb.gui.component.text.TextField;
 import org.wmb.rendering.Color;
 
 import java.awt.*;
@@ -15,9 +15,9 @@ public final class ControlXYZ extends ContainerComponent {
     private final Label labelX;
     private final Label labelY;
     private final Label labelZ;
-    private final TextField fieldX;
-    private final TextField fieldY;
-    private final TextField fieldZ;
+    private final FloatField fieldX;
+    private final FloatField fieldY;
+    private final FloatField fieldZ;
 
     public ControlXYZ(String title) {
         super();
@@ -26,45 +26,45 @@ public final class ControlXYZ extends ContainerComponent {
 
         this.labelX = new Label("X", Align.LEFT, Theme.FONT_BOLD);
         this.labelX.setBackground(Color.RED);
-        this.fieldX = new TextField();
+        this.fieldX = new FloatField();
         addComponent(labelX);
         addComponent(fieldX);
 
         this.labelY = new Label("Y", Align.LEFT, Theme.FONT_BOLD);
         this.labelY.setBackground(Color.GREEN);
-        this.fieldY = new TextField();
+        this.fieldY = new FloatField();
         addComponent(labelY);
         addComponent(fieldY);
 
         this.labelZ = new Label("Z", Align.LEFT, Theme.FONT_BOLD);
         this.labelZ.setBackground(Color.BLUE);
-        this.fieldZ = new TextField();
+        this.fieldZ = new FloatField();
         addComponent(labelZ);
         addComponent(fieldZ);
     }
 
     public void setX(float x) {
-        this.fieldX.setText(Float.toString(x));
+        this.fieldX.setValue(x);
     }
 
     public float getX() {
-        return Float.parseFloat(this.fieldX.getText());
+        return this.fieldX.getValue();
     }
 
     public void setY(float y) {
-        this.fieldY.setText(Float.toString(y));
+        this.fieldY.setValue(y);
     }
 
     public float getY() {
-        return Float.parseFloat(this.fieldY.getText());
+        return this.fieldY.getValue();
     }
 
     public void setZ(float z) {
-        this.fieldZ.setText(Float.toString(z));
+        this.fieldZ.setValue(z);
     }
 
     public float getZ() {
-        return Float.parseFloat(this.fieldZ.getText());
+        return this.fieldZ.getValue();
     }
 
     private static final int padding = 2;

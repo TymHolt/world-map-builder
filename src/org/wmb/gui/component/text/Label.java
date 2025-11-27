@@ -1,7 +1,7 @@
-package org.wmb.gui.component;
+package org.wmb.gui.component.text;
 
 import org.wmb.gui.Theme;
-import org.wmb.gui.component.text.TextComponent;
+import org.wmb.gui.component.Align;
 import org.wmb.gui.font.FontDefinition;
 import org.wmb.rendering.Color;
 

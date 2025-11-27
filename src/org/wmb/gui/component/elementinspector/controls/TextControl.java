@@ -1,11 +1,9 @@
 package org.wmb.gui.component.elementinspector.controls;
 
-import org.wmb.gui.GuiGraphics;
 import org.wmb.gui.component.Align;
-import org.wmb.gui.component.Label;
+import org.wmb.gui.component.text.Label;
 import org.wmb.gui.component.container.ContainerComponent;
 import org.wmb.gui.component.text.TextField;
-import org.wmb.gui.input.Cursor;
 
 import java.awt.Dimension;
 
@@ -17,7 +15,9 @@ public final class TextControl extends ContainerComponent {
     public TextControl(String name) {
         super();
         this.label = new Label(name, Align.LEFT);
+        addComponent(this.label);
         this.textField = new TextField("", Align.CENTER);
+        addComponent(this.textField);
     }
 
     public void setText(String text) {
@@ -55,29 +55,5 @@ public final class TextControl extends ContainerComponent {
 
         final int textFieldWidth = (widthToSplit * 3) / 4;
         this.textField.setBounds(currentX, y, textFieldWidth, componentHeight);
-    }
-
-    @Override
-    public void draw(GuiGraphics graphics) {
-        this.label.draw(graphics);
-        this.textField.draw(graphics);
-    }
-
-    @Override
-    public Cursor getCursor(int mouseX, int mouseY) {
-        if (this.textField.getBounds().contains(mouseX, mouseY))
-            return this.textField.getCursor(mouseX, mouseY);
-        else
-            return super.getCursor(mouseX, mouseY);
-    }
-
-    @Override
-    public void onLooseFocus() {
-        this.textField.onLooseFocus();
-    }
-
-    @Override
-    public void onGainFocus() {
-        this.textField.onGainFocus();
     }
 }

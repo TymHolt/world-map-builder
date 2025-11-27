@@ -1,6 +1,7 @@
 package org.wmb.gui;
 
 import org.wmb.editor.element.Element;
+import org.wmb.gui.input.KeyClickEvent;
 import org.wmb.gui.input.MouseClickEvent;
 import org.wmb.gui.input.MouseMoveEvent;
 import org.wmb.WmbContext;
@@ -73,6 +74,16 @@ public final class MainGui {
             @Override
             public void mouseScroll(MouseScrollEvent event) {
                 container.onMouseScroll(event);
+            }
+
+            @Override
+            public void textInput(char c) {
+                container.onTextInput(c);
+            }
+
+            @Override
+            public void keyClick(KeyClickEvent event) {
+                container.onKeyClick(event);
             }
         });
     }

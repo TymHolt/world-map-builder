@@ -4,6 +4,7 @@ import org.wmb.gui.GuiGraphics;
 import org.wmb.gui.component.Border;
 import org.wmb.gui.component.Component;
 import org.wmb.gui.input.Cursor;
+import org.wmb.gui.input.KeyClickEvent;
 import org.wmb.gui.input.MouseClickEvent;
 import org.wmb.gui.input.MouseMoveEvent;
 import org.wmb.gui.input.MouseScrollEvent;
@@ -38,6 +39,19 @@ public abstract class ContainerComponent extends Component {
 
     protected List<Component> getComponentList() {
         return this.componentList;
+    }
+
+    protected Component getFocusedComponent() {
+        return this.focusedComponent;
+    }
+
+    protected void setFocusedComponent(Component component) {
+        if (this.focusedComponent != null)
+            this.focusedComponent.onLooseFocus();
+
+        this.focusedComponent = component;
+        if (this.focusedComponent != null)
+            this.focusedComponent.onGainFocus();
     }
 
     public void addComponent(Component component) {
@@ -143,5 +157,17 @@ public abstract class ContainerComponent extends Component {
         super.draw(graphics);
         for (Component component : getComponentList())
             component.draw(graphics);
+    }
+
+    @Override
+    public void onTextInput(char c) {
+        if (this.focusedComponent != null)
+            this.focusedComponent.onTextInput(c);
+    }
+
+    @Override
+    public void onKeyClick(KeyClickEvent event) {
+        if (this.focusedComponent != null)
+            this.focusedComponent.onKeyClick(event);
     }
 }

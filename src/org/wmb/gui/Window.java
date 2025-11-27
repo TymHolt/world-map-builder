@@ -75,13 +75,33 @@ public final class Window {
         });
 
         GLFW.glfwSetScrollCallback(this.windowId, (window, xoffset, yoffset) -> {
-            if (inputListener == null)
+            if (this.inputListener == null)
                 return;
 
             final Point mouse = this.getMousePosition();
             final MouseScrollEvent event = new MouseScrollEvent(ScrollDirection.fromValue(yoffset),
                 mouse.x, mouse.y);
             this.inputListener.mouseScroll(event);
+        });
+
+        GLFW.glfwSetCharCallback(this.windowId, (window, codepoint) -> {
+            if (this.inputListener == null)
+                return;
+
+            this.inputListener.textInput((char) codepoint);
+        });
+
+        GLFW.glfwSetKeyCallback(this.windowId, (window, key, scancode, action, mods) -> {
+            if (this.inputListener == null)
+                return;
+
+            final KeyButton button = KeyButton.getByGlfwId(key);
+            final ClickAction clickAction = ClickAction.getByGlfwId(action);
+
+            if (button == null || clickAction == null)
+                return;
+
+            this.inputListener.keyClick(new KeyClickEvent(button, clickAction));
         });
     }
 

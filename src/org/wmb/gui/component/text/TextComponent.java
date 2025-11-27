@@ -9,6 +9,7 @@ import org.wmb.gui.font.FontDefinition;
 import org.wmb.rendering.Color;
 
 import java.awt.Dimension;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.util.Objects;
 
@@ -71,21 +72,24 @@ public abstract class TextComponent extends Component {
         return this.font.getTextSize(this.text);
     }
 
-    @Override
-    public void draw(GuiGraphics graphics) {
-        super.draw(graphics);
-
+    protected Point getTextDrawLocation() {
         final Dimension textSize = this.font.getTextSize(this.text);
         final Rectangle innerBounds = getBorder().getInner(getBounds());
         final int x = innerBounds.x;
-        final int y = innerBounds.y + ((innerBounds.height - textSize.height) / 2);
+        final int textHeight = textSize.height != 0 ? textSize.height : innerBounds.height;
+        final int y = innerBounds.y + ((innerBounds.height - textHeight) / 2);
 
-        switch (align) {
-            case LEFT -> graphics.fillText(this.text, x, y, this.foreground, this.font);
-            case RIGHT -> graphics.fillText(this.text, x + (innerBounds.width - textSize.width),
-                y, this.foreground, this.font);
-            case CENTER -> graphics.fillText(this.text,
-                x + (innerBounds.width - textSize.width) / 2, y, this.foreground, this.font);
-        }
+        return switch (align) {
+            case LEFT -> new Point(x, y);
+            case RIGHT -> new Point(x + (innerBounds.width - textSize.width), y);
+            case CENTER -> new Point(x + (innerBounds.width - textSize.width) / 2, y);
+        };
+    }
+
+    @Override
+    public void draw(GuiGraphics graphics) {
+        super.draw(graphics);
+        final Point drawLocation = getTextDrawLocation();
+        graphics.fillText(this.text, drawLocation.x, drawLocation.y, this.foreground, this.font);
     }
 }

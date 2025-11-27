@@ -33,6 +33,7 @@ public final class SceneView3dComponent extends Component {
     private final Camera camera;
     private boolean rotatingCamera;
     private final float fov;
+    private boolean focused;
 
     public SceneView3dComponent(WmbContext context) throws IOException {
         Objects.requireNonNull(context, "Context is null");
@@ -64,6 +65,7 @@ public final class SceneView3dComponent extends Component {
         this.rotatingCamera = false;
         this.lastWidth = -1;
         this.lastHeight = -1;
+        this.focused = false;
     }
 
     public void renderScene(Scene3d scene) {
@@ -131,6 +133,9 @@ public final class SceneView3dComponent extends Component {
         final float deltaTime = (float) deltaTimeLong / 1000.0f;
         final float moveDelta = CAMERA_MOVE_SPEED * deltaTime;
 
+        if (!this.focused)
+            return;
+
         final Matrix4f rotationMatrix = camera.getLookYawRotationMatrix();
         final Vector4f forward = rotationMatrix.transform(
             new Vector4f(0.0f, 0.0f, -moveDelta, 1.0f));
@@ -190,7 +195,13 @@ public final class SceneView3dComponent extends Component {
     }
 
     @Override
+    public void onGainFocus() {
+        this.focused = true;
+    }
+
+    @Override
     public void onLooseFocus() {
         this.rotatingCamera = false;
+        this.focused = false;
     }
 }

@@ -1,6 +1,7 @@
 package org.wmb.gui.component;
 
 import org.wmb.gui.input.Cursor;
+import org.wmb.gui.input.KeyClickEvent;
 import org.wmb.gui.input.MouseClickEvent;
 import org.wmb.gui.input.MouseMoveEvent;
 import org.wmb.gui.GuiGraphics;
@@ -89,5 +90,13 @@ public abstract class Component {
 
     public Cursor getCursor(int mouseX, int mouseY) {
         return Cursor.DEFAULT;
+    }
+
+    public void onTextInput(char c) {
+
+    }
+
+    public void onKeyClick(KeyClickEvent event) {
+
     }
 }

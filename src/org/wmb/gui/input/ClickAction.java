@@ -7,7 +7,8 @@ import java.util.HashMap;
 public enum ClickAction {
 
     PRESS(GLFW.GLFW_PRESS),
-    RELEASE(GLFW.GLFW_RELEASE);
+    RELEASE(GLFW.GLFW_RELEASE),
+    REPEAT(GLFW.GLFW_REPEAT);
 
     private static final HashMap<Integer, ClickAction> glfwMapping;
 
