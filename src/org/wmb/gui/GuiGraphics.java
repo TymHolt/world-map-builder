@@ -91,20 +91,24 @@ public final class GuiGraphics {
         }
 
         try {
-            this.quadMeshData = new AllocatedMeshData(new float[]{
+            final MeshDataDescription meshDataDescription = new MeshDataDescription();
+            meshDataDescription.addDataArray(3, new float[] {
                 -1.0f, 1.0f, 0.0f,
                 -1.0f, -1.0f, 0.0f,
                 1.0f, -1.0f, 0.0f,
                 1.0f, 1.0f, 0.0f
-            }, new float[]{
+            });
+            meshDataDescription.addDataArray(2, new float[] {
                 0.0f, 1.0f,
                 0.0f, 0.0f,
                 1.0f, 0.0f,
                 1.0f, 1.0f
-            }, new short[]{
+            });
+            meshDataDescription.setIndexArray(new short[] {
                 0, 1, 2,
                 2, 3, 0
             });
+            this.quadMeshData = new AllocatedMeshData(meshDataDescription);
         } catch(OpenGLStateException exception) {
             this.quadShaderProgram.delete();
             this.icons.delete();

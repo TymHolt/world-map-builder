@@ -42,20 +42,24 @@ public class Object3dElementRenderer {
         }
 
         try {
-            this.testMeshData = new AllocatedMeshData(new float[] {
+            final MeshDataDescription meshDataDescription = new MeshDataDescription();
+            meshDataDescription.addDataArray(3, new float[] {
                 -0.5f, 0.5f, 0.0f,
                 -0.5f, -0.5f, 0.0f,
                 0.5f, -0.5f, 0.0f,
                 0.5f, 0.5f, 0.0f
-            }, new float[]{
+            });
+            meshDataDescription.addDataArray(2, new float[] {
                 0.0f, 0.0f,
                 0.0f, 1.0f,
                 1.0f, 1.0f,
                 1.0f, 0.0f
-            }, new short[] {
+            });
+            meshDataDescription.setIndexArray(new short[] {
                 0, 1, 2,
                 2, 3, 0
             });
+            this.testMeshData = new AllocatedMeshData(meshDataDescription);
         } catch(OpenGLStateException exception) {
             this.object3dShaderProgram.delete();
             throw new OpenGLStateException("(TestMeshData) " + exception.getMessage());
