@@ -7,6 +7,7 @@ import org.wmb.Log;
 import org.wmb.WmbContext;
 import org.wmb.gui.Window;
 import org.wmb.gui.component.Component;
+import org.wmb.gui.data.Bounds;
 import org.wmb.gui.input.*;
 import org.wmb.gui.GuiGraphics;
 import org.wmb.editor.Scene3d;
@@ -18,7 +19,6 @@ import org.wmb.rendering.Camera;
 import org.wmb.rendering.Color;
 import org.wmb.rendering.OpenGLStateException;
 
-import java.awt.*;
 import java.io.IOException;
 import java.util.Objects;
 
@@ -36,6 +36,7 @@ public final class SceneView3dComponent extends Component {
     private boolean focused;
 
     public SceneView3dComponent(WmbContext context) throws IOException {
+        super();
         Objects.requireNonNull(context, "Context is null");
         this.context = context;
 
@@ -69,17 +70,19 @@ public final class SceneView3dComponent extends Component {
     }
 
     public void renderScene(Scene3d scene) {
-        final Rectangle bounds = getInnerBounds();
-        if (bounds.width != this.lastWidth || bounds.height != this.lastHeight) {
+        final Bounds innerBounds = getInnerBounds();
+        final int innerBoundsWidth = innerBounds.getWidth();
+        final int innerBoundsHeight = innerBounds.getHeight();
+        if (innerBoundsWidth != this.lastWidth || innerBoundsHeight != this.lastHeight) {
             try {
-                resizeFramebuffer(bounds.width, bounds.height);
+                resizeFramebuffer(innerBoundsWidth, innerBoundsHeight);
             } catch (OpenGLStateException exception) {
-                Log.debug("New framebuffer size: " + bounds.width + "x" + bounds.height);
+                Log.debug("New framebuffer size: " + innerBoundsWidth + "x" + innerBoundsHeight);
                 throw new RuntimeException("(Prepare GuiGraphics)" + exception);
             }
 
-            this.lastWidth = bounds.width;
-            this.lastHeight = bounds.height;
+            this.lastWidth = innerBoundsWidth;
+            this.lastHeight = innerBoundsHeight;
         }
 
         GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, this.framebuffer.getFboId());
@@ -90,10 +93,10 @@ public final class SceneView3dComponent extends Component {
 
         handleUpdateInput();
 
-        final float aspect = (float) (bounds.getWidth() / bounds.getHeight());
-        this.gridLineRenderer.render(0, 0, bounds.width, bounds.height, this.camera, aspect,
+        final float aspect = (float) innerBoundsWidth / (float) innerBoundsHeight;
+        this.gridLineRenderer.render(0, 0, innerBoundsWidth, innerBoundsHeight, this.camera, aspect,
             Color.GREY);
-        this.object3dElementRenderer.preparePipeline(0, 0, bounds.width, bounds.height);
+        this.object3dElementRenderer.preparePipeline(0, 0, innerBoundsWidth, innerBoundsHeight);
         this.object3dElementRenderer.uniformCamera(this.camera, aspect);
         recursiveRender(scene);
         this.object3dElementRenderer.resetPipeline();
@@ -186,9 +189,9 @@ public final class SceneView3dComponent extends Component {
 
         final int dx = event.xTo - event.xFrom;
         final int dy = event.yTo - event.yFrom;
-        final Rectangle bounds = getBounds();
-        final float dxf = (float) dx / (float) bounds.width;
-        final float dyf = (float) dy / (float) bounds.height;
+        final Bounds bounds = getBounds();
+        final float dxf = (float) dx / (float) bounds.getWidth();
+        final float dyf = (float) dy / (float) bounds.getHeight();
 
         this.camera.setPitch(this.camera.getPitch() + (dyf * this.fov * 2.0f));
         this.camera.setYaw(this.camera.getYaw() + (dxf * this.fov * 2.0f));

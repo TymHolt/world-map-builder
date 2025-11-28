@@ -3,6 +3,8 @@ package org.wmb.gui;
 import org.lwjgl.opengl.GL30;
 import org.wmb.Log;
 import org.wmb.WmbContext;
+import org.wmb.gui.data.Bounds;
+import org.wmb.gui.data.Size;
 import org.wmb.gui.font.AllocatedFont;
 import org.wmb.gui.font.AllocatedGlyph;
 import org.wmb.gui.font.FontDefinition;
@@ -11,7 +13,6 @@ import org.wmb.gui.icon.Icon;
 import org.wmb.rendering.*;
 import org.wmb.rendering.Color;
 
-import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -126,10 +127,12 @@ public final class GuiGraphics {
     }
 
     void preparePipeline() throws OpenGLStateException {
-        final Dimension windowSize = this.context.getWindow().getSize();
-        if (windowSize.width != this.lastWidth || windowSize.height != this.lastHeight) {
-            final int framebufferWidth = windowSize.width * this.antiAliasLevel;
-            final int framebufferHeight = windowSize.height * this.antiAliasLevel;
+        final Size windowSize = this.context.getWindow().getSize();
+        final int windowWidth = windowSize.getWidth();
+        final int windowHeight = windowSize.getHeight();
+        if (windowWidth != this.lastWidth || windowHeight != this.lastHeight) {
+            final int framebufferWidth = windowWidth * this.antiAliasLevel;
+            final int framebufferHeight = windowHeight * this.antiAliasLevel;
             try {
                 resizeFramebuffer(framebufferWidth, framebufferHeight);
             } catch (OpenGLStateException exception) {
@@ -137,8 +140,8 @@ public final class GuiGraphics {
                 throw new OpenGLStateException("(Framebuffer resize)" + exception);
             }
 
-            this.lastWidth = windowSize.width;
-            this.lastHeight = windowSize.height;
+            this.lastWidth = windowWidth;
+            this.lastHeight = windowHeight;
         }
 
         try {
@@ -168,8 +171,8 @@ public final class GuiGraphics {
     void resetPipeline() {
         GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, 0);
 
-        final Dimension windowSize = this.context.getWindow().getSize();
-        GL30.glViewport(0, 0, windowSize.width, windowSize.height);
+        final Size windowSize = this.context.getWindow().getSize();
+        GL30.glViewport(0, 0, windowSize.getWidth(), windowSize.getHeight());
         GL30.glBindTexture(GL30.GL_TEXTURE_2D, this.framebuffer.getId());
         GL30.glUniform1f(this.texturedFlagUl, 1.0f);
         GL30.glUniform1f(this.maskColorFactorUl, 0.0f);
@@ -223,12 +226,8 @@ public final class GuiGraphics {
             GL30.GL_UNSIGNED_SHORT, 0);
     }
 
-    public void fillQuadColor(Rectangle bounds, Color color) {
-        correctViewport(bounds.x, bounds.y, bounds.width, bounds.height);
-        AllocatedShaderProgram.uniformColor(this.colorUl, color);
-        GL30.glUniform1f(this.texturedFlagUl, 0.0f);
-        GL30.glDrawElements(GL30.GL_TRIANGLES, this.quadMeshData.vertexCount,
-            GL30.GL_UNSIGNED_SHORT, 0);
+    public void fillQuadColor(Bounds bounds, Color color) {
+        fillQuadColor(bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getHeight(), color);
     }
 
     public void fillQuadTexture(int x, int y, int width, int height, ITexture texture) {
@@ -240,13 +239,9 @@ public final class GuiGraphics {
             GL30.GL_UNSIGNED_SHORT, 0);
     }
 
-    public void fillQuadTexture(Rectangle bounds, ITexture texture) {
-        correctViewport(bounds.x, bounds.y, bounds.width, bounds.height);
-        GL30.glBindTexture(GL30.GL_TEXTURE_2D, texture.getId());
-        GL30.glUniform1f(this.texturedFlagUl, 1.0f);
-        GL30.glUniform1f(this.maskColorFactorUl, 0.0f);
-        GL30.glDrawElements(GL30.GL_TRIANGLES, this.quadMeshData.vertexCount,
-            GL30.GL_UNSIGNED_SHORT, 0);
+    public void fillQuadTexture(Bounds bounds, ITexture texture) {
+        fillQuadTexture(bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getHeight(),
+            texture);
     }
 
     public void fillQuadMask(int x, int y, int width, int height, ITexture texture, Color color) {
@@ -259,14 +254,9 @@ public final class GuiGraphics {
             GL30.GL_UNSIGNED_SHORT, 0);
     }
 
-    public void fillQuadMask(Rectangle bounds, ITexture texture, Color color) {
-        correctViewport(bounds.x, bounds.y, bounds.width, bounds.height);
-        GL30.glBindTexture(GL30.GL_TEXTURE_2D, texture.getId());
-        AllocatedShaderProgram.uniformColor(this.colorUl, color);
-        GL30.glUniform1f(this.texturedFlagUl, 1.0f);
-        GL30.glUniform1f(this.maskColorFactorUl, 1.0f);
-        GL30.glDrawElements(GL30.GL_TRIANGLES, this.quadMeshData.vertexCount,
-            GL30.GL_UNSIGNED_SHORT, 0);
+    public void fillQuadMask(Bounds bounds, ITexture texture, Color color) {
+        fillQuadMask(bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getHeight(),
+            texture, color);
     }
 
     public void fillQuadIcon(int x, int y, int width, int height, Icon icon, Color color) {

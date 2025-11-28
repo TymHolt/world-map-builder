@@ -2,7 +2,6 @@ package org.wmb.gui.component.elementinspector;
 
 import org.wmb.gui.Theme;
 import org.wmb.gui.component.Align;
-import org.wmb.gui.component.Border;
 import org.wmb.gui.component.container.CompassContainerComponent;
 import org.wmb.gui.component.text.Label;
 
@@ -12,16 +11,12 @@ public final class ElementInspectorComponent extends CompassContainerComponent {
 
     public ElementInspectorComponent() {
         super();
-        setBackground(Theme.BACKGROUND);
-        setNorth(new Label("Element Inspector", Align.CENTER, Theme.FONT_BOLD));
+        setBorder(0, 0, 3, 0);
+        final Label label = new Label("Element Inspector", Align.CENTER, Theme.FONT_BOLD);
+        label.setBackground(Theme.BACKGROUND);
+        setNorth(label);
         this.inspectorViewComponent = new InspectorViewComponent();
         setCenter(this.inspectorViewComponent);
-
-        final Border border = new Border(3, Theme.BORDER);
-        border.setTop(0);
-        border.setRight(0);
-        border.setBottom(0);
-        setBorder(border);
     }
 
     public void setInspector(Inspector inspector) {

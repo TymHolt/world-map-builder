@@ -1,6 +1,8 @@
 package org.wmb.gui;
 
 import org.wmb.editor.element.Element;
+import org.wmb.gui.data.DynamicSize;
+import org.wmb.gui.data.Size;
 import org.wmb.gui.input.KeyClickEvent;
 import org.wmb.gui.input.MouseClickEvent;
 import org.wmb.gui.input.MouseMoveEvent;
@@ -13,7 +15,6 @@ import org.wmb.gui.component.MenuBarComponent;
 import org.wmb.gui.input.MouseScrollEvent;
 import org.wmb.rendering.OpenGLStateException;
 
-import java.awt.*;
 import java.io.IOException;
 import java.util.Objects;
 
@@ -46,8 +47,6 @@ public final class MainGui {
         this.container.setCenter(this.sceneViewComponent);
 
         final MenuBarComponent menuBar = new MenuBarComponent();
-        menuBar.setBackground(Theme.BACKGROUND);
-        menuBar.getBorder().setColor(Theme.BORDER);
         this.container.setNorth(menuBar);
 
         final SceneTreeComponent sceneTree = new SceneTreeComponent(this.context);
@@ -88,11 +87,10 @@ public final class MainGui {
         });
     }
 
-    public void resize(Dimension dimension) {
-        Objects.requireNonNull(dimension, "Dimension is null");
-        this.container.setBounds(0, 0, dimension.width, dimension.height);
+    public void resize(Size size) {
+        this.container.setBounds(0, 0, size.getWidth(), size.getHeight());
 
-        final Dimension minSize = this.container.getRequestedSize();
+        final DynamicSize minSize = this.container.getRequestedSize();
         this.context.getWindow().setMinimumSize(minSize.width, minSize.height);
     }
 

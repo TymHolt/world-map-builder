@@ -3,6 +3,7 @@ package org.wmb.gui.component.elementinspector;
 import org.wmb.gui.Theme;
 import org.wmb.gui.component.Component;
 import org.wmb.gui.component.container.ContainerComponent;
+import org.wmb.gui.data.DynamicSize;
 import org.wmb.gui.input.KeyButton;
 import org.wmb.gui.input.KeyClickEvent;
 import org.wmb.gui.input.MouseClickEvent;
@@ -16,6 +17,7 @@ public class InspectorViewComponent extends ContainerComponent {
     private Inspector inspector;
 
     public InspectorViewComponent() {
+        super();
         setBackground(Theme.BACKGROUND);
         this.inspector = new Inspector() {
 
@@ -37,9 +39,10 @@ public class InspectorViewComponent extends ContainerComponent {
     }
 
     @Override
-    public Dimension getRequestedSize() {
+    public void getRequestedSize(DynamicSize destination) {
         final Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-        return new Dimension(screenSize.width / 9, 1);
+        destination.width = screenSize.width / 9;
+        destination.height = 1;
     }
 
     @Override
@@ -48,7 +51,7 @@ public class InspectorViewComponent extends ContainerComponent {
 
         int currentY = y;
         for (Component component : getComponentList()) {
-            final Dimension requestedSize = component.getRequestedSize();
+            final DynamicSize requestedSize = component.getRequestedSize();
             component.setBounds(x, currentY, width, requestedSize.height);
             currentY += requestedSize.height;
         }

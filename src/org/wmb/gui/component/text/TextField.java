@@ -3,14 +3,12 @@ package org.wmb.gui.component.text;
 import org.wmb.gui.GuiGraphics;
 import org.wmb.gui.Theme;
 import org.wmb.gui.component.Align;
-import org.wmb.gui.component.Border;
+import org.wmb.gui.data.Position;
 import org.wmb.gui.font.FontDefinition;
-import org.wmb.gui.input.ClickAction;
 import org.wmb.gui.input.Cursor;
 import org.wmb.gui.input.KeyClickEvent;
 import org.wmb.rendering.Color;
 
-import java.awt.Point;
 import java.util.Objects;
 
 public class TextField extends TextComponent {
@@ -28,11 +26,9 @@ public class TextField extends TextComponent {
 
     public TextField(String text, Align align) {
         super(text, align);
-        setBorder(new Border(1, Theme.BORDER));
+        setBorder(1, 1, 1, 1);
         setFocusBackground(Theme.BACKGROUND_LIGHT);
         setFocusForeground(Theme.FOREGROUND);
-        setBackground(Theme.BACKGROUND);
-        setForeground(Theme.FOREGROUND);
         this.textCursorLocation = -1;
     }
 
@@ -143,10 +139,10 @@ public class TextField extends TextComponent {
         final String textBeforeCursor = text.substring(0, this.textCursorLocation);
         final FontDefinition font = getFont();
         final int textCursorOffsetX = font.getTextSize(textBeforeCursor).width;
-        final Point textOffset = getTextDrawLocation();
-        final int cursorX = textCursorOffsetX + textOffset.x;
+        final Position textOffset = getTextPosition();
+        final int cursorX = textCursorOffsetX + textOffset.getX();
 
-        graphics.fillQuadColor(cursorX, textOffset.y, 2, font.textHeight, getForeground());
+        graphics.fillQuadColor(cursorX, textOffset.getY(), 2, font.textHeight, getForeground());
     }
 
     @Override

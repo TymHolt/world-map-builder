@@ -4,8 +4,7 @@ import org.wmb.gui.component.Align;
 import org.wmb.gui.component.text.Label;
 import org.wmb.gui.component.container.ContainerComponent;
 import org.wmb.gui.component.text.TextField;
-
-import java.awt.Dimension;
+import org.wmb.gui.data.DynamicSize;
 
 public final class TextControl extends ContainerComponent {
 
@@ -31,20 +30,19 @@ public final class TextControl extends ContainerComponent {
     private static final int padding = 2;
 
     @Override
-    public Dimension getRequestedSize() {
-        final Dimension labelSize = this.label.getRequestedSize();
-        final Dimension textFieldSize = this.textField.getRequestedSize();
-        return new Dimension(
-            padding * 3 + labelSize.width + textFieldSize.width,
-            Math.max(labelSize.height, textFieldSize.height));
+    public void getRequestedSize(DynamicSize destination) {
+        final DynamicSize labelSize = this.label.getRequestedSize();
+        final DynamicSize textFieldSize = this.textField.getRequestedSize();
+        destination.width = padding * 3 + labelSize.width + textFieldSize.width;
+        destination.height = Math.max(labelSize.height, textFieldSize.height);
     }
 
     @Override
     public void setBounds(int x, int y, int width, int height) {
         super.setBounds(x, y, width, height);
 
-        final Dimension labelSize = this.label.getRequestedSize();
-        final Dimension textFieldSize = this.textField.getRequestedSize();
+        final DynamicSize labelSize = this.label.getRequestedSize();
+        final DynamicSize textFieldSize = this.textField.getRequestedSize();
         final int widthToSplit = width - padding * 3;
         final int componentHeight = Math.max(labelSize.height, textFieldSize.height);
 

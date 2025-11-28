@@ -5,13 +5,18 @@ import org.wmb.editor.element.Element;
 import org.wmb.gui.GuiGraphics;
 import org.wmb.gui.Theme;
 import org.wmb.gui.component.Component;
+import org.wmb.gui.data.Bounds;
+import org.wmb.gui.data.DynamicBounds;
+import org.wmb.gui.data.DynamicSize;
+import org.wmb.gui.data.Position;
 import org.wmb.gui.icon.Icon;
 import org.wmb.gui.input.ClickAction;
 import org.wmb.gui.input.Cursor;
 import org.wmb.gui.input.MouseButton;
 import org.wmb.gui.input.MouseClickEvent;
 
-import java.awt.*;
+import java.awt.Dimension;
+import java.awt.Toolkit;
 import java.util.List;
 import java.util.Objects;
 
@@ -24,6 +29,7 @@ final class TreeViewComponent extends Component {
     private int elementHeight;
 
     public TreeViewComponent(WmbContext context) {
+        super();
         setBackground(Theme.BACKGROUND);
 
         this.context = context;
@@ -41,9 +47,10 @@ final class TreeViewComponent extends Component {
     }
 
     @Override
-    public Dimension getRequestedSize() {
+    public void getRequestedSize(DynamicSize destination) {
         final Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-        return new Dimension(screenSize.width / 9, 1);
+        destination.width = screenSize.width / 9;
+        destination.height = 1;
     }
 
     @Override
@@ -53,8 +60,8 @@ final class TreeViewComponent extends Component {
         if (event.action != ClickAction.PRESS || event.button != MouseButton.LEFT)
             return;
 
-        final Rectangle innerBounds = getInnerBounds();
-        final int innerY = event.y - innerBounds.y;
+        final Bounds innerBounds = getInnerBounds();
+        final int innerY = event.y - innerBounds.getY();
         final int elementClickedIndex = innerY / this.elementHeight;
         final java.util.List<TreeNode> tree = this.sceneTree.getTree();
 
@@ -63,7 +70,7 @@ final class TreeViewComponent extends Component {
 
         final TreeNode treeNode = tree.get(elementClickedIndex);
         final int iconSize = this.elementHeight;
-        final int collapseIconX = innerBounds.x + (treeNode.indentLevel * childIndent);
+        final int collapseIconX = innerBounds.getX() + (treeNode.indentLevel * childIndent);
 
         final boolean collapseAction = event.x >= collapseIconX &&
             event.x < collapseIconX + iconSize && treeNode.hasChildren;
@@ -76,8 +83,8 @@ final class TreeViewComponent extends Component {
 
     @Override
     public org.wmb.gui.input.Cursor getCursor(int mouseX, int mouseY) {
-        final Rectangle innerBounds = getInnerBounds();
-        final int innerY = mouseY - innerBounds.y;
+        final Bounds innerBounds = getInnerBounds();
+        final int innerY = mouseY - innerBounds.getY();
         final int elementClickedIndex = innerY / this.elementHeight;
         final List<TreeNode> tree = this.sceneTree.getTree();
 
@@ -91,19 +98,20 @@ final class TreeViewComponent extends Component {
     public void draw(GuiGraphics graphics) {
         super.draw(graphics);
 
-        final Rectangle innerBounds = getInnerBounds();
-        int y = innerBounds.y;
+        final Bounds innerBounds = getInnerBounds();
+        final int innerBoundsX = innerBounds.getX();
+        int y = innerBounds.getY();
 
-        final Point mouse = this.context.getWindow().getMousePosition();
+        final Position mouse = this.context.getWindow().getMousePosition();
         int mouseY = -1;
 
         if (innerBounds.contains(mouse))
-            mouseY = mouse.y;
+            mouseY = mouse.getY();
 
         this.elementHeight = Theme.FONT_PLAIN.textHeight;
         for (TreeNode treeNode : this.sceneTree.getTree()) {
-            final Rectangle lineBounds = new Rectangle(innerBounds.x, y, innerBounds.width,
-                elementHeight);
+            final DynamicBounds lineBounds = new DynamicBounds(innerBoundsX, y,
+                innerBounds.getWidth(), elementHeight);
 
             final int nextY = y + this.elementHeight;
             if (mouseY >= y && mouseY < nextY)
@@ -112,7 +120,7 @@ final class TreeViewComponent extends Component {
             if (treeNode.element == this.context.getSelectedElement())
                 graphics.fillQuadColor(lineBounds, Theme.HIGHLIGHT);
 
-            int x = innerBounds.x + (treeNode.indentLevel * childIndent);
+            int x = innerBoundsX + (treeNode.indentLevel * childIndent);
             final int iconSize = this.elementHeight;
             final int iconSize2 = iconSize / 2;
             final int iconSize4 = iconSize / 4;

@@ -4,9 +4,10 @@ import org.bfg.generate.BitmapFont;
 import org.bfg.generate.BitmapFontGenerator;
 import org.bfg.generate.GlyphInfo;
 import org.bfg.generate.GlyphRange;
+import org.wmb.gui.data.DynamicSize;
 import org.wmb.rendering.OpenGLStateException;
 
-import java.awt.*;
+import java.awt.Font;
 import java.util.Objects;
 
 public final class FontDefinition {
@@ -29,7 +30,7 @@ public final class FontDefinition {
         this.textHeight = height;
     }
 
-    public Dimension getTextSize(String text) {
+    public void getTextSize(String text, DynamicSize destination) {
         if (text == null)
             text = "null";
 
@@ -45,7 +46,14 @@ public final class FontDefinition {
             height = Math.max(height, glyph.height);
         }
 
-        return new Dimension(width, height);
+        destination.width = width;
+        destination.height = height;
+    }
+
+    public DynamicSize getTextSize(String text) {
+        final DynamicSize textSize = new DynamicSize(0, 0);
+        getTextSize(text, textSize);
+        return textSize;
     }
 
     public AllocatedFont allocate() throws OpenGLStateException {

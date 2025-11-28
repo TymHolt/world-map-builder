@@ -1,8 +1,7 @@
 package org.wmb.gui.component;
 
 import org.wmb.gui.GuiGraphics;
-
-import java.awt.Dimension;
+import org.wmb.gui.data.DynamicSize;
 
 public final class VerticalPadding extends Component{
 
@@ -14,8 +13,9 @@ public final class VerticalPadding extends Component{
     }
 
     @Override
-    public Dimension getRequestedSize() {
-        return new Dimension(1, this.padding);
+    public void getRequestedSize(DynamicSize destination) {
+        destination.width = 1;
+        destination.height = this.padding;
     }
 
     @Override

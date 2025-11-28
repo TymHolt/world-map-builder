@@ -5,9 +5,8 @@ import org.wmb.gui.component.Align;
 import org.wmb.gui.component.text.FloatField;
 import org.wmb.gui.component.text.Label;
 import org.wmb.gui.component.container.ContainerComponent;
+import org.wmb.gui.data.DynamicSize;
 import org.wmb.rendering.Color;
-
-import java.awt.*;
 
 public final class ControlXYZ extends ContainerComponent {
 
@@ -70,25 +69,24 @@ public final class ControlXYZ extends ContainerComponent {
     private static final int padding = 2;
 
     @Override
-    public Dimension getRequestedSize() {
-        final int width = padding * 7
+    public void getRequestedSize(DynamicSize destination) {
+        destination.width = padding * 7
             + this.labelX.getRequestedSize().width
             + this.fieldX.getRequestedSize().width
             + this.labelY.getRequestedSize().width
             + this.fieldY.getRequestedSize().width
             + this.labelZ.getRequestedSize().width
             + this.fieldZ.getRequestedSize().width;
-        final int height = this.label.getRequestedSize().height * 2;
-        return new Dimension(width, height);
+        destination.height = this.label.getRequestedSize().height * 2;
     }
 
     @Override
     public void setBounds(int x, int y, int width, int height) {
         super.setBounds(x, y, width, height);
 
-        final Dimension labelXSize = this.labelX.getRequestedSize();
-        final Dimension labelYSize = this.labelY.getRequestedSize();
-        final Dimension labelZSize = this.labelZ.getRequestedSize();
+        final DynamicSize labelXSize = this.labelX.getRequestedSize();
+        final DynamicSize labelYSize = this.labelY.getRequestedSize();
+        final DynamicSize labelZSize = this.labelZ.getRequestedSize();
         final int allHeight = Math.max(labelXSize.height, Math.max(labelYSize.height,
             labelZSize.height));
         final int labelWidth = max(new int[] {

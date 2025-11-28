@@ -1,8 +1,8 @@
 package org.wmb.gui.component.container;
 
 import org.wmb.gui.GuiGraphics;
-import org.wmb.gui.component.Border;
 import org.wmb.gui.component.Component;
+import org.wmb.gui.data.Bounds;
 import org.wmb.gui.input.Cursor;
 import org.wmb.gui.input.KeyClickEvent;
 import org.wmb.gui.input.MouseClickEvent;
@@ -10,7 +10,6 @@ import org.wmb.gui.input.MouseMoveEvent;
 import org.wmb.gui.input.MouseScrollEvent;
 import org.wmb.rendering.Color;
 
-import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -22,7 +21,6 @@ public abstract class ContainerComponent extends Component {
 
     public ContainerComponent() {
         super();
-        setBorder(new Border());
         setBackground(Color.TRANSPARENT);
         this.componentList = new ArrayList<>();
     }
@@ -105,7 +103,7 @@ public abstract class ContainerComponent extends Component {
         if (this.focusedComponent == null)
             return;
 
-        final Rectangle bounds = this.focusedComponent.getBounds();
+        final Bounds bounds = this.focusedComponent.getBounds();
         if (bounds.contains(event.xFrom, event.yFrom) || bounds.contains(event.xTo, event.yTo))
             this.focusedComponent.onMouseMove(event);
     }

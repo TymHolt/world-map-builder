@@ -4,11 +4,16 @@ import org.lwjgl.glfw.Callbacks;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL;
+import org.wmb.gui.data.DynamicPosition;
+import org.wmb.gui.data.DynamicSize;
+import org.wmb.gui.data.Position;
+import org.wmb.gui.data.Size;
 import org.wmb.gui.input.*;
 import org.wmb.Main;
 import org.wmb.gui.input.Cursor;
 
-import java.awt.*;
+import java.awt.Dimension;
+import java.awt.Toolkit;
 
 public final class Window {
 
@@ -26,8 +31,7 @@ public final class Window {
 
     private final long windowId;
     private WindowListener inputListener;
-    private int xFrom;
-    private int yFrom;
+    private final DynamicPosition mousePosition;
 
     public Window(int width, int height, String title) {
         if (width < 1 || height < 1)
@@ -45,22 +49,19 @@ public final class Window {
         GLFW.glfwShowWindow(this.windowId);
         GL.createCapabilities();
 
+        this.mousePosition = new DynamicPosition(0, 0);
+
         GLFW.glfwSetMouseButtonCallback(this.windowId, (window, button, action, mods) -> {
             final MouseButton mouseButton = MouseButton.getByGlfwId(button);
             final ClickAction clickAction = ClickAction.getByGlfwId(action);
-            final Point mouse = this.getMousePosition();
 
             if (mouseButton == null || clickAction == null || inputListener == null)
                 return;
 
             final MouseClickEvent event = new MouseClickEvent(mouseButton, clickAction,
-                mouse.x, mouse.y);
+                this.mousePosition.x, this.mousePosition.y);
             this.inputListener.mouseClick(event);
         });
-
-        final Point mousePosition = getMousePosition();
-        this.xFrom = mousePosition.x;
-        this.yFrom = mousePosition.y;
 
         GLFW.glfwSetCursorPosCallback(this.windowId, (window, xToDouble, yToDouble) -> {
             if (this.inputListener == null)
@@ -68,9 +69,10 @@ public final class Window {
 
             final int xTo = (int) xToDouble;
             final int yTo = (int) yToDouble;
-            final MouseMoveEvent event = new MouseMoveEvent(this.xFrom, this.yFrom, xTo, yTo);
-            this.xFrom = xTo;
-            this.yFrom = yTo;
+            final MouseMoveEvent event = new MouseMoveEvent(mousePosition.x, mousePosition.y,
+                xTo, yTo);
+            this.mousePosition.x = xTo;
+            this.mousePosition.y = yTo;
             this.inputListener.mouseMove(event);
         });
 
@@ -78,9 +80,8 @@ public final class Window {
             if (this.inputListener == null)
                 return;
 
-            final Point mouse = this.getMousePosition();
             final MouseScrollEvent event = new MouseScrollEvent(ScrollDirection.fromValue(yoffset),
-                mouse.x, mouse.y);
+                this.mousePosition.x, this.mousePosition.y);
             this.inputListener.mouseScroll(event);
         });
 
@@ -126,22 +127,19 @@ public final class Window {
         GLFW.glfwDestroyWindow(this.windowId);
     }
 
-    public Point getMousePosition() {
-        final double[] xPositionPointer = new double[1];
-        final double[] yPositionPointer = new double[1];
-        GLFW.glfwGetCursorPos(windowId, xPositionPointer, yPositionPointer);
-        return new Point((int) xPositionPointer[0], (int) yPositionPointer[0]);
+    public Position getMousePosition() {
+        return this.mousePosition;
     }
 
     public boolean isKeyPressed(KeyButton button) {
         return GLFW.glfwGetKey(this.windowId, button.getGlfwId()) == GLFW.GLFW_PRESS;
     }
 
-    public Dimension getSize() {
+    public Size getSize() {
         final int[] widthPointer = new int[1];
         final int[] heightPointer = new int[1];
         GLFW.glfwGetFramebufferSize(windowId, widthPointer, heightPointer);
-        return new Dimension(widthPointer[0], heightPointer[0]);
+        return new DynamicSize(widthPointer[0], heightPointer[0]);
     }
 
     public void setMinimumSize(int width, int height) {
@@ -183,10 +181,10 @@ public final class Window {
 
     private void centerWindow() {
         final Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-        final Dimension windowSize = getSize();
+        final Size windowSize = getSize();
         GLFW.glfwSetWindowPos(this.windowId,
-            (screenSize.width - windowSize.width) / 2,
-            (screenSize.height - windowSize.height) / 2);
+            (screenSize.width - windowSize.getWidth()) / 2,
+            (screenSize.height - windowSize.getHeight()) / 2);
     }
 
     private static void setGlfwFlags() {

@@ -5,12 +5,13 @@ public final class FloatField extends TextField {
     private float value;
 
     public FloatField() {
-        this.value = 0.0f;
+        super();
+        setValue(0.0f);
     }
 
     public void setValue(float value) {
         this.value = value;
-        setText(Float.toString(value));
+        setText(String.format("%.2f", value));
     }
 
     public float getValue() {
@@ -28,7 +29,6 @@ public final class FloatField extends TextField {
 
         }
 
-        this.value = newValue;
-        setText(String.format("%.2f", newValue));
+        setValue(newValue);
     }
 }

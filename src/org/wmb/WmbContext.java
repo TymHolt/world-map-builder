@@ -5,6 +5,7 @@ import org.wmb.editor.element.Element;
 import org.wmb.editor.element.Object3dElement.Object3dElement;
 import org.wmb.gui.MainGui;
 import org.wmb.gui.Window;
+import org.wmb.gui.data.Size;
 import org.wmb.rendering.OpenGLStateException;
 
 import java.awt.*;
@@ -74,10 +75,12 @@ public final class WmbContext {
         }
 
         this.window.makeContextCurrent();
-        final Dimension windowSize = this.window.getSize();;
-        if (this.lastWidth != windowSize.width || this.lastHeight != windowSize.height) {
-            this.lastWidth = windowSize.width;
-            this.lastHeight = windowSize.height;
+        final Size windowSize = this.window.getSize();
+        final int windowWidth = windowSize.getWidth();
+        final int windowHeight = windowSize.getHeight();
+        if (this.lastWidth != windowWidth || this.lastHeight != windowHeight) {
+            this.lastWidth = windowWidth;
+            this.lastHeight = windowHeight;
             this.gui.resize(windowSize);
         }
 
