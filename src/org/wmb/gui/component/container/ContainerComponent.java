@@ -90,21 +90,14 @@ public abstract class ContainerComponent extends Component {
                 continue;
 
             if (component.getBounds().contains(event.x, event.y)) {
-                if (this.focusedComponent != null)
-                    this.focusedComponent.onLooseFocus();
-
-                this.focusedComponent = component;
-                component.onGainFocus();
+                setFocusedComponent(component);
                 component.onMouseClick(event);
                 return;
             }
         }
 
         // No contained component clicked
-        if (this.focusedComponent != null) {
-            this.focusedComponent.onLooseFocus();
-            this.focusedComponent = null;
-        }
+        setFocusedComponent(null);
     }
 
     @Override
@@ -169,5 +162,25 @@ public abstract class ContainerComponent extends Component {
     public void onKeyClick(KeyClickEvent event) {
         if (this.focusedComponent != null)
             this.focusedComponent.onKeyClick(event);
+    }
+
+    @Override
+    public boolean handleTabThrough() {
+        if (this.focusedComponent != null && this.focusedComponent.handleTabThrough())
+            return true;
+
+        final int focusedIndex = this.componentList.indexOf(this.focusedComponent);
+        final int componentCount = this.componentList.size();
+        for (int index = focusedIndex + 1; index < componentCount; index++) {
+            final Component currentComponent = this.componentList.get(index);
+
+            if (currentComponent.handleTabThrough()) {
+                setFocusedComponent(currentComponent);
+                return true;
+            }
+        }
+
+        setFocusedComponent(null);
+        return false;
     }
 }

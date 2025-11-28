@@ -15,6 +15,7 @@ import java.util.Objects;
 
 public class TextField extends TextComponent {
 
+    private boolean focused;
     private int textCursorLocation;
     private Color focusBackground;
     private Color focusForeground;
@@ -65,15 +66,17 @@ public class TextField extends TextComponent {
 
     @Override
     public void onGainFocus() {
+        this.focused = true;
         this.oldBackground = getBackground();
         this.oldForeground = getForeground();
         setBackground(this.focusBackground);
         setForeground(this.focusForeground);
-        this.textCursorLocation = 0;
+        this.textCursorLocation = getText().length();
     }
 
     @Override
     public void onLooseFocus() {
+        this.focused = false;
         setBackground(this.oldBackground);
         setForeground(this.oldForeground);
         this.textCursorLocation = -1;
@@ -99,7 +102,7 @@ public class TextField extends TextComponent {
 
     @Override
     public void onKeyClick(KeyClickEvent event) {
-        if (event.action != ClickAction.PRESS && event.action != ClickAction.REPEAT)
+        if (!event.action.isPressOrRepeat())
             return;
 
         final String text = getText();
@@ -123,7 +126,7 @@ public class TextField extends TextComponent {
                     final String preCursor = text.substring(0, this.textCursorLocation);
                     final String postCursor = text.substring(this.textCursorLocation + 1);
                     setText(preCursor + postCursor);
-                    setCursorLocation(this.textCursorLocation - 1);
+                    setCursorLocation(this.textCursorLocation);
                 }
                 break;
         }
@@ -144,5 +147,10 @@ public class TextField extends TextComponent {
         final int cursorX = textCursorOffsetX + textOffset.x;
 
         graphics.fillQuadColor(cursorX, textOffset.y, 2, font.textHeight, getForeground());
+    }
+
+    @Override
+    public boolean handleTabThrough() {
+        return !this.focused;
     }
 }

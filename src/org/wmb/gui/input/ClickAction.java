@@ -29,6 +29,10 @@ public enum ClickAction {
         this.glfwId = glfwId;
     }
 
+    public boolean isPressOrRepeat() {
+        return this == PRESS || this == REPEAT;
+    }
+
     public int getGlfwId() {
         return glfwId;
     }

@@ -24,19 +24,19 @@ public final class ControlXYZ extends ContainerComponent {
         this.label = new Label(title, Align.LEFT, Theme.FONT_PLAIN);
         addComponent(label);
 
-        this.labelX = new Label("X", Align.LEFT, Theme.FONT_BOLD);
+        this.labelX = new Label("X", Align.CENTER, Theme.FONT_BOLD);
         this.labelX.setBackground(Color.RED);
         this.fieldX = new FloatField();
         addComponent(labelX);
         addComponent(fieldX);
 
-        this.labelY = new Label("Y", Align.LEFT, Theme.FONT_BOLD);
+        this.labelY = new Label("Y", Align.CENTER, Theme.FONT_BOLD);
         this.labelY.setBackground(Color.GREEN);
         this.fieldY = new FloatField();
         addComponent(labelY);
         addComponent(fieldY);
 
-        this.labelZ = new Label("Z", Align.LEFT, Theme.FONT_BOLD);
+        this.labelZ = new Label("Z", Align.CENTER, Theme.FONT_BOLD);
         this.labelZ.setBackground(Color.BLUE);
         this.fieldZ = new FloatField();
         addComponent(labelZ);
@@ -89,10 +89,14 @@ public final class ControlXYZ extends ContainerComponent {
         final Dimension labelXSize = this.labelX.getRequestedSize();
         final Dimension labelYSize = this.labelY.getRequestedSize();
         final Dimension labelZSize = this.labelZ.getRequestedSize();
-        final int labelWidth = Math.max(labelXSize.width, Math.max(labelYSize.width,
-            labelZSize.width));
         final int allHeight = Math.max(labelXSize.height, Math.max(labelYSize.height,
             labelZSize.height));
+        final int labelWidth = max(new int[] {
+            labelXSize.width,
+            labelYSize.width,
+            labelZSize.width,
+            allHeight
+        });
         final int fieldWidth = (width - (3 * labelWidth) - (7 * padding)) / 3;
 
         int currentY = y;
@@ -116,5 +120,14 @@ public final class ControlXYZ extends ContainerComponent {
         this.labelZ.setBounds(currentX, currentY, labelWidth, allHeight);
         currentX += labelWidth + padding;
         this.fieldZ.setBounds(currentX, currentY, fieldWidth, allHeight);
+    }
+
+    private static int max(int[] values) {
+        int max = 0;
+        for (int value : values)
+            if (value > max)
+                max = value;
+
+        return max;
     }
 }

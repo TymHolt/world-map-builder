@@ -99,4 +99,8 @@ public abstract class Component {
     public void onKeyClick(KeyClickEvent event) {
 
     }
+
+    public boolean handleTabThrough() {
+        return false;
+    }
 }

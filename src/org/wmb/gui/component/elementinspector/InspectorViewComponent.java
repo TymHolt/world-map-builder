@@ -3,7 +3,6 @@ package org.wmb.gui.component.elementinspector;
 import org.wmb.gui.Theme;
 import org.wmb.gui.component.Component;
 import org.wmb.gui.component.container.ContainerComponent;
-import org.wmb.gui.input.ClickAction;
 import org.wmb.gui.input.KeyButton;
 import org.wmb.gui.input.KeyClickEvent;
 import org.wmb.gui.input.MouseClickEvent;
@@ -78,9 +77,15 @@ public class InspectorViewComponent extends ContainerComponent {
     public void onKeyClick(KeyClickEvent event) {
         super.onKeyClick(event);
 
-        if (event.button == KeyButton.ENTER && event.action == ClickAction.PRESS) {
+        // Enter, apply changes
+        if (event.button == KeyButton.ENTER && event.action.isPressOrRepeat()) {
             setFocusedComponent(null);
             this.inspector.write();
+            return;
         }
+
+        // Tab, apply and go to next input component
+        if (event.button == KeyButton.TAB && event.action.isPressOrRepeat())
+            handleTabThrough();
     }
 }
