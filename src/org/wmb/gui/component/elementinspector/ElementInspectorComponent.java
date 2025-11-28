@@ -22,4 +22,8 @@ public final class ElementInspectorComponent extends CompassContainerComponent {
     public void setInspector(Inspector inspector) {
         this.inspectorViewComponent.setInspector(inspector);
     }
+
+    public void notifyReadScene() {
+        this.inspectorViewComponent.notifyReadScene();
+    }
 }

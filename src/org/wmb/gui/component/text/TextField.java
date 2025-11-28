@@ -149,4 +149,9 @@ public class TextField extends TextComponent {
     public boolean handleTabThrough() {
         return !this.focused;
     }
+
+    @Override
+    public boolean isListeningForKeyboard() {
+        return this.focused;
+    }
 }

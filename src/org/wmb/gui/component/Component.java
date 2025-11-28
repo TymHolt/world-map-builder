@@ -291,4 +291,8 @@ public abstract class Component {
     public boolean handleTabThrough() {
         return false;
     }
+
+    public boolean isListeningForKeyboard() {
+        return false;
+    }
 }

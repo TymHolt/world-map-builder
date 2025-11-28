@@ -49,6 +49,10 @@ public final class WmbContext {
         return this.scene;
     }
 
+    public MainGui getGui() {
+        return this.gui;
+    }
+
     public void setSelectedElement(Element element) {
         this.selectedElement = element;
         this.gui.notifyElementSelected(element);

@@ -91,4 +91,8 @@ public class InspectorViewComponent extends ContainerComponent {
         if (event.button == KeyButton.TAB && event.action.isPressOrRepeat())
             handleTabThrough();
     }
+
+    public void notifyReadScene() {
+        this.inspector.read();
+    }
 }

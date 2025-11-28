@@ -1,6 +1,7 @@
 package org.wmb.gui.component.sceneview3d;
 
 import org.joml.Matrix4f;
+import org.joml.Vector3f;
 import org.joml.Vector4f;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL30;
@@ -28,6 +29,16 @@ import java.util.Objects;
 
 public final class SceneView3dComponent extends Component {
 
+    private enum GizmoAxis {
+        X, Y, Z
+    }
+
+    private enum AAPlane {
+        XZ,
+        XY,
+        YZ
+    }
+
     private final WmbContext context;
     private AllocatedFramebuffer framebuffer;
     private AllocatedFramebuffer gizmoFramebuffer;
@@ -39,8 +50,9 @@ public final class SceneView3dComponent extends Component {
     private final Camera camera;
     private boolean rotatingCamera;
     private final float fov;
-    private boolean focused;
-    private boolean hoversGizmo;
+    private GizmoAxis hoveredAxis;
+    private GizmoAxis draggingAxis;
+    private AAPlane draggingPlane;
 
     public SceneView3dComponent(WmbContext context) throws IOException {
         super();
@@ -92,8 +104,9 @@ public final class SceneView3dComponent extends Component {
         this.rotatingCamera = false;
         this.lastWidth = -1;
         this.lastHeight = -1;
-        this.focused = false;
-        this.hoversGizmo = false;
+        this.hoveredAxis = null;
+        this.draggingAxis = null;
+        this.draggingPlane = null;
     }
 
     public void renderScene(Scene3d scene) throws OpenGLStateException {
@@ -122,7 +135,7 @@ public final class SceneView3dComponent extends Component {
         GL30.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         GL30.glClear(GL30.GL_COLOR_BUFFER_BIT | GL30.GL_DEPTH_BUFFER_BIT);
 
-        this.hoversGizmo = false;
+        this.hoveredAxis = null;
         final Element selectedElement = this.context.getSelectedElement();
         if (selectedElement instanceof Object3dElement) {
             final Object3dElement object3dElement = (Object3dElement) selectedElement;
@@ -139,10 +152,16 @@ public final class SceneView3dComponent extends Component {
                 final ByteBuffer pixelData = BufferUtils.createByteBuffer(4);
                 GL30.glReadPixels(x, y, 1, 1, GL30.GL_RGBA, GL30.GL_UNSIGNED_BYTE, pixelData);
 
-                final int r = pixelData.get(0) & 0xFF;
-                final int g = pixelData.get(1) & 0xFF;
-                final int b = pixelData.get(2) & 0xFF;
-                this.hoversGizmo = (r + g + b) > 0;
+                final int red = pixelData.get(0) & 0xFF;
+                final int green = pixelData.get(1) & 0xFF;
+                final int blue = pixelData.get(2) & 0xFF;
+
+                if (red > 0)
+                    this.hoveredAxis = GizmoAxis.X;
+                else if (green > 0)
+                    this.hoveredAxis = GizmoAxis.Y;
+                else if(blue > 0)
+                    this.hoveredAxis = GizmoAxis.Z;
             }
         }
 
@@ -181,10 +200,7 @@ public final class SceneView3dComponent extends Component {
     @Override
     public void onMouseScroll(MouseScrollEvent event) {
         final float direction = event.direction == ScrollDirection.UP ? 1.0f : -1.0f;
-        final Matrix4f rotationMatrix = camera.getLookRotationMatrix();
-        final Vector4f forward = rotationMatrix.transform(
-            new Vector4f(0.0f, 0.0f, -direction, 1.0f));
-        camera.move(forward);
+        this.camera.move(this.camera.getLookVector().mul(direction));
     }
 
     private static final float CAMERA_MOVE_SPEED = 8.0f;
@@ -197,7 +213,7 @@ public final class SceneView3dComponent extends Component {
         final float deltaTime = (float) deltaTimeLong / 1000.0f;
         final float moveDelta = CAMERA_MOVE_SPEED * deltaTime;
 
-        if (!this.focused)
+        if (this.context.getGui().isListeningForKeyboard())
             return;
 
         final Matrix4f rotationMatrix = camera.getLookYawRotationMatrix();
@@ -257,40 +273,132 @@ public final class SceneView3dComponent extends Component {
 
     @Override
     public void onMouseClick(MouseClickEvent event) {
-        if (event.button != MouseButton.MIDDLE)
+        if (event.button == MouseButton.MIDDLE) {
+            this.rotatingCamera = event.action == ClickAction.PRESS;
             return;
+        }
 
-        this.rotatingCamera = event.action == ClickAction.PRESS;
+        if (event.button == MouseButton.LEFT) {
+            if (event.action == ClickAction.PRESS && this.hoveredAxis != null) {
+                this.draggingAxis = this.hoveredAxis;
+                this.draggingPlane = getBestDraggingPlane(this.draggingAxis);
+            } else {
+                this.draggingAxis = null;
+                this.draggingPlane = null;
+            }
+        }
+    }
+
+   private AAPlane getBestDraggingPlane(GizmoAxis axis) {
+        final Vector3f lookVector = this.camera.getLookVector();
+        final float xzFactor = Math.max(lookVector.dot(0.0f, 1.0f, 0.0f),
+            lookVector.dot(0.0f, -1.0f, 0.0f));
+        final float xyFactor = Math.max(lookVector.dot(0.0f, 0.0f, 1.0f),
+           lookVector.dot(0.0f, 0.0f, -1.0f));
+        final float yzFactor = Math.max(lookVector.dot(1.0f, 0.0f, 0.0f),
+           lookVector.dot(-1.0f, 0.0f, 0.0f));
+
+        return switch (axis) {
+            case X -> xzFactor > xyFactor ? AAPlane.XZ : AAPlane.XY;
+            case Y -> xyFactor > yzFactor ? AAPlane.XY : AAPlane.YZ;
+            case Z -> xzFactor > yzFactor ? AAPlane.XZ : AAPlane.YZ;
+        };
     }
 
     @Override
     public void onMouseMove(MouseMoveEvent event) {
-        if (!this.rotatingCamera)
-            return;
+        if (this.rotatingCamera) {
+            final int dx = event.xTo - event.xFrom;
+            final int dy = event.yTo - event.yFrom;
+            final Bounds bounds = getBounds();
+            final float dxf = (float) dx / (float) bounds.getWidth();
+            final float dyf = (float) dy / (float) bounds.getHeight();
 
-        final int dx = event.xTo - event.xFrom;
-        final int dy = event.yTo - event.yFrom;
-        final Bounds bounds = getBounds();
-        final float dxf = (float) dx / (float) bounds.getWidth();
-        final float dyf = (float) dy / (float) bounds.getHeight();
+            this.camera.setPitch(this.camera.getPitch() + (dyf * this.fov * 2.0f));
+            this.camera.setYaw(this.camera.getYaw() + (dxf * this.fov * 2.0f));
+        }
 
-        this.camera.setPitch(this.camera.getPitch() + (dyf * this.fov * 2.0f));
-        this.camera.setYaw(this.camera.getYaw() + (dxf * this.fov * 2.0f));
+        if (this.draggingAxis != null && this.draggingPlane != null) {
+            final Bounds innerBounds = getInnerBounds();
+            final float innerBoundsWidth = (float) innerBounds.getWidth();
+            final float innerBoundsHeight = (float) innerBounds.getHeight();
+            final float localX = (float) (event.xTo - innerBounds.getX());
+            final float localY = (float) (event.yTo - innerBounds.getY());
+
+            final Vector4f ray = new Vector4f(
+                (2.0f * localX) / innerBoundsWidth - 1.0f,
+                1.0f - (2.0f * localY) / innerBoundsHeight,
+                -1.0f,
+                1.0f
+            );
+            final float aspect = innerBoundsWidth / innerBoundsHeight;
+            final Matrix4f projectionInverse = this.camera.getProjectionMatrixInverse(aspect);
+            projectionInverse.transform(ray);
+            ray.z = -1.0f;
+            ray.w = 0.0f;
+            ray.normalize();
+
+            this.camera.getLookRotationMatrix().transform(ray);
+
+            final Element selectedElement = this.context.getSelectedElement();
+            if (selectedElement instanceof Object3dElement) {
+                final Object3dElement object3dElement = (Object3dElement) selectedElement;
+
+                float planePosition = 0.0f;
+                switch (this.draggingPlane) {
+                    case XY -> planePosition = object3dElement.getTransform().getPosition().getZ();
+                    case XZ -> planePosition = object3dElement.getTransform().getPosition().getY();
+                    case YZ -> planePosition = object3dElement.getTransform().getPosition().getX();
+                }
+
+                final Vector3f intersection = intersect(ray, this.draggingPlane, planePosition);
+                switch (this.draggingAxis) {
+                    case X -> object3dElement.getTransform().getPosition().setX(intersection.x);
+                    case Y -> object3dElement.getTransform().getPosition().setY(intersection.y);
+                    case Z -> object3dElement.getTransform().getPosition().setZ(intersection.z);
+                }
+
+                this.context.getGui().notifyReadScene();
+            }
+        }
     }
 
-    @Override
-    public void onGainFocus() {
-        this.focused = true;
+    private Vector3f intersect(Vector4f ray, AAPlane plane, float planePosition) {
+        final Vector3f intersection = new Vector3f();
+        switch (plane) {
+            case XZ:
+                final float yDiff = planePosition - this.camera.getY();
+                final float ySteps = yDiff / ray.y;
+                intersection.x = this.camera.getX() + ray.x * ySteps;
+                intersection.y = planePosition;
+                intersection.z = this.camera.getZ() + ray.z * ySteps;
+                break;
+            case XY:
+                final float zDiff = planePosition - this.camera.getZ();
+                final float zSteps = zDiff / ray.z;
+                intersection.x = this.camera.getX() + ray.x * zSteps;
+                intersection.y = this.camera.getY() + ray.y * zSteps;
+                intersection.z = planePosition;
+                break;
+            case YZ:
+                final float xDiff = planePosition - this.camera.getX();
+                final float xSteps = xDiff / ray.x;
+                intersection.x = planePosition;
+                intersection.y = this.camera.getY() + ray.y * xSteps;
+                intersection.z = this.camera.getZ() + ray.z * xSteps;
+                break;
+        }
+
+        return intersection;
     }
 
     @Override
     public void onLooseFocus() {
         this.rotatingCamera = false;
-        this.focused = false;
     }
 
     @Override
     public Cursor getCursor(int mouseX, int mouseY) {
-        return this.hoversGizmo ? Cursor.HAND : Cursor.DEFAULT;
+        return this.hoveredAxis != null ? Cursor.HAND : Cursor.DEFAULT;
     }
 }

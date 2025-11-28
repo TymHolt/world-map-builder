@@ -1,6 +1,7 @@
 package org.wmb.rendering;
 
 import org.joml.Matrix4f;
+import org.joml.Vector3f;
 import org.joml.Vector4f;
 
 public final class Camera {
@@ -109,6 +110,12 @@ public final class Camera {
         moveZ(direction.z);
     }
 
+    public void move(Vector3f direction) {
+        moveX(direction.x);
+        moveY(direction.y);
+        moveZ(direction.z);
+    }
+
     public Matrix4f getRotationMatrix() {
         return new Matrix4f().identity()
             .rotate((float) Math.toRadians(this.pitch), 1.0f, 0.0f, 0.0f)
@@ -126,11 +133,21 @@ public final class Camera {
             .rotate((float) Math.toRadians(-this.pitch), 1.0f, 0.0f, 0.0f);
     }
 
+    public Vector3f getLookVector() {
+        final Matrix4f rotationMatrix = getLookRotationMatrix();
+        final Vector4f forward = rotationMatrix.transform(new Vector4f(0.0f, 0.0f, -1.0f, 1.0f));
+        return forward.xyz(new Vector3f());
+    }
+
     public Matrix4f getViewMatrix() {
         return getRotationMatrix().mul(new Matrix4f().identity().translate(-this.x, -this.y, -this.z));
     }
 
     public Matrix4f getProjectionMatrix(float aspect) {
         return new Matrix4f().identity().perspective(fov, aspect, near, far);
+    }
+
+    public Matrix4f getProjectionMatrixInverse(float aspect) {
+        return getProjectionMatrix(aspect).invert();
     }
 }

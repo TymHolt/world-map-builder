@@ -104,6 +104,10 @@ public final class MainGui {
         this.container.setBounds(this.container.getBounds());
     }
 
+    public void notifyReadScene() {
+        this.elementInspector.notifyReadScene();
+    }
+
     private long count = -1L;
 
     public void draw() throws OpenGLStateException {
@@ -128,5 +132,9 @@ public final class MainGui {
     public void delete() {
         this.sceneViewComponent.delete();
         this.graphics.delete();
+    }
+
+    public boolean isListeningForKeyboard() {
+        return this.container.isListeningForKeyboard();
     }
 }

@@ -181,4 +181,12 @@ public abstract class ContainerComponent extends Component {
         setFocusedComponent(null);
         return false;
     }
+
+    @Override
+    public boolean isListeningForKeyboard() {
+        if (this.focusedComponent != null)
+            return this.focusedComponent.isListeningForKeyboard();
+
+        return false;
+    }
 }
