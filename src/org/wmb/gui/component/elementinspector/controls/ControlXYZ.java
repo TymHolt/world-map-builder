@@ -6,7 +6,7 @@ import org.wmb.gui.component.text.FloatField;
 import org.wmb.gui.component.text.Label;
 import org.wmb.gui.component.container.ContainerComponent;
 import org.wmb.gui.data.DynamicSize;
-import org.wmb.rendering.Color;
+import org.wmb.rendering.Colors;
 
 public final class ControlXYZ extends ContainerComponent {
 
@@ -24,19 +24,19 @@ public final class ControlXYZ extends ContainerComponent {
         addComponent(label);
 
         this.labelX = new Label("X", Align.CENTER, Theme.FONT_BOLD);
-        this.labelX.setBackground(Color.RED);
+        this.labelX.setBackground(Colors.RED);
         this.fieldX = new FloatField();
         addComponent(labelX);
         addComponent(fieldX);
 
         this.labelY = new Label("Y", Align.CENTER, Theme.FONT_BOLD);
-        this.labelY.setBackground(Color.GREEN);
+        this.labelY.setBackground(Colors.GREEN);
         this.fieldY = new FloatField();
         addComponent(labelY);
         addComponent(fieldY);
 
         this.labelZ = new Label("Z", Align.CENTER, Theme.FONT_BOLD);
-        this.labelZ.setBackground(Color.BLUE);
+        this.labelZ.setBackground(Colors.BLUE);
         this.fieldZ = new FloatField();
         addComponent(labelZ);
         addComponent(fieldZ);

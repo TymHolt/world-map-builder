@@ -8,7 +8,7 @@ import org.wmb.gui.input.KeyClickEvent;
 import org.wmb.gui.input.MouseClickEvent;
 import org.wmb.gui.input.MouseMoveEvent;
 import org.wmb.gui.input.MouseScrollEvent;
-import org.wmb.rendering.Color;
+import org.wmb.rendering.Colors;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +21,7 @@ public abstract class ContainerComponent extends Component {
 
     public ContainerComponent() {
         super();
-        setBackground(Color.TRANSPARENT);
+        setBackground(Colors.TRANSPARENT);
         this.componentList = new ArrayList<>();
     }
 

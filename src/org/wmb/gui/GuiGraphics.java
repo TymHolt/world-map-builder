@@ -13,7 +13,6 @@ import org.wmb.gui.icon.Icon;
 import org.wmb.rendering.*;
 import org.wmb.rendering.Color;
 
-import java.awt.Rectangle;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -273,12 +272,30 @@ public final class GuiGraphics {
             GL30.GL_UNSIGNED_SHORT, 0);
     }
 
-    public void fillQuadIcon(Rectangle bounds, Icon icon, Color color) {
-        correctViewport(bounds.x, bounds.y, bounds.width, bounds.height);
+    public void fillQuadIcon(Bounds bounds, Icon icon, Color color) {
+        correctViewport(bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getHeight());
         GL30.glBindTexture(GL30.GL_TEXTURE_2D, this.icons.getIconTexture(icon).getId());
         AllocatedShaderProgram.uniformColor(this.colorUl, color);
         GL30.glUniform1f(this.texturedFlagUl, 1.0f);
         GL30.glUniform1f(this.maskColorFactorUl, 1.0f);
+        GL30.glDrawElements(GL30.GL_TRIANGLES, this.quadMeshData.vertexCount,
+            GL30.GL_UNSIGNED_SHORT, 0);
+    }
+
+    public void fillQuadIcon(int x, int y, int width, int height, Icon icon) {
+        correctViewport(x, y, width, height);
+        GL30.glBindTexture(GL30.GL_TEXTURE_2D, this.icons.getIconTexture(icon).getId());
+        GL30.glUniform1f(this.texturedFlagUl, 1.0f);
+        GL30.glUniform1f(this.maskColorFactorUl, 0.0f);
+        GL30.glDrawElements(GL30.GL_TRIANGLES, this.quadMeshData.vertexCount,
+            GL30.GL_UNSIGNED_SHORT, 0);
+    }
+
+    public void fillQuadIcon(Bounds bounds, Icon icon) {
+        correctViewport(bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getHeight());
+        GL30.glBindTexture(GL30.GL_TEXTURE_2D, this.icons.getIconTexture(icon).getId());
+        GL30.glUniform1f(this.texturedFlagUl, 1.0f);
+        GL30.glUniform1f(this.maskColorFactorUl, 0.0f);
         GL30.glDrawElements(GL30.GL_TRIANGLES, this.quadMeshData.vertexCount,
             GL30.GL_UNSIGNED_SHORT, 0);
     }
