@@ -8,13 +8,16 @@ import org.lwjgl.opengl.GL30;
 import org.wmb.Log;
 import org.wmb.WmbContext;
 import org.wmb.gui.Window;
-import org.wmb.gui.component.Component;
+import org.wmb.gui.component.IconSwitchComponent;
+import org.wmb.gui.component.container.ContainerComponent;
 import org.wmb.gui.component.sceneview3d.gizmos.Gizmo;
 import org.wmb.gui.component.sceneview3d.gizmos.GizmoAxis;
 import org.wmb.gui.component.sceneview3d.gizmos.GizmoRenderer;
 import org.wmb.gui.component.sceneview3d.gizmos.TranslationGizmo;
 import org.wmb.gui.data.Bounds;
 import org.wmb.gui.data.Position;
+import org.wmb.gui.data.Size;
+import org.wmb.gui.icon.Icon;
 import org.wmb.gui.input.*;
 import org.wmb.gui.GuiGraphics;
 import org.wmb.editor.Scene3d;
@@ -32,7 +35,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Objects;
 
-public final class SceneView3dComponent extends Component {
+public final class SceneView3dComponent extends ContainerComponent {
 
     private final WmbContext context;
     private AllocatedFramebuffer framebuffer;
@@ -46,6 +49,10 @@ public final class SceneView3dComponent extends Component {
     private final Camera camera;
     private boolean rotatingCamera;
     private final float fov;
+
+    private final IconSwitchComponent translationGizmoSwitch;
+    private final IconSwitchComponent rotationGizmoSwitch;
+    private final IconSwitchComponent scaleGizmoSwitch;
     private final TranslationGizmo translationGizmo;
     private Gizmo activeGizmo;
     private GizmoAxis hoveredAxis;
@@ -113,7 +120,40 @@ public final class SceneView3dComponent extends Component {
         this.lastHeight = -1;
         this.aspect = 1.0f;
         this.hoveredAxis = null;
-        this.activeGizmo = this.translationGizmo;
+        this.activeGizmo = null;
+
+        this.translationGizmoSwitch = new IconSwitchComponent(Icon.GIZMO_TRANSLATE);
+        this.rotationGizmoSwitch = new IconSwitchComponent(Icon.GIZMO_ROTATE);
+        this.scaleGizmoSwitch = new IconSwitchComponent(Icon.GIZMO_SCALE);
+
+        this.translationGizmoSwitch.setSwitchListener(switchComponent -> {
+            if (switchComponent.isSelected()) {
+                this.activeGizmo = translationGizmo;
+                this.rotationGizmoSwitch.setSelected(false);
+                this.scaleGizmoSwitch.setSelected(false);
+            } else if(this.activeGizmo == translationGizmo)
+                this.activeGizmo = null;
+        });
+        this.translationGizmoSwitch.setUnselectedGrayScaleMode(true);
+        addComponent(this.translationGizmoSwitch);
+
+        this.rotationGizmoSwitch.setSwitchListener(switchComponent -> {
+            if (switchComponent.isSelected()) {
+                this.translationGizmoSwitch.setSelected(false);
+                this.scaleGizmoSwitch.setSelected(false);
+            }
+        });
+        this.rotationGizmoSwitch.setUnselectedGrayScaleMode(true);
+        addComponent(this.rotationGizmoSwitch);
+
+        this.scaleGizmoSwitch.setSwitchListener(switchComponent -> {
+            if (switchComponent.isSelected()) {
+                this.translationGizmoSwitch.setSelected(false);
+                this.rotationGizmoSwitch.setSelected(false);
+            }
+        });
+        this.scaleGizmoSwitch.setUnselectedGrayScaleMode(true);
+        addComponent(this.scaleGizmoSwitch);
     }
 
     private void resizeFramebuffer(int width, int height) throws OpenGLStateException {
@@ -212,10 +252,30 @@ public final class SceneView3dComponent extends Component {
 
     @Override
     public void draw(GuiGraphics graphics) {
-        super.draw(graphics);
         final Bounds bounds = getInnerBounds();
         graphics.fillQuadTexture(bounds, this.framebuffer);
         graphics.fillQuadTexture(bounds, this.gizmoFramebuffer);
+        super.draw(graphics);
+    }
+
+    @Override
+    public void setBounds(int x, int y, int width, int height) {
+        super.setBounds(x, y, width, height);
+
+        final Size gizmoSize = this.translationGizmoSwitch.getRequestedSize();
+        final int gizmoWidth = gizmoSize.getWidth();
+        final int gizmoHeight = gizmoSize.getHeight();
+        final int gizmoX = x + gizmoWidth;
+        int currentY = y + gizmoHeight;
+
+        this.translationGizmoSwitch.setBounds(gizmoX, currentY, gizmoWidth, gizmoHeight);
+        currentY += gizmoHeight * 2;
+
+        this.rotationGizmoSwitch.setBounds(gizmoX, currentY, gizmoWidth, gizmoHeight);
+        currentY += gizmoHeight * 2;
+
+        this.scaleGizmoSwitch.setBounds(gizmoX, currentY, gizmoWidth, gizmoHeight);
+        currentY += gizmoHeight * 2;
     }
 
     @Override
@@ -256,6 +316,8 @@ public final class SceneView3dComponent extends Component {
 
     @Override
     public void onMouseClick(MouseClickEvent event) {
+        super.onMouseClick(event);
+
         if (event.button == MouseButton.MIDDLE)
             this.rotatingCamera = event.action == ClickAction.PRESS;
 
@@ -288,7 +350,7 @@ public final class SceneView3dComponent extends Component {
 
     @Override
     public Cursor getCursor(int mouseX, int mouseY) {
-        return this.hoveredAxis != null ? Cursor.HAND : Cursor.DEFAULT;
+        return this.hoveredAxis != null ? Cursor.HAND : super.getCursor(mouseX, mouseY);
     }
 
     private void getPixelColor(int x, int y, DynamicColor color) {

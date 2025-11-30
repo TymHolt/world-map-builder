@@ -1,6 +1,5 @@
 package org.wmb.gui.component.sceneview3d.gizmos;
 
-import org.bfg.Context;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
@@ -15,12 +14,13 @@ import org.wmb.rendering.AllocatedMeshData;
 import org.wmb.rendering.Camera;
 import org.wmb.rendering.MeshDataDescription;
 import org.wmb.rendering.OpenGLStateException;
+import org.wmb.rendering.math.ObjectPosition;
 
 public final class TranslationGizmo implements Gizmo {
 
     private final AllocatedMeshData meshData;
     private GizmoAxis draggingAxis;
-    private AAPlane draggingPlane;
+    private GizmoAAPlane draggingPlane;
 
     public TranslationGizmo() throws OpenGLStateException {
         try {
@@ -238,7 +238,7 @@ public final class TranslationGizmo implements Gizmo {
         if (event.button == MouseButton.LEFT) {
             if (event.action == ClickAction.PRESS && hoveredAxis != null) {
                 this.draggingAxis = hoveredAxis;
-                this.draggingPlane = getBestDraggingPlane(this.draggingAxis, lookVector);
+                this.draggingPlane = GizmoAAPlane.getBestPlane(this.draggingAxis, lookVector);
             } else {
                 this.draggingAxis = null;
                 this.draggingPlane = null;
@@ -246,75 +246,31 @@ public final class TranslationGizmo implements Gizmo {
         }
     }
 
-    private AAPlane getBestDraggingPlane(GizmoAxis axis, Vector3f lookVector) {
-        final float xzFactor = Math.max(lookVector.dot(0.0f, 1.0f, 0.0f),
-            lookVector.dot(0.0f, -1.0f, 0.0f));
-        final float xyFactor = Math.max(lookVector.dot(0.0f, 0.0f, 1.0f),
-            lookVector.dot(0.0f, 0.0f, -1.0f));
-        final float yzFactor = Math.max(lookVector.dot(1.0f, 0.0f, 0.0f),
-            lookVector.dot(-1.0f, 0.0f, 0.0f));
-
-        return switch (axis) {
-            case X -> xzFactor > xyFactor ? AAPlane.XZ : AAPlane.XY;
-            case Y -> xyFactor > yzFactor ? AAPlane.XY : AAPlane.YZ;
-            case Z -> xzFactor > yzFactor ? AAPlane.XZ : AAPlane.YZ;
-        };
-    }
-
     @Override
     public void handleMouseMove(Vector4f mouseRay, WmbContext context, Camera camera) {
-        if (this.draggingAxis != null && this.draggingPlane != null) {
-            final Element selectedElement = context.getSelectedElement();
-            if (selectedElement instanceof Object3dElement) {
-                final Object3dElement object3dElement = (Object3dElement) selectedElement;
-                float planePosition = 0.0f;
+        if (this.draggingAxis == null || this.draggingPlane == null)
+            return;
 
-                switch (this.draggingPlane) {
-                    case XY -> planePosition = object3dElement.getTransform().getPosition().getZ();
-                    case XZ -> planePosition = object3dElement.getTransform().getPosition().getY();
-                    case YZ -> planePosition = object3dElement.getTransform().getPosition().getX();
-                }
+        final Element selectedElement = context.getSelectedElement();
+        if (!(selectedElement instanceof Object3dElement))
+            return;
 
-                final Vector3f intersection = intersect(mouseRay, this.draggingPlane,
-                    planePosition, camera);
-                switch (this.draggingAxis) {
-                    case X -> object3dElement.getTransform().getPosition().setX(intersection.x);
-                    case Y -> object3dElement.getTransform().getPosition().setY(intersection.y);
-                    case Z -> object3dElement.getTransform().getPosition().setZ(intersection.z);
-                }
+        final Object3dElement object3dElement = (Object3dElement) selectedElement;
+        final ObjectPosition objectPosition = object3dElement.getTransform().getPosition();
+        final Vector3f planePosition = new Vector3f(
+            objectPosition.getX(),
+            objectPosition.getY(),
+            objectPosition.getZ()
+        );
 
-                context.getGui().notifyReadScene();
-            }
-        }
-    }
-
-    private Vector3f intersect(Vector4f ray, AAPlane plane, float planePosition, Camera camera) {
-        final Vector3f intersection = new Vector3f();
-        switch (plane) {
-            case XZ:
-                final float yDiff = planePosition - camera.getY();
-                final float ySteps = yDiff / ray.y;
-                intersection.x = camera.getX() + ray.x * ySteps;
-                intersection.y = planePosition;
-                intersection.z = camera.getZ() + ray.z * ySteps;
-                break;
-            case XY:
-                final float zDiff = planePosition - camera.getZ();
-                final float zSteps = zDiff / ray.z;
-                intersection.x = camera.getX() + ray.x * zSteps;
-                intersection.y = camera.getY() + ray.y * zSteps;
-                intersection.z = planePosition;
-                break;
-            case YZ:
-                final float xDiff = planePosition - camera.getX();
-                final float xSteps = xDiff / ray.x;
-                intersection.x = planePosition;
-                intersection.y = camera.getY() + ray.y * xSteps;
-                intersection.z = camera.getZ() + ray.z * xSteps;
-                break;
+        final Vector3f intersection = this.draggingPlane.intersect(mouseRay, planePosition, camera);
+        switch (this.draggingAxis) {
+            case X -> objectPosition.setX(intersection.x);
+            case Y -> objectPosition.setY(intersection.y);
+            case Z -> objectPosition.setZ(intersection.z);
         }
 
-        return intersection;
+        context.getGui().notifyReadScene();
     }
 
     @Override
@@ -334,11 +290,5 @@ public final class TranslationGizmo implements Gizmo {
 
     public void delete() {
         this.meshData.delete();
-    }
-
-    private enum AAPlane {
-        XZ,
-        XY,
-        YZ
     }
 }
