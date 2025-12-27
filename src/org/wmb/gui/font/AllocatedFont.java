@@ -29,7 +29,7 @@ public class AllocatedFont {
                     if (glyph != null)
                         glyph.delete();
 
-                throw new OpenGLStateException("(Glyph) " + exception.getMessage());
+                throw exception;
             }
         }
     }

@@ -29,7 +29,7 @@ public final class AllocatedIcons {
                     iconTexture.delete();
             }
 
-            throw new IOException("(Icons) " + exception.getMessage());
+            throw exception;
         }
     }
 

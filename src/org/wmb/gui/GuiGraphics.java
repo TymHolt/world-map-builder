@@ -21,6 +21,8 @@ import java.util.Objects;
 
 public final class GuiGraphics {
 
+    private static final String TAG = "GuiGraphics";
+
     private static class CachedFont {
 
         final AllocatedFont allocatedFont;
@@ -69,7 +71,8 @@ public final class GuiGraphics {
                 "/org/wmb/gui/gui_graphics_quad_fs.glsl"
             );
         } catch (IOException exception) {
-            throw new IOException("(QuadShaderProgram) " + exception.getMessage());
+            Log.error(TAG, "Quad shader program failed to load");
+            throw exception;
         }
 
         try {
@@ -79,14 +82,16 @@ public final class GuiGraphics {
             this.maskColorFactorUl = quadShaderProgram.getUniformLocation("u_mask_color_factor");
         } catch (OpenGLStateException exception) {
             this.quadShaderProgram.delete();
-            throw new OpenGLStateException("(QuadShaderProgram) " + exception.getMessage());
+            Log.error(TAG, "Quad shader program failed to resolve uniform location");
+            throw exception;
         }
 
         try {
             this.icons = new AllocatedIcons();
         } catch (IOException exception) {
             this.quadShaderProgram.delete();
-            throw new IOException("(Icons) " + exception.getMessage());
+            Log.error(TAG, "Icons failed to load");
+            throw exception;
         }
 
         try {
@@ -111,7 +116,8 @@ public final class GuiGraphics {
         } catch(OpenGLStateException exception) {
             this.quadShaderProgram.delete();
             this.icons.delete();
-            throw new OpenGLStateException("(QuadMeshData) " + exception.getMessage());
+            Log.error(TAG, "Quad mesh data failed to load");
+            throw exception;
         }
 
         try {
@@ -120,7 +126,8 @@ public final class GuiGraphics {
             this.quadShaderProgram.delete();
             this.icons.delete();
             this.quadMeshData.delete();
-            throw new OpenGLStateException("(Framebuffer) " + exception.getMessage());
+            Log.error(TAG, "Framebuffer failed to load");
+            throw exception;
         }
 
         this.cachedFonts = new HashMap<>();
@@ -139,8 +146,10 @@ public final class GuiGraphics {
             try {
                 resizeFramebuffer(framebufferWidth, framebufferHeight);
             } catch (OpenGLStateException exception) {
-                Log.debug("New framebuffer size: " + framebufferWidth + "x" + framebufferHeight);
-                throw new OpenGLStateException("(Framebuffer resize)" + exception);
+                Log.error(TAG, "Framebuffer resize failed");
+                Log.debug(TAG, "New framebuffer size: " + framebufferWidth + "x" +
+                    framebufferHeight);
+                throw exception;
             }
 
             this.lastWidth = windowWidth;
@@ -153,7 +162,8 @@ public final class GuiGraphics {
                 this.cachedFonts.put(fontDefinition, new CachedFont(allocatedFont));
             }
         } catch (OpenGLStateException exception) {
-            throw new OpenGLStateException("(Font allocation)" + exception);
+            Log.error(TAG, "Failed to load font definition");
+            throw exception;
         }
 
         this.fontAllocationQueue.clear();

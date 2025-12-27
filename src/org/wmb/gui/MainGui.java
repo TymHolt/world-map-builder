@@ -1,5 +1,6 @@
 package org.wmb.gui;
 
+import org.wmb.Log;
 import org.wmb.editor.element.Element;
 import org.wmb.gui.data.DynamicSize;
 import org.wmb.gui.data.Size;
@@ -20,6 +21,8 @@ import java.util.Objects;
 
 public final class MainGui {
 
+    private static final String TAG = "MainGui";
+
     private final WmbContext context;
     private final GuiGraphics graphics;
     private final CompassContainerComponent container;
@@ -33,14 +36,16 @@ public final class MainGui {
         try {
             this.graphics = new GuiGraphics(this.context, 2);
         } catch (IOException exception) {
-            throw new IOException("(GuiGraphics) " + exception.getMessage());
+            Log.error(TAG, "Graphics failed to load");
+            throw exception;
         }
 
         try {
             this.sceneViewComponent = new SceneView3dComponent(this.context);
         } catch (IOException exception) {
             this.graphics.delete();
-            throw new IOException("(SceneViewComponent) " + exception.getMessage());
+            Log.error(TAG, "SceneView3d failed to load");
+            throw exception;
         }
 
         this.container = new CompassContainerComponent();
@@ -116,12 +121,18 @@ public final class MainGui {
         if (count++ % 100 == 0)
             recalculateLayout();
 
-        this.sceneViewComponent.renderScene(this.context.getScene());
+        try {
+            this.sceneViewComponent.renderScene(this.context.getScene());
+        } catch (OpenGLStateException exception) {
+            Log.error(TAG, "Exception during scene view rendering");
+            throw exception;
+        }
 
         try {
             this.graphics.preparePipeline();
         } catch (OpenGLStateException exception) {
-            throw new OpenGLStateException("(Prepare GuiGraphics)" + exception.getMessage());
+            Log.error(TAG, "Exception during GUI graphics pipeline prepare");
+            throw exception;
         }
 
         this.graphics.clear();

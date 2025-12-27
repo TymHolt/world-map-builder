@@ -2,17 +2,18 @@ package org.wmb.gui.component.sceneview3d.gizmos;
 
 import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL30;
+import org.wmb.Log;
 import org.wmb.editor.element.Object3dElement.Object3dElement;
 import org.wmb.rendering.AllocatedMeshData;
 import org.wmb.rendering.AllocatedShaderProgram;
 import org.wmb.rendering.Camera;
-import org.wmb.rendering.MeshDataDescription;
 import org.wmb.rendering.OpenGLStateException;
-import org.wmb.rendering.math.ObjectPosition;
 
 import java.io.IOException;
 
 public final class GizmoRenderer {
+
+    private static final String TAG = "GizmoRenderer";
 
     private final AllocatedShaderProgram gizmoShaderProgram;
     private final int transformUl;
@@ -26,7 +27,8 @@ public final class GizmoRenderer {
                 "/org/wmb/gui/component/sceneview3d/gizmos/gizmo_fs.glsl"
             );
         } catch (IOException exception) {
-            throw new IOException("(GizmoShaderProgram) " + exception.getMessage());
+            Log.error(TAG, "Shader program failed to load");
+            throw exception;
         }
 
         try {
@@ -35,7 +37,8 @@ public final class GizmoRenderer {
             this.projectionUl = gizmoShaderProgram.getUniformLocation("u_projection");
         } catch (OpenGLStateException exception) {
             this.gizmoShaderProgram.delete();
-            throw new OpenGLStateException("(GizmoShaderProgram) " + exception.getMessage());
+            Log.error(TAG, "Shader program failed to resolve uniform location");
+            throw exception;
         }
     }
 
@@ -65,16 +68,6 @@ public final class GizmoRenderer {
 
         GL30.glBindVertexArray(0);
     }
-
-    /*public void renderTranslationGizmo(ObjectPosition position) {
-        GL30.glBindVertexArray(this.translationGizmoMeshData.getId());
-        AllocatedShaderProgram.uniformMat4(this.transformUl, position.getAsMatrix());
-
-        GL30.glDrawElements(GL30.GL_TRIANGLES, this.translationGizmoMeshData.vertexCount,
-            GL30.GL_UNSIGNED_SHORT, 0);
-
-        GL30.glBindVertexArray(0);
-    }*/
 
     public void resetPipeline() {
         GL30.glUseProgram(0);

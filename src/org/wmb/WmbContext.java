@@ -6,7 +6,6 @@ import org.wmb.editor.element.Object3dElement.Object3dElement;
 import org.wmb.gui.MainGui;
 import org.wmb.gui.Window;
 import org.wmb.gui.data.Size;
-import org.wmb.rendering.OpenGLStateException;
 
 import java.awt.*;
 import java.io.IOException;
@@ -14,6 +13,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public final class WmbContext {
+
+    private static final String TAG = "WmbContext";
 
     private Scene3d scene;
     private Element selectedElement;
@@ -35,7 +36,8 @@ public final class WmbContext {
             this.gui = new MainGui(this);
         } catch (IOException exception) {
             this.window.close();
-            throw new IOException("(MainGui) " + exception.getMessage());
+            Log.error(TAG, "Main GUI failed to load");
+            throw exception;
         }
 
         addContext(this);
@@ -65,7 +67,7 @@ public final class WmbContext {
     private int lastWidth = -1;
     private int lastHeight = -1;
 
-    private void update() {
+    private void update() throws IOException {
         if (!this.active)
             return;
 
@@ -90,13 +92,14 @@ public final class WmbContext {
 
         try {
             this.gui.draw();
-        } catch (OpenGLStateException exception) {
+        } catch (IOException exception) {
             this.active = false;
             this.window.makeContextCurrent();
             this.gui.delete();
             this.window.close();
             removeContext(this);
-            throw new RuntimeException(exception);
+            Log.error(TAG, "Exception during draw call");
+            throw exception;
         }
 
         this.window.update();
@@ -104,7 +107,7 @@ public final class WmbContext {
 
     private static final List<WmbContext> contextList = new ArrayList<>();
 
-    static void updateAll() {
+    static void updateAll() throws IOException {
         List<WmbContext> listCopy;
         synchronized (WmbContext.contextList) {
             listCopy = new ArrayList<>(contextList);

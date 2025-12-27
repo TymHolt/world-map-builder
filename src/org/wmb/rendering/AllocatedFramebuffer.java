@@ -31,7 +31,7 @@ public final class AllocatedFramebuffer implements ITexture {
         if (this.textureId < 1) {
             GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, 0);
             GL30.glDeleteFramebuffers(this.fboId);
-            throw new OpenGLStateException("Texture creation failed");
+            throw new OpenGLStateException("FBO Texture creation failed");
         }
 
         GL30.glBindTexture(GL30.GL_TEXTURE_2D, this.textureId);

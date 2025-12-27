@@ -1,7 +1,6 @@
 package org.wmb.gui.component.sceneview3d;
 
 import org.joml.Matrix4f;
-import org.joml.Vector3f;
 import org.joml.Vector4f;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL30;
@@ -37,6 +36,8 @@ import java.util.Objects;
 
 public final class SceneView3dComponent extends ContainerComponent {
 
+    private static final String TAG = "SceneView3dComponent";
+
     private final WmbContext context;
     private AllocatedFramebuffer framebuffer;
     private AllocatedFramebuffer gizmoFramebuffer;
@@ -65,14 +66,16 @@ public final class SceneView3dComponent extends ContainerComponent {
         try {
             this.framebuffer = new AllocatedFramebuffer(2, 2);
         } catch (OpenGLStateException exception) {
-            throw new OpenGLStateException("(Framebuffer) " + exception.getMessage());
+            Log.error(TAG, "Object3dElement framebuffer failed to load");
+            throw exception;
         }
 
         try {
             this.gizmoFramebuffer = new AllocatedFramebuffer(2, 2);
         } catch (OpenGLStateException exception) {
             this.framebuffer.delete();
-            throw new OpenGLStateException("(GizmoFramebuffer) " + exception.getMessage());
+            Log.error(TAG, "Gizmo framebuffer failed to load");
+            throw exception;
         }
 
         try {
@@ -80,7 +83,8 @@ public final class SceneView3dComponent extends ContainerComponent {
         } catch (IOException exception) {
             this.gizmoFramebuffer.delete();
             this.framebuffer.delete();
-            throw new OpenGLStateException("(GizmoRenderer) " + exception.getMessage());
+            Log.error(TAG, "Gizmo renderer failed to load");
+            throw exception;
         }
 
         try {
@@ -89,7 +93,8 @@ public final class SceneView3dComponent extends ContainerComponent {
             this.gizmoFramebuffer.delete();
             this.framebuffer.delete();
             this.gizmoRenderer.delete();
-            throw new OpenGLStateException("(Object3dElementRenderer) " + exception.getMessage());
+            Log.error(TAG, "Object3dElement renderer failed to load");
+            throw exception;
         }
 
         try {
@@ -99,7 +104,8 @@ public final class SceneView3dComponent extends ContainerComponent {
             this.framebuffer.delete();
             this.object3dElementRenderer.delete();
             this.gizmoRenderer.delete();
-            throw new IOException("(GridLineRenderer) " + exception.getMessage());
+            Log.error(TAG, "Grid line renderer failed to load");
+            throw exception;
         }
 
         try {
@@ -110,7 +116,8 @@ public final class SceneView3dComponent extends ContainerComponent {
             this.object3dElementRenderer.delete();
             this.gizmoRenderer.delete();
             this.gridLineRenderer.delete();
-            throw new OpenGLStateException("(TranslationGizmo) " + exception.getMessage());
+            Log.error(TAG, "Translation gizmo failed to load");
+            throw exception;
         }
 
         this.fov = 70.0f;
@@ -161,7 +168,8 @@ public final class SceneView3dComponent extends ContainerComponent {
         try {
             newFramebuffer = new AllocatedFramebuffer(width, height);
         } catch (OpenGLStateException exception) {
-            throw new OpenGLStateException("(Framebuffer) " + exception.getMessage());
+            Log.error(TAG, "Object3dElement framebuffer failed to load");
+            throw exception;
         }
 
         final AllocatedFramebuffer newGizmoFramebuffer;
@@ -169,7 +177,8 @@ public final class SceneView3dComponent extends ContainerComponent {
             newGizmoFramebuffer = new AllocatedFramebuffer(width, height);
         } catch (OpenGLStateException exception) {
             newFramebuffer.delete();
-            throw new OpenGLStateException("(GizmoFramebuffer) " + exception.getMessage());
+            Log.error(TAG, "Gizmo framebuffer failed to load");
+            throw exception;
         }
 
         this.framebuffer.delete();
@@ -186,8 +195,10 @@ public final class SceneView3dComponent extends ContainerComponent {
             try {
                 resizeFramebuffer(innerBoundsWidth, innerBoundsHeight);
             } catch (OpenGLStateException exception) {
-                Log.debug("New framebuffer size: " + innerBoundsWidth + "x" + innerBoundsHeight);
-                throw new OpenGLStateException("(Prepare GuiGraphics)" + exception);
+                Log.error(TAG, "Framebuffer resize failed");
+                Log.debug(TAG, "New framebuffer size: " + innerBoundsWidth + "x" +
+                    innerBoundsHeight);
+                throw exception;
             }
 
             this.lastWidth = innerBoundsWidth;

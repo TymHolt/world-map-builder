@@ -1,6 +1,7 @@
 package org.wmb.gui.component.sceneview3d;
 
 import org.lwjgl.opengl.GL30;
+import org.wmb.Log;
 import org.wmb.rendering.AllocatedLineData;
 import org.wmb.rendering.AllocatedShaderProgram;
 import org.wmb.rendering.Camera;
@@ -12,6 +13,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 final class GridLineRenderer {
+
+    private static final String TAG = "GridLineRenderer";
 
     private final AllocatedShaderProgram gridLineShaderProgram;
     private final AllocatedLineData lineData;
@@ -29,7 +32,8 @@ final class GridLineRenderer {
                 "/org/wmb/gui/component/sceneview3d/grid_line_fs.glsl"
             );
         } catch (IOException exception) {
-            throw new IOException("(GridLineShaderProgram) " + exception.getMessage());
+            Log.error(TAG, "Shader program failed to load");
+            throw exception;
         }
 
         try {
@@ -38,14 +42,16 @@ final class GridLineRenderer {
             this.colorUl = this.gridLineShaderProgram.getUniformLocation("u_color");
         } catch (OpenGLStateException exception) {
             this.gridLineShaderProgram.delete();
-            throw new OpenGLStateException("(GridLineShaderProgram) " + exception.getMessage());
+            Log.error(TAG, "Shader program failed to resolve uniform location");
+            throw exception;
         }
 
         try {
             this.lineData = new AllocatedLineData(generateLineData(size));
         } catch (OpenGLStateException exception) {
             this.gridLineShaderProgram.delete();
-            throw new OpenGLStateException("(Line Data) " + exception.getMessage());
+            Log.error(TAG, "Line data failed to load");
+            throw exception;
         }
     }
 

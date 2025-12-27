@@ -1,11 +1,14 @@
 package org.wmb.editor.element.Object3dElement;
 
 import org.lwjgl.opengl.GL30;
+import org.wmb.Log;
 import org.wmb.rendering.*;
 
 import java.io.IOException;
 
 public class Object3dElementRenderer {
+
+    private static final String TAG = "Object3dElementRenderer";
 
     private final AllocatedShaderProgram object3dShaderProgram;
     private final int textureUl;
@@ -25,7 +28,8 @@ public class Object3dElementRenderer {
                 "/org/wmb/editor/element/Object3dElement/object_3d_renderer_fs.glsl"
             );
         } catch (IOException exception) {
-            throw new IOException("(Object3dShaderProgram) " + exception.getMessage());
+            Log.error(TAG, "Shader program failed to load");
+            throw exception;
         }
 
         try {
@@ -38,7 +42,8 @@ public class Object3dElementRenderer {
                 "u_highlight_factor");
         } catch (OpenGLStateException exception) {
             this.object3dShaderProgram.delete();
-            throw new OpenGLStateException("(Object3dShaderProgram) " + exception.getMessage());
+            Log.error(TAG, "Shader program failed to resolve uniform location");
+            throw exception;
         }
 
         try {
@@ -62,7 +67,8 @@ public class Object3dElementRenderer {
             this.testMeshData = new AllocatedMeshData(meshDataDescription);
         } catch(OpenGLStateException exception) {
             this.object3dShaderProgram.delete();
-            throw new OpenGLStateException("(TestMeshData) " + exception.getMessage());
+            Log.error(TAG, "Test mesh data failed to load");
+            throw exception;
         }
 
         try {
@@ -70,7 +76,8 @@ public class Object3dElementRenderer {
         } catch (OpenGLStateException exception) {
             this.object3dShaderProgram.delete();
             this.testMeshData.delete();
-            throw new OpenGLStateException("(TestTexture) " + exception.getMessage());
+            Log.error(TAG, "Test texture failed to load");
+            throw exception;
         }
     }
 

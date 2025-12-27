@@ -3,7 +3,7 @@ package org.wmb.gui.component;
 import org.wmb.gui.GuiGraphics;
 import org.wmb.gui.data.DynamicSize;
 
-public final class VerticalPadding extends Component{
+public final class VerticalPadding extends Component {
 
     private final int padding;
 

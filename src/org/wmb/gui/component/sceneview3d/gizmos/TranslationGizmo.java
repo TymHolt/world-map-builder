@@ -3,6 +3,7 @@ package org.wmb.gui.component.sceneview3d.gizmos;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
+import org.wmb.Log;
 import org.wmb.WmbContext;
 import org.wmb.editor.element.Element;
 import org.wmb.editor.element.Object3dElement.Object3dElement;
@@ -17,6 +18,8 @@ import org.wmb.rendering.OpenGLStateException;
 import org.wmb.rendering.math.ObjectPosition;
 
 public final class TranslationGizmo implements Gizmo {
+
+    private static final String TAG = "TranslationGizmo";
 
     private final AllocatedMeshData meshData;
     private GizmoAxis draggingAxis;
@@ -225,7 +228,8 @@ public final class TranslationGizmo implements Gizmo {
             });
             this.meshData = new AllocatedMeshData(meshDataDescription);
         } catch(OpenGLStateException exception) {
-            throw new OpenGLStateException("(TranslationGizmoMeshData) " + exception.getMessage());
+            Log.error(TAG, "Mesh data failed to load");
+            throw exception;
         }
 
         this.draggingAxis = null;

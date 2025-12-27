@@ -39,7 +39,7 @@ public final class AllocatedMeshData {
                         GL30.glDeleteBuffers(vboId);
                 }
 
-                throw new OpenGLStateException("(Data Array) " + exception.getMessage());
+                throw exception;
             }
         }
 
@@ -56,7 +56,7 @@ public final class AllocatedMeshData {
                     GL30.glDeleteBuffers(vboId);
             }
 
-            throw new OpenGLStateException("(Index data) " + exception.getMessage());
+            throw exception;
         }
 
         for (int index = 0; index < this.vboIds.length - 1; index++)

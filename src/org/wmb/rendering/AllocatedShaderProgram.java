@@ -11,6 +11,8 @@ import java.util.Objects;
 
 public final class AllocatedShaderProgram {
 
+    private static final String TAG = "AllocatedShaderProgram";
+
     private final int programId;
 
     public static AllocatedShaderProgram fromResources(String vertexShaderPath,
@@ -22,14 +24,16 @@ public final class AllocatedShaderProgram {
         try {
             vertexShaderSource = ResourceLoader.loadText(vertexShaderPath);
         } catch (IOException exception) {
-            throw new IOException("(Vertex Shader) " + exception.getMessage());
+            Log.error(TAG, "Vertex shader failed to load from resource");
+            throw exception;
         }
 
         final String fragmentShaderSource;
         try {
             fragmentShaderSource = ResourceLoader.loadText(fragmentShaderPath);
         } catch (IOException exception) {
-            throw new IOException("(Fragment shader) " + exception.getMessage());
+            Log.error(TAG, "Fragment shader failed to load from resource");
+            throw exception;
         }
 
         return new AllocatedShaderProgram(vertexShaderSource, fragmentShaderSource);
@@ -49,7 +53,8 @@ public final class AllocatedShaderProgram {
             vertexShaderId = loadShader(GL30.GL_VERTEX_SHADER, vertexShaderSource);
         } catch(OpenGLStateException exception) {
             GL30.glDeleteProgram(this.programId);
-            throw new OpenGLStateException("(Vertex Shader) " + exception.getMessage());
+            Log.error(TAG, "Vertex shader failed to load");
+            throw exception;
         }
         GL30.glAttachShader(this.programId, vertexShaderId);
 
@@ -60,13 +65,15 @@ public final class AllocatedShaderProgram {
             GL30.glDetachShader(this.programId, vertexShaderId);
             GL30.glDeleteShader(vertexShaderId);
             GL30.glDeleteProgram(this.programId);
-            throw new OpenGLStateException("(Fragment Shader) " + exception.getMessage());
+            Log.error(TAG, "Fragment shader failed to load");
+            throw exception;
         }
         GL30.glAttachShader(this.programId, fragmentShaderId);
 
         GL30.glLinkProgram(this.programId);
         if (GL30.glGetProgrami(this.programId, GL30.GL_LINK_STATUS) == 0) {
-            Log.debug("Program info log:\n" + GL30.glGetProgramInfoLog(this.programId));
+            final String programInfoLog = GL30.glGetProgramInfoLog(this.programId);
+            Log.debug(TAG, "Program info log:\n" + programInfoLog);
             GL30.glDetachShader(this.programId, vertexShaderId);
             GL30.glDetachShader(this.programId, fragmentShaderId);
             GL30.glDeleteShader(vertexShaderId);
@@ -83,7 +90,8 @@ public final class AllocatedShaderProgram {
 
         GL30.glValidateProgram(this.programId);
         if (GL30.glGetProgrami(this.programId, GL30.GL_VALIDATE_STATUS) == 0) {
-            Log.debug("Program info log:\n" + GL30.glGetProgramInfoLog(this.programId));
+            final String programInfoLog = GL30.glGetProgramInfoLog(this.programId);
+            Log.debug(TAG, "Program info log:\n" + programInfoLog);
             GL30.glDeleteProgram(this.programId);
             throw new OpenGLStateException("Program validation failed");
         }
@@ -97,7 +105,8 @@ public final class AllocatedShaderProgram {
         GL30.glShaderSource(shaderId, source);
         GL30.glCompileShader(shaderId);
         if (GL30.glGetShaderi(shaderId, GL30.GL_COMPILE_STATUS) == 0) {
-            Log.debug("Shader info log:\n" + GL30.glGetShaderInfoLog(shaderId));
+            final String shaderInfoLog = GL30.glGetShaderInfoLog(shaderId);
+            Log.debug(TAG, "Shader info log:\n" + shaderInfoLog);
             GL30.glDeleteShader(shaderId);
             throw new OpenGLStateException("Shader compilation failed");
         }
@@ -109,8 +118,10 @@ public final class AllocatedShaderProgram {
         Objects.requireNonNull(name, "Name is null");
 
         final int uniformLocation = GL30.glGetUniformLocation(this.programId, name);
-        if (uniformLocation == -1)
+        if (uniformLocation == -1) {
+            Log.debug(TAG, "Uniform name not resolved: " + name);
             throw new OpenGLStateException("No uniform location for id " + name);
+        }
 
         return uniformLocation;
     }

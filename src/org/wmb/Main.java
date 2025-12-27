@@ -15,10 +15,8 @@ public final class Main {
         try {
             handleArguments(args);
 
-            if (isDebugEnabled()) {
-                Log.debug("Debug enabled");
-                Log.debug("Running max UPS: " + Main.maxUps);
-            }
+            Log.debug("Debug enabled");
+            Log.debug("Running max UPS: " + Main.maxUps);
 
             // TODO Multiple context lead to JVM natives crash
             new WmbContext();
