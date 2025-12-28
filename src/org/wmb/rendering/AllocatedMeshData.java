@@ -2,12 +2,22 @@ package org.wmb.rendering;
 
 import org.lwjgl.opengl.GL30;
 import org.lwjgl.system.MemoryUtil;
+import org.wmb.loading.ResourceLoader;
+import org.wmb.loading.obj.ObjFileLoader;
 
+import java.io.IOException;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 import java.util.List;
+import java.util.Objects;
 
 public final class AllocatedMeshData {
+
+    public static AllocatedMeshData fromResource(String objPath) throws IOException {
+        Objects.requireNonNull(objPath, "OBJ path is null");
+        final String objSource = ResourceLoader.loadText(objPath);
+        return new AllocatedMeshData(ObjFileLoader.load(objSource).toMeshDataDescription());
+    }
 
     private final int vaoId;
     private final int[] vboIds;

@@ -4,7 +4,7 @@ import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL30;
 import org.lwjgl.system.MemoryStack;
 import org.wmb.Log;
-import org.wmb.ResourceLoader;
+import org.wmb.loading.ResourceLoader;
 
 import java.io.IOException;
 import java.util.Objects;

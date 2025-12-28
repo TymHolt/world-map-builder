@@ -2,6 +2,7 @@ package org.wmb.editor.element.Object3dElement;
 
 import org.lwjgl.opengl.GL30;
 import org.wmb.Log;
+import org.wmb.loading.ResourceLoader;
 import org.wmb.rendering.*;
 
 import java.io.IOException;
@@ -47,33 +48,18 @@ public class Object3dElementRenderer {
         }
 
         try {
-            final MeshDataDescription meshDataDescription = new MeshDataDescription();
-            meshDataDescription.addDataArray(3, new float[] {
-                -0.5f, 0.5f, 0.0f,
-                -0.5f, -0.5f, 0.0f,
-                0.5f, -0.5f, 0.0f,
-                0.5f, 0.5f, 0.0f
-            });
-            meshDataDescription.addDataArray(2, new float[] {
-                0.0f, 0.0f,
-                0.0f, 1.0f,
-                1.0f, 1.0f,
-                1.0f, 0.0f
-            });
-            meshDataDescription.setIndexArray(new short[] {
-                0, 1, 2,
-                2, 3, 0
-            });
-            this.testMeshData = new AllocatedMeshData(meshDataDescription);
-        } catch(OpenGLStateException exception) {
+            final String path = "/org/wmb/editor/element/Object3dElement/cube.obj";
+            this.testMeshData = AllocatedMeshData.fromResource(path);
+        } catch(IOException exception) {
             this.object3dShaderProgram.delete();
             Log.error(TAG, "Test mesh data failed to load");
             throw exception;
         }
 
         try {
-            this.testTexture = new AllocatedTexture(TextureUtil.getDebugBufferedImage());
-        } catch (OpenGLStateException exception) {
+            final String path = "/org/wmb/editor/element/Object3dElement/cube_texture.png";
+            this.testTexture = new AllocatedTexture(ResourceLoader.loadImage(path));
+        } catch (IOException exception) {
             this.object3dShaderProgram.delete();
             this.testMeshData.delete();
             Log.error(TAG, "Test texture failed to load");

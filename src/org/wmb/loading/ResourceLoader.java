@@ -1,4 +1,4 @@
-package org.wmb;
+package org.wmb.loading;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -8,8 +8,12 @@ import java.nio.charset.StandardCharsets;
 
 public final class ResourceLoader {
 
-    public static InputStream loadStream(String path) {
-        return ResourceLoader.class.getResourceAsStream(path);
+    public static InputStream loadStream(String path) throws IOException {
+        final InputStream inputStream = ResourceLoader.class.getResourceAsStream(path);
+        if (inputStream == null)
+            throw new IOException("No stream for resource " + path);
+
+        return inputStream;
     }
 
     public static String loadText(String path) throws IOException {
@@ -17,6 +21,6 @@ public final class ResourceLoader {
     }
 
     public static BufferedImage loadImage(String path) throws IOException {
-       return ImageIO.read(loadStream(path));
+        return ImageIO.read(loadStream(path));
     }
 }

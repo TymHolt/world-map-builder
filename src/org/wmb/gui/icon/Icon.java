@@ -1,6 +1,6 @@
 package org.wmb.gui.icon;
 
-import org.wmb.ResourceLoader;
+import org.wmb.loading.ResourceLoader;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
