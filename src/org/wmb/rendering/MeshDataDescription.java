@@ -16,7 +16,7 @@ public final class MeshDataDescription {
     }
 
     private final List<DataArray> dataArrays;
-    private short[] indexArray;
+    private int[] indexArray;
 
     public MeshDataDescription() {
         this.dataArrays = new ArrayList<>();
@@ -37,7 +37,7 @@ public final class MeshDataDescription {
         this.dataArrays.add(new DataArray(elementsPerVertex, data));
     }
 
-    public void setIndexArray(short[] indices) {
+    public void setIndexArray(int[] indices) {
         Objects.requireNonNull(indices, "Indices are null");
         this.indexArray = indices;
     }
@@ -55,9 +55,9 @@ public final class MeshDataDescription {
                 throw new IllegalArgumentException("Data arrays have different amount of vertices");
 
         // Indices must be in bounds to the given vertex definitions
-        short minIndex = Short.MAX_VALUE;
-        short maxIndex = Short.MIN_VALUE;
-        for (short index : this.indexArray) {
+        int minIndex = Short.MAX_VALUE;
+        int maxIndex = Short.MIN_VALUE;
+        for (int index : this.indexArray) {
             if (index < minIndex)
                 minIndex = index;
             if (index > maxIndex)
@@ -74,7 +74,7 @@ public final class MeshDataDescription {
         return this.dataArrays;
     }
 
-    short[] getIndexArray() {
+    int[] getIndexArray() {
         return this.indexArray;
     }
 }

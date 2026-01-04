@@ -14,12 +14,12 @@ public class ObjTriangleMesh {
     public final float[] positons;
     public final float[] texturePositions;
     public final float[] normals;
-    public final short[] faces;
+    public final int[] faces;
 
     public ObjTriangleMesh(List<Float> positions, List<Float> texturePositions, List<Float> normals,
-        List<Short> faces) {
+        List<Integer> faces) {
         this(toFloatArray(positions), toFloatArray(texturePositions), toFloatArray(normals),
-            toShortArray(faces));
+            toIntArray(faces));
     }
 
     private static float[] toFloatArray(List<Float> floatList) {
@@ -30,16 +30,16 @@ public class ObjTriangleMesh {
         return floatArray;
     }
 
-    private static short[] toShortArray(List<Short> shortList) {
+    private static int[] toIntArray(List<Integer> intList) {
         int index = 0;
-        final short[] shortArray = new short[shortList.size()];
-        for (short value : shortList)
-            shortArray[index++] = value;
-        return shortArray;
+        final int[] intArray = new int[intList.size()];
+        for (int value : intList)
+            intArray[index++] = value;
+        return intArray;
     }
 
     public ObjTriangleMesh(float[] positons, float[] texturePositions, float[] normals,
-        short[] faces) {
+        int[] faces) {
         Objects.requireNonNull(positons, "Position array is null");
         Objects.requireNonNull(positons, "Texture position array is null");
         Objects.requireNonNull(positons, "Normal array is null");
@@ -93,9 +93,9 @@ public class ObjTriangleMesh {
         final List<Float> positionData = new ArrayList<>();
         final List<Float> texturePositionData = new ArrayList<>();
         final List<Float> normalData = new ArrayList<>();
-        final List<Short> indexData = new ArrayList<>();
+        final List<Integer> indexData = new ArrayList<>();
 
-        short vertexIndex = (short) 0;
+        int vertexIndex = 0;
         for (int index = 0; index < this.faces.length;) {
             // OBJ indices start from 1
             int positionIndex = (faces[index++] - 1) * 3;
@@ -120,7 +120,7 @@ public class ObjTriangleMesh {
         meshDataDescription.addDataArray(3, toFloatArray(positionData));
         meshDataDescription.addDataArray(2, toFloatArray(texturePositionData));
         meshDataDescription.addDataArray(3, toFloatArray(normalData));
-        meshDataDescription.setIndexArray(toShortArray(indexData));
+        meshDataDescription.setIndexArray(toIntArray(indexData));
         meshDataDescription.verify();
         return meshDataDescription;
     }

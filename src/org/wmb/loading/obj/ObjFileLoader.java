@@ -14,7 +14,7 @@ public final class ObjFileLoader {
         final List<Float> positions = new ArrayList<>();
         final List<Float> texturePositions = new ArrayList<>();
         final List<Float> normals = new ArrayList<>();
-        final List<Short> faces = new ArrayList<>();
+        final List<Integer> faces = new ArrayList<>();
 
         for (String line : lines) {
             if (line.startsWith("#") || line.isBlank())
@@ -49,7 +49,7 @@ public final class ObjFileLoader {
         fillFloatList(positions, 0.0f, 3);
         fillFloatList(texturePositions, 0.0f, 2);
         fillFloatList(normals, 0.0f, 3);
-        fillShortList(faces, (short) 0, 9);
+        fillIntList(faces, (short) 0, 9);
 
         try {
             // Constructor checks index integrity
@@ -72,7 +72,7 @@ public final class ObjFileLoader {
         }
     }
 
-    private static void readFace(List<Short> faces, String[] tokens) throws ObjFormatException {
+    private static void readFace(List<Integer> faces, String[] tokens) throws ObjFormatException {
         if (tokens.length - 1 != 3)
             throw new ObjFormatException("Expected 3 vertices");
 
@@ -80,11 +80,11 @@ public final class ObjFileLoader {
             readVertex(faces, tokens[tokenIndex].split("/"));
     }
 
-    private static void readVertex(List<Short> faces, String[] indices) throws ObjFormatException {
+    private static void readVertex(List<Integer> faces, String[] indices) throws ObjFormatException {
         try {
-            faces.add(Short.parseShort(indices[0]));
-            faces.add(indices.length > 1 ? Short.parseShort(indices[1]) : 1);
-            faces.add(indices.length > 2 ? Short.parseShort(indices[2]) : 1);
+            faces.add(Integer.parseInt(indices[0]));
+            faces.add(indices.length > 1 ? Integer.parseInt(indices[1]) : 1);
+            faces.add(indices.length > 2 ? Integer.parseInt(indices[2]) : 1);
         } catch(NumberFormatException exception) {
             throw new ObjFormatException(exception.getMessage());
         }
@@ -95,7 +95,7 @@ public final class ObjFileLoader {
             list.add(value);
     }
 
-    private static void fillShortList(List<Short> list, short value, int minListSize) {
+    private static void fillIntList(List<Integer> list, int value, int minListSize) {
         while (list.size() < minListSize)
             list.add(value);
     }

@@ -7,7 +7,6 @@ import org.wmb.loading.obj.ObjFileLoader;
 
 import java.io.IOException;
 import java.nio.FloatBuffer;
-import java.nio.ShortBuffer;
 import java.util.List;
 import java.util.Objects;
 
@@ -60,7 +59,7 @@ public final class AllocatedMeshData {
         }
 
         try {
-            final short[] indexArray = description.getIndexArray();
+            final int[] indexArray = description.getIndexArray();
             this.vboIds[this.vboIds.length - 1] = createEbo(indexArray);
             this.vertexCount = indexArray.length;
         } catch(OpenGLStateException exception) {
@@ -98,15 +97,14 @@ public final class AllocatedMeshData {
         return vboId;
     }
 
-    private static int createEbo(short[] data) throws OpenGLStateException {
+    private static int createEbo(int[] data) throws OpenGLStateException {
         final int eboId = GL30.glGenBuffers();
         GL30.glBindBuffer(GL30.GL_ELEMENT_ARRAY_BUFFER, eboId);
 
         if (eboId < 1)
             throw new OpenGLStateException("EBO creation failed");
 
-        final ShortBuffer dataBuffer = MemoryUtil.memAllocShort(data.length).put(data).flip();
-        GL30.glBufferData(GL30.GL_ELEMENT_ARRAY_BUFFER, dataBuffer, GL30.GL_STATIC_DRAW);
+        GL30.glBufferData(GL30.GL_ELEMENT_ARRAY_BUFFER, data, GL30.GL_STATIC_DRAW);
 
         // EBO does not get unbound!
         return eboId;

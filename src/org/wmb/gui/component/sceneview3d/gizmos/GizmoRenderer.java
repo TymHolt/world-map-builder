@@ -64,7 +64,7 @@ public final class GizmoRenderer {
         AllocatedShaderProgram.uniformMat4(this.transformUl, transform);
 
         GL30.glDrawElements(GL30.GL_TRIANGLES, gizmoMesh.vertexCount,
-            GL30.GL_UNSIGNED_SHORT, 0);
+            GL30.GL_UNSIGNED_INT, 0);
 
         GL30.glBindVertexArray(0);
     }

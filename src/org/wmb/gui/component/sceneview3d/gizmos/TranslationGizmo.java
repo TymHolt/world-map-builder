@@ -177,7 +177,7 @@ public final class TranslationGizmo implements Gizmo {
                 0.0f, 0.0f, 1.0f,
                 0.0f, 0.0f, 1.0f
             });
-            meshDataDescription.setIndexArray(new short[] {
+            meshDataDescription.setIndexArray(new int[] {
                 // x front
                 0, 1, 2,
                 2, 3, 0,

@@ -73,7 +73,7 @@ public class Object3dElementRenderer {
         GL30.glUniform1f(this.highlightFactorUl, factor);
 
         GL30.glDrawElements(GL30.GL_TRIANGLES, element.getMeshData().vertexCount,
-            GL30.GL_UNSIGNED_SHORT, 0);
+            GL30.GL_UNSIGNED_INT, 0);
 
         GL30.glBindVertexArray(0);
     }

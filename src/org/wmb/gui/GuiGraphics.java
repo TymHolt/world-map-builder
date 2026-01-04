@@ -108,7 +108,7 @@ public final class GuiGraphics {
                 1.0f, 0.0f,
                 1.0f, 1.0f
             });
-            meshDataDescription.setIndexArray(new short[] {
+            meshDataDescription.setIndexArray(new int[] {
                 0, 1, 2,
                 2, 3, 0
             });
@@ -190,7 +190,7 @@ public final class GuiGraphics {
         GL30.glUniform1f(this.texturedFlagUl, 1.0f);
         GL30.glUniform1f(this.maskColorFactorUl, 0.0f);
         GL30.glDrawElements(GL30.GL_TRIANGLES, this.quadMeshData.vertexCount,
-            GL30.GL_UNSIGNED_SHORT, 0);
+            GL30.GL_UNSIGNED_INT, 0);
 
         GL30.glDisable(GL30.GL_BLEND);
         GL30.glDisable(GL30.GL_MULTISAMPLE);
@@ -236,7 +236,7 @@ public final class GuiGraphics {
         AllocatedShaderProgram.uniformColor(this.colorUl, color);
         GL30.glUniform1f(this.texturedFlagUl, 0.0f);
         GL30.glDrawElements(GL30.GL_TRIANGLES, this.quadMeshData.vertexCount,
-            GL30.GL_UNSIGNED_SHORT, 0);
+            GL30.GL_UNSIGNED_INT, 0);
     }
 
     public void fillQuadColor(Bounds bounds, Color color) {
@@ -249,7 +249,7 @@ public final class GuiGraphics {
         GL30.glUniform1f(this.texturedFlagUl, 1.0f);
         GL30.glUniform1f(this.maskColorFactorUl, 0.0f);
         GL30.glDrawElements(GL30.GL_TRIANGLES, this.quadMeshData.vertexCount,
-            GL30.GL_UNSIGNED_SHORT, 0);
+            GL30.GL_UNSIGNED_INT, 0);
     }
 
     public void fillQuadTexture(Bounds bounds, ITexture texture) {
@@ -264,7 +264,7 @@ public final class GuiGraphics {
         GL30.glUniform1f(this.texturedFlagUl, 1.0f);
         GL30.glUniform1f(this.maskColorFactorUl, 1.0f);
         GL30.glDrawElements(GL30.GL_TRIANGLES, this.quadMeshData.vertexCount,
-            GL30.GL_UNSIGNED_SHORT, 0);
+            GL30.GL_UNSIGNED_INT, 0);
     }
 
     public void fillQuadMask(Bounds bounds, ITexture texture, Color color) {
@@ -279,7 +279,7 @@ public final class GuiGraphics {
         GL30.glUniform1f(this.texturedFlagUl, 1.0f);
         GL30.glUniform1f(this.maskColorFactorUl, 1.0f);
         GL30.glDrawElements(GL30.GL_TRIANGLES, this.quadMeshData.vertexCount,
-            GL30.GL_UNSIGNED_SHORT, 0);
+            GL30.GL_UNSIGNED_INT, 0);
     }
 
     public void fillQuadIcon(Bounds bounds, Icon icon, Color color) {
@@ -289,7 +289,7 @@ public final class GuiGraphics {
         GL30.glUniform1f(this.texturedFlagUl, 1.0f);
         GL30.glUniform1f(this.maskColorFactorUl, 1.0f);
         GL30.glDrawElements(GL30.GL_TRIANGLES, this.quadMeshData.vertexCount,
-            GL30.GL_UNSIGNED_SHORT, 0);
+            GL30.GL_UNSIGNED_INT, 0);
     }
 
     public void fillQuadIcon(int x, int y, int width, int height, Icon icon) {
@@ -298,7 +298,7 @@ public final class GuiGraphics {
         GL30.glUniform1f(this.texturedFlagUl, 1.0f);
         GL30.glUniform1f(this.maskColorFactorUl, 0.0f);
         GL30.glDrawElements(GL30.GL_TRIANGLES, this.quadMeshData.vertexCount,
-            GL30.GL_UNSIGNED_SHORT, 0);
+            GL30.GL_UNSIGNED_INT, 0);
     }
 
     public void fillQuadIcon(Bounds bounds, Icon icon) {
@@ -307,7 +307,7 @@ public final class GuiGraphics {
         GL30.glUniform1f(this.texturedFlagUl, 1.0f);
         GL30.glUniform1f(this.maskColorFactorUl, 0.0f);
         GL30.glDrawElements(GL30.GL_TRIANGLES, this.quadMeshData.vertexCount,
-            GL30.GL_UNSIGNED_SHORT, 0);
+            GL30.GL_UNSIGNED_INT, 0);
     }
 
     public void fillText(String text, int x, int y, Color color, FontDefinition fontDefinition) {
@@ -343,7 +343,7 @@ public final class GuiGraphics {
             correctViewport(currentX, y, glyph.width, glyph.height);
             GL30.glBindTexture(GL30.GL_TEXTURE_2D, glyph.getId());
             GL30.glDrawElements(GL30.GL_TRIANGLES, this.quadMeshData.vertexCount,
-                GL30.GL_UNSIGNED_SHORT, 0);
+                GL30.GL_UNSIGNED_INT, 0);
 
             currentX += glyph.width + allocatedFont.getLeading();
         }
