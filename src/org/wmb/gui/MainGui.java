@@ -115,7 +115,7 @@ public final class MainGui {
 
     private long count = -1L;
 
-    public void draw() throws OpenGLStateException {
+    public void draw() throws IOException {
         // Some components compute parts of their bounds in their draw() method
         // This will ensure the bounds get recalculated from time to time
         if (count++ % 100 == 0)
@@ -123,7 +123,7 @@ public final class MainGui {
 
         try {
             this.sceneViewComponent.renderScene(this.context.getScene());
-        } catch (OpenGLStateException exception) {
+        } catch (IOException exception) {
             Log.error(TAG, "Exception during scene view rendering");
             throw exception;
         }

@@ -187,7 +187,7 @@ public final class SceneView3dComponent extends ContainerComponent {
         this.gizmoFramebuffer = newGizmoFramebuffer;
     }
 
-    public void renderScene(Scene3d scene) throws OpenGLStateException {
+    public void renderScene(Scene3d scene) throws IOException {
         final Bounds innerBounds = getInnerBounds();
         final int innerBoundsWidth = innerBounds.getWidth();
         final int innerBoundsHeight = innerBounds.getHeight();
@@ -240,7 +240,14 @@ public final class SceneView3dComponent extends ContainerComponent {
             this.aspect, Colors.GREY);
         this.object3dElementRenderer.preparePipeline(0, 0, innerBoundsWidth, innerBoundsHeight);
         this.object3dElementRenderer.uniformCamera(this.camera, this.aspect);
-        recursiveRender(scene);
+
+        try {
+            recursiveRender(scene);
+        } catch (IOException exception) {
+            Log.error(TAG, "Exception during recursive render");
+            throw exception;
+        }
+
         this.object3dElementRenderer.resetPipeline();
 
         GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, 0);
@@ -248,7 +255,7 @@ public final class SceneView3dComponent extends ContainerComponent {
         // -----------------------------------------------------------------------------------------
     }
 
-    private void recursiveRender(Element element) {
+    private void recursiveRender(Element element) throws IOException {
         if (element == null)
             return;
 

@@ -15,7 +15,13 @@ public final class AllocatedMeshData {
 
     public static AllocatedMeshData fromResource(String objPath) throws IOException {
         Objects.requireNonNull(objPath, "OBJ path is null");
-        final String objSource = ResourceLoader.loadText(objPath);
+        final String objSource = ResourceLoader.loadResourceText(objPath);
+        return new AllocatedMeshData(ObjFileLoader.load(objSource).toMeshDataDescription());
+    }
+
+    public static AllocatedMeshData fromFile(String objPath) throws IOException {
+        Objects.requireNonNull(objPath, "OBJ path is null");
+        final String objSource = ResourceLoader.loadFileText(objPath);
         return new AllocatedMeshData(ObjFileLoader.load(objSource).toMeshDataDescription());
     }
 

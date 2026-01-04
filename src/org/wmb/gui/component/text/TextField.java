@@ -13,6 +13,7 @@ import java.util.Objects;
 
 public class TextField extends TextComponent {
 
+    private boolean editAllowed;
     private boolean focused;
     private int textCursorLocation;
     private Color focusBackground;
@@ -30,6 +31,7 @@ public class TextField extends TextComponent {
         setFocusBackground(Theme.BACKGROUND_LIGHT);
         setFocusForeground(Theme.FOREGROUND);
         this.textCursorLocation = -1;
+        this.editAllowed = true;
     }
 
     public void setFocusBackground(Color color) {
@@ -50,19 +52,20 @@ public class TextField extends TextComponent {
         return this.focusForeground;
     }
 
-    @Override
-    public void setForeground(Color color) {
-        super.setForeground(color);
+    public void setEditAllowed(boolean allowed) {
+        this.editAllowed = allowed;
     }
 
-    @Override
-    public void setBackground(Color color) {
-        super.setBackground(color);
+    public boolean isEditAllowed() {
+        return this.editAllowed;
     }
 
     @Override
     public void onGainFocus() {
         this.focused = true;
+        if (!this.editAllowed)
+            return;
+
         this.oldBackground = getBackground();
         this.oldForeground = getForeground();
         setBackground(this.focusBackground);
@@ -73,6 +76,9 @@ public class TextField extends TextComponent {
     @Override
     public void onLooseFocus() {
         this.focused = false;
+        if (!this.editAllowed)
+            return;
+
         setBackground(this.oldBackground);
         setForeground(this.oldForeground);
         this.textCursorLocation = -1;
@@ -80,7 +86,7 @@ public class TextField extends TextComponent {
 
     @Override
     public Cursor getCursor(int mouseX, int mouseY) {
-        return Cursor.HAND;
+        return this.editAllowed ? Cursor.HAND : Cursor.DEFAULT;
     }
 
     private void setCursorLocation(int index) {
@@ -89,6 +95,9 @@ public class TextField extends TextComponent {
 
     @Override
     public void onTextInput(char c) {
+        if (!this.editAllowed)
+            return;
+
         final String text = getText();
         final String preCursor = text.substring(0, this.textCursorLocation);
         final String postCursor = text.substring(this.textCursorLocation);
@@ -98,7 +107,7 @@ public class TextField extends TextComponent {
 
     @Override
     public void onKeyClick(KeyClickEvent event) {
-        if (!event.action.isPressOrRepeat())
+        if (!event.action.isPressOrRepeat() || !this.editAllowed)
             return;
 
         final String text = getText();

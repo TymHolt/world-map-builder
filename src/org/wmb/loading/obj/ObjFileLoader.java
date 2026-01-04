@@ -17,7 +17,7 @@ public final class ObjFileLoader {
         final List<Short> faces = new ArrayList<>();
 
         for (String line : lines) {
-            if (line.startsWith("#"))
+            if (line.startsWith("#") || line.isBlank())
                 continue;
 
             final String[] tokens = line.split(" ");
@@ -34,6 +34,11 @@ public final class ObjFileLoader {
                     break;
                 case "f":
                     readFace(faces, tokens);
+                    break;
+                case "o":
+                case "mtllib":
+                case "s":
+                    // TODO Implement when needed
                     break;
                 default:
                     throw new ObjFormatException("Unknown identifier " + identifier);
@@ -78,8 +83,8 @@ public final class ObjFileLoader {
     private static void readVertex(List<Short> faces, String[] indices) throws ObjFormatException {
         try {
             faces.add(Short.parseShort(indices[0]));
-            faces.add(indices.length > 1 ? Short.parseShort(indices[1]) : 0);
-            faces.add(indices.length > 2 ? Short.parseShort(indices[2]) : 0);
+            faces.add(indices.length > 1 ? Short.parseShort(indices[1]) : 1);
+            faces.add(indices.length > 2 ? Short.parseShort(indices[2]) : 1);
         } catch(NumberFormatException exception) {
             throw new ObjFormatException(exception.getMessage());
         }

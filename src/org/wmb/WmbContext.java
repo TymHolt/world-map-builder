@@ -6,6 +6,8 @@ import org.wmb.editor.element.Object3dElement.Object3dElement;
 import org.wmb.gui.MainGui;
 import org.wmb.gui.Window;
 import org.wmb.gui.data.Size;
+import org.wmb.rendering.AllocatedMeshData;
+import org.wmb.rendering.AllocatedTexture;
 
 import java.awt.*;
 import java.io.IOException;
@@ -30,12 +32,22 @@ public final class WmbContext {
         this.window.makeContextCurrent();
 
         this.scene = new Scene3d();
-        this.scene.getChildren().add(new Object3dElement(this.scene));
+
+        final Object3dElement element;
+        try {
+            element = new Object3dElement(this.scene);
+            this.scene.getChildren().add(element);
+        } catch (IOException exception) {
+            this.window.close();
+            Log.error(TAG, "Test element failed to load");
+            throw exception;
+        }
 
         try {
             this.gui = new MainGui(this);
         } catch (IOException exception) {
             this.window.close();
+            element.deleteResources();
             Log.error(TAG, "Main GUI failed to load");
             throw exception;
         }
@@ -72,11 +84,7 @@ public final class WmbContext {
             return;
 
         if (this.window.wasCloseRequested()) {
-            this.active = false;
-            this.window.makeContextCurrent();
-            this.gui.delete();
-            this.window.close();
-            removeContext(this);
+            handleClose();
             return;
         }
 
@@ -93,16 +101,32 @@ public final class WmbContext {
         try {
             this.gui.draw();
         } catch (IOException exception) {
-            this.active = false;
-            this.window.makeContextCurrent();
-            this.gui.delete();
-            this.window.close();
-            removeContext(this);
+            handleClose();
             Log.error(TAG, "Exception during draw call");
             throw exception;
         }
 
         this.window.update();
+    }
+
+    private void handleClose() {
+        this.active = false;
+        this.window.makeContextCurrent();
+        handleRecursiveDelete(scene);
+        this.gui.delete();
+        this.window.close();
+        removeContext(this);
+    }
+
+    private void handleRecursiveDelete(Element element) {
+        if (element == null)
+            return;
+
+        if (element instanceof Object3dElement object3dElement)
+            object3dElement.deleteResources();
+
+        for (Element child : element.getChildren())
+            handleRecursiveDelete(child);
     }
 
     private static final List<WmbContext> contextList = new ArrayList<>();

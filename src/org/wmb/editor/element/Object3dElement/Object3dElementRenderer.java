@@ -2,7 +2,6 @@ package org.wmb.editor.element.Object3dElement;
 
 import org.lwjgl.opengl.GL30;
 import org.wmb.Log;
-import org.wmb.loading.ResourceLoader;
 import org.wmb.rendering.*;
 
 import java.io.IOException;
@@ -18,9 +17,6 @@ public class Object3dElementRenderer {
     private final int projectionUl;
     private final int highlightColorUl;
     private final int highlightFactorUl;
-
-    private final AllocatedMeshData testMeshData;
-    private final AllocatedTexture testTexture;
 
     public Object3dElementRenderer() throws IOException {
         try {
@@ -46,31 +42,10 @@ public class Object3dElementRenderer {
             Log.error(TAG, "Shader program failed to resolve uniform location");
             throw exception;
         }
-
-        try {
-            final String path = "/org/wmb/editor/element/Object3dElement/cube.obj";
-            this.testMeshData = AllocatedMeshData.fromResource(path);
-        } catch(IOException exception) {
-            this.object3dShaderProgram.delete();
-            Log.error(TAG, "Test mesh data failed to load");
-            throw exception;
-        }
-
-        try {
-            final String path = "/org/wmb/editor/element/Object3dElement/cube_texture.png";
-            this.testTexture = new AllocatedTexture(ResourceLoader.loadImage(path));
-        } catch (IOException exception) {
-            this.object3dShaderProgram.delete();
-            this.testMeshData.delete();
-            Log.error(TAG, "Test texture failed to load");
-            throw exception;
-        }
     }
 
     public void delete() {
         this.object3dShaderProgram.delete();
-        this.testMeshData.delete();
-        this.testTexture.delete();
     }
 
     public void preparePipeline(int x, int y, int width, int height) {
@@ -87,15 +62,17 @@ public class Object3dElementRenderer {
         AllocatedShaderProgram.uniformMat4(this.projectionUl, camera.getProjectionMatrix(aspect));
     }
 
-    public void render(Object3dElement element, Color highlight, float factor) {
-        GL30.glBindTexture(GL30.GL_TEXTURE_2D, this.testTexture.getId());
-        GL30.glBindVertexArray(this.testMeshData.getId());
+    public void render(Object3dElement element, Color highlight, float factor) throws IOException {
+        element.syncResources();
+
+        GL30.glBindTexture(GL30.GL_TEXTURE_2D, element.getTexture().getId());
+        GL30.glBindVertexArray(element.getMeshData().getId());
 
         AllocatedShaderProgram.uniformMat4(this.transformUl, element.getTransform().getAsMatrix());
         AllocatedShaderProgram.uniformColor(this.highlightColorUl, highlight);
         GL30.glUniform1f(this.highlightFactorUl, factor);
 
-        GL30.glDrawElements(GL30.GL_TRIANGLES, this.testMeshData.vertexCount,
+        GL30.glDrawElements(GL30.GL_TRIANGLES, element.getMeshData().vertexCount,
             GL30.GL_UNSIGNED_SHORT, 0);
 
         GL30.glBindVertexArray(0);

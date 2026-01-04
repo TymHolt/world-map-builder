@@ -15,7 +15,9 @@ public enum Icon {
     FRAME("/org/wmb/gui/icon/raw/frame.png", true),
     GIZMO_TRANSLATE("/org/wmb/gui/icon/raw/gizmo_translate.png", false),
     GIZMO_ROTATE("/org/wmb/gui/icon/raw/gizmo_rotate.png", false),
-    GIZMO_SCALE("/org/wmb/gui/icon/raw/gizmo_scale.png", false);
+    GIZMO_SCALE("/org/wmb/gui/icon/raw/gizmo_scale.png", false),
+    CROSS("/org/wmb/gui/icon/raw/cross.png", true),
+    FOLDER("/org/wmb/gui/icon/raw/folder.png", true);
 
     private final String path;
     public final boolean masked;
@@ -26,6 +28,6 @@ public enum Icon {
     }
 
     public BufferedImage loadImage() throws IOException {
-        return ResourceLoader.loadImage(this.path);
+        return ResourceLoader.loadResourceImage(this.path);
     }
 }

@@ -152,11 +152,15 @@ public final class IconSwitchComponent extends Component {
     }
 
     public void setSelected(boolean selected) {
+        setSelected(selected, true);
+    }
+
+    public void setSelected(boolean selected, boolean notifyListener) {
         this.selected = selected;
 
         setBackground(selected ? this.selectedBackgroundColor : this.unselectedBackgroundColor);
 
-        if (this.switchListener != null)
+        if (this.switchListener != null && notifyListener)
             this.switchListener.onSwitch(this);
     }
 

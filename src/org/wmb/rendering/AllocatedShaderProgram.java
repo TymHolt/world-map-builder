@@ -22,7 +22,7 @@ public final class AllocatedShaderProgram {
 
         final String vertexShaderSource;
         try {
-            vertexShaderSource = ResourceLoader.loadText(vertexShaderPath);
+            vertexShaderSource = ResourceLoader.loadResourceText(vertexShaderPath);
         } catch (IOException exception) {
             Log.error(TAG, "Vertex shader failed to load from resource");
             throw exception;
@@ -30,7 +30,7 @@ public final class AllocatedShaderProgram {
 
         final String fragmentShaderSource;
         try {
-            fragmentShaderSource = ResourceLoader.loadText(fragmentShaderPath);
+            fragmentShaderSource = ResourceLoader.loadResourceText(fragmentShaderPath);
         } catch (IOException exception) {
             Log.error(TAG, "Fragment shader failed to load from resource");
             throw exception;
