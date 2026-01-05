@@ -57,7 +57,7 @@ public final class MainGui {
         final SceneTreeComponent sceneTree = new SceneTreeComponent(this.context);
         this.container.setWest(sceneTree);
 
-        this.elementInspector = new ElementInspectorComponent();
+        this.elementInspector = new ElementInspectorComponent(context);
         this.container.setEast(this.elementInspector);
 
         this.context.getWindow().setInputListener(new WindowListener() {
@@ -111,6 +111,10 @@ public final class MainGui {
 
     public void notifyReadScene() {
         this.elementInspector.notifyReadScene();
+    }
+
+    public void notifyWriteScene() {
+        this.elementInspector.notifyWriteScene();
     }
 
     private long count = -1L;

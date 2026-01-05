@@ -1,5 +1,6 @@
 package org.wmb.gui.component.elementinspector;
 
+import org.wmb.WmbContext;
 import org.wmb.gui.Theme;
 import org.wmb.gui.component.Component;
 import org.wmb.gui.component.container.ContainerComponent;
@@ -14,10 +15,13 @@ import java.util.Objects;
 
 public class InspectorViewComponent extends ContainerComponent {
 
+    private final WmbContext context;
     private Inspector inspector;
 
-    public InspectorViewComponent() {
+    public InspectorViewComponent(WmbContext context) {
         super();
+        Objects.requireNonNull(context);
+        this.context = context;
         setBackground(Theme.BACKGROUND);
         this.inspector = new Inspector() {
 
@@ -94,5 +98,13 @@ public class InspectorViewComponent extends ContainerComponent {
 
     public void notifyReadScene() {
         this.inspector.read();
+    }
+
+    public void notifyWriteScene() {
+        this.inspector.write();
+    }
+
+    public WmbContext getContext() {
+        return this.context;
     }
 }

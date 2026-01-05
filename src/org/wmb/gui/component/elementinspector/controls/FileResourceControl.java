@@ -1,5 +1,6 @@
 package org.wmb.gui.component.elementinspector.controls;
 
+import org.wmb.WmbContext;
 import org.wmb.gui.Theme;
 import org.wmb.gui.component.Align;
 import org.wmb.gui.component.IconSwitchComponent;
@@ -10,17 +11,22 @@ import org.wmb.gui.data.DynamicSize;
 import org.wmb.gui.icon.Icon;
 
 import javax.swing.JFileChooser;
+import java.util.Objects;
 
 public final class FileResourceControl extends ContainerComponent {
 
     private static final String NONE_TEXT = "SELECT";
 
+    private final WmbContext context;
     private final Label label;
     private final TextField pathTextField;
     private final IconSwitchComponent deleteComponent;
 
-    public FileResourceControl(String title) {
+    public FileResourceControl(String title, WmbContext context) {
         super();
+        Objects.requireNonNull(context);
+        this.context = context;
+
         this.label = new Label(title, Align.LEFT);
         addComponent(this.label);
 
@@ -36,9 +42,10 @@ public final class FileResourceControl extends ContainerComponent {
         this.deleteComponent.setSwitchListener(switchComponent -> {
             if (switchComponent.isSelected()) {
                 final JFileChooser fileChooser = new JFileChooser();
-                if (fileChooser.showDialog(null, "Load") == JFileChooser.APPROVE_OPTION)
+                if (fileChooser.showDialog(null, "Load") == JFileChooser.APPROVE_OPTION) {
                     this.pathTextField.setText(fileChooser.getSelectedFile().getAbsolutePath());
-                else
+                    this.context.notifyWriteScene();
+                } else
                     switchComponent.setSelected(false, false);
             } else
                 this.pathTextField.setText(NONE_TEXT);

@@ -2,6 +2,7 @@ package org.wmb.editor.element.Object3dElement;
 
 import org.lwjgl.opengl.GL30;
 import org.wmb.Log;
+import org.wmb.ResourceManager;
 import org.wmb.rendering.*;
 
 import java.io.IOException;
@@ -62,17 +63,19 @@ public class Object3dElementRenderer {
         AllocatedShaderProgram.uniformMat4(this.projectionUl, camera.getProjectionMatrix(aspect));
     }
 
-    public void render(Object3dElement element, Color highlight, float factor) throws IOException {
-        element.syncResources();
+    public void render(Object3dElement element, Color highlight, float factor,
+        ResourceManager resourceManager) throws IOException {
+        final AllocatedMeshData model = resourceManager.getModel(element.modelPath);
+        final AllocatedTexture texture = resourceManager.getTexture(element.texturePath);
 
-        GL30.glBindTexture(GL30.GL_TEXTURE_2D, element.getTexture().getId());
-        GL30.glBindVertexArray(element.getMeshData().getId());
+        GL30.glBindTexture(GL30.GL_TEXTURE_2D, texture.getId());
+        GL30.glBindVertexArray(model.getId());
 
         AllocatedShaderProgram.uniformMat4(this.transformUl, element.getTransform().getAsMatrix());
         AllocatedShaderProgram.uniformColor(this.highlightColorUl, highlight);
         GL30.glUniform1f(this.highlightFactorUl, factor);
 
-        GL30.glDrawElements(GL30.GL_TRIANGLES, element.getMeshData().vertexCount,
+        GL30.glDrawElements(GL30.GL_TRIANGLES, model.vertexCount,
             GL30.GL_UNSIGNED_INT, 0);
 
         GL30.glBindVertexArray(0);

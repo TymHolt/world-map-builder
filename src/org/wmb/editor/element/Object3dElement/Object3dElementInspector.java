@@ -1,5 +1,7 @@
 package org.wmb.editor.element.Object3dElement;
 
+import org.wmb.ResourceManager;
+import org.wmb.WmbContext;
 import org.wmb.gui.component.VerticalPadding;
 import org.wmb.gui.component.elementinspector.BasicInspector;
 import org.wmb.gui.component.elementinspector.InspectorViewComponent;
@@ -9,24 +11,30 @@ import org.wmb.rendering.math.ObjectPosition;
 import org.wmb.rendering.math.ObjectRotation;
 import org.wmb.rendering.math.ObjectTransform;
 
+import javax.swing.JOptionPane;
+import java.io.IOException;
+
 public final class Object3dElementInspector extends BasicInspector {
 
     private final Object3dElement element;
     private final ControlXYZ positionControl;
     private final ControlXYZ rotationControl;
     private final FileResourceControl modelControl;
+    private WmbContext context;
 
-    Object3dElementInspector(Object3dElement element) {
+    Object3dElementInspector(Object3dElement element, WmbContext context) {
         super(element);
         this.element = element;
         this.positionControl = new ControlXYZ("Position");
         this.rotationControl = new ControlXYZ("Rotation");
-        this.modelControl = new FileResourceControl("Model");
+        this.modelControl = new FileResourceControl("Model", context);
     }
 
     @Override
     public void init(InspectorViewComponent inspectorView) {
         super.init(inspectorView);
+        this.context = inspectorView.getContext();
+
         inspectorView.addComponent(new VerticalPadding(5));
         inspectorView.addComponent(this.positionControl);
         inspectorView.addComponent(new VerticalPadding(5));
@@ -50,8 +58,7 @@ public final class Object3dElementInspector extends BasicInspector {
         this.rotationControl.setY(rotation.getYaw());
         this.rotationControl.setZ(rotation.getRoll());
 
-        final String resourcePath = this.element.getRequestedMeshResourcePath();
-        this.modelControl.setSelectedPath(resourcePath);
+        this.modelControl.setSelectedPath(this.element.modelPath);
     }
 
     @Override
@@ -69,9 +76,21 @@ public final class Object3dElementInspector extends BasicInspector {
         rotation.setYaw(this.rotationControl.getY());
         rotation.setRoll(this.rotationControl.getZ());
 
-        if (this.modelControl.hasSelectedPath())
-            this.element.setRequestedMeshResourcePath(this.modelControl.getSelectedPath());
-        else
-            this.element.setRequestedMeshResourcePath(null);
+        if (this.modelControl.hasSelectedPath()) {
+            final String path = this.modelControl.getSelectedPath();
+            final ResourceManager resourceManager = this.context.getResourceManager();
+
+            if (!resourceManager.hasModelLoaded(path)) {
+                try {
+                    resourceManager.loadModel(path);
+                    this.element.modelPath = path;
+                } catch (IOException exception) {
+                    JOptionPane.showMessageDialog(null, exception.getMessage(),
+                        "Failed to load model", JOptionPane.ERROR_MESSAGE);
+                }
+            } else
+                this.element.modelPath = path;
+        } else
+            this.element.modelPath = null;
     }
 }

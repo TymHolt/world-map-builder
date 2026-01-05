@@ -6,8 +6,6 @@ import org.wmb.editor.element.Object3dElement.Object3dElement;
 import org.wmb.gui.MainGui;
 import org.wmb.gui.Window;
 import org.wmb.gui.data.Size;
-import org.wmb.rendering.AllocatedMeshData;
-import org.wmb.rendering.AllocatedTexture;
 
 import java.awt.*;
 import java.io.IOException;
@@ -22,6 +20,7 @@ public final class WmbContext {
     private Element selectedElement;
     private final Window window;
     private final MainGui gui;
+    private final ResourceManager resourceManager;
     private boolean active;
 
     WmbContext() throws IOException {
@@ -31,24 +30,23 @@ public final class WmbContext {
             "World Map Builder");
         this.window.makeContextCurrent();
 
-        this.scene = new Scene3d();
-
-        final Object3dElement element;
-        try {
-            element = new Object3dElement(this.scene);
-            this.scene.getChildren().add(element);
-        } catch (IOException exception) {
-            this.window.close();
-            Log.error(TAG, "Test element failed to load");
-            throw exception;
-        }
+        this.scene = new Scene3d(this);
+        this.scene.getChildren().add(new Object3dElement(this.scene, this));
 
         try {
             this.gui = new MainGui(this);
         } catch (IOException exception) {
             this.window.close();
-            element.deleteResources();
             Log.error(TAG, "Main GUI failed to load");
+            throw exception;
+        }
+
+        try {
+            this.resourceManager = new ResourceManager();
+        } catch (IOException exception) {
+            this.gui.delete();
+            this.window.close();
+            Log.error(TAG, "Resource manager failed to load");
             throw exception;
         }
 
@@ -67,6 +65,10 @@ public final class WmbContext {
         return this.gui;
     }
 
+    public ResourceManager getResourceManager() {
+        return this.resourceManager;
+    }
+
     public void setSelectedElement(Element element) {
         this.selectedElement = element;
         this.gui.notifyElementSelected(element);
@@ -74,6 +76,10 @@ public final class WmbContext {
 
     public Element getSelectedElement() {
         return this.selectedElement;
+    }
+
+    public void notifyWriteScene() {
+        this.gui.notifyWriteScene();
     }
 
     private int lastWidth = -1;
@@ -112,21 +118,10 @@ public final class WmbContext {
     private void handleClose() {
         this.active = false;
         this.window.makeContextCurrent();
-        handleRecursiveDelete(scene);
         this.gui.delete();
+        this.resourceManager.delete();
         this.window.close();
         removeContext(this);
-    }
-
-    private void handleRecursiveDelete(Element element) {
-        if (element == null)
-            return;
-
-        if (element instanceof Object3dElement object3dElement)
-            object3dElement.deleteResources();
-
-        for (Element child : element.getChildren())
-            handleRecursiveDelete(child);
     }
 
     private static final List<WmbContext> contextList = new ArrayList<>();
