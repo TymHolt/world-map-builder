@@ -19,7 +19,7 @@ public final class ResourceManager {
 
     ResourceManager() throws IOException {
         try {
-            final String path = "/org/wmb/editor/element/Object3dElement/cube.obj";
+            final String path = "/org/wmb/editor/element/Object3dElement/model_default.obj";
             this.debugModel = AllocatedMeshData.fromResource(path);
         } catch (IOException exception) {
             Log.error(TAG, "Debug model failed to load");
@@ -29,7 +29,7 @@ public final class ResourceManager {
         this.loadedModels = new HashMap<>();
 
         try {
-            final String path = "/org/wmb/editor/element/Object3dElement/cube_texture.png";
+            final String path = "/org/wmb/editor/element/Object3dElement/texture_default.png";
             this.debugTexture = new AllocatedTexture(ResourceLoader.loadResourceImage(path));
         } catch (IOException exception) {
             this.debugModel.delete();
@@ -89,7 +89,7 @@ public final class ResourceManager {
             loadedTextures.remove(path);
         }
 
-        loadedTextures.put(path, new AllocatedTexture(ResourceLoader.loadResourceImage(path)));
+        loadedTextures.put(path, new AllocatedTexture(ResourceLoader.loadFileImage(path)));
     }
 
     public boolean hasTextureLoaded(String path) {

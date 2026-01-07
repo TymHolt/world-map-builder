@@ -20,6 +20,7 @@ public final class Object3dElementInspector extends BasicInspector {
     private final ControlXYZ positionControl;
     private final ControlXYZ rotationControl;
     private final FileResourceControl modelControl;
+    private final FileResourceControl textureControl;
     private WmbContext context;
 
     Object3dElementInspector(Object3dElement element, WmbContext context) {
@@ -28,6 +29,7 @@ public final class Object3dElementInspector extends BasicInspector {
         this.positionControl = new ControlXYZ("Position");
         this.rotationControl = new ControlXYZ("Rotation");
         this.modelControl = new FileResourceControl("Model", context);
+        this.textureControl = new FileResourceControl("Texture", context);
     }
 
     @Override
@@ -41,6 +43,8 @@ public final class Object3dElementInspector extends BasicInspector {
         inspectorView.addComponent(this.rotationControl);
         inspectorView.addComponent(new VerticalPadding(5));
         inspectorView.addComponent(this.modelControl);
+        inspectorView.addComponent(new VerticalPadding(5));
+        inspectorView.addComponent(this.textureControl);
     }
 
     @Override
@@ -59,6 +63,7 @@ public final class Object3dElementInspector extends BasicInspector {
         this.rotationControl.setZ(rotation.getRoll());
 
         this.modelControl.setSelectedPath(this.element.modelPath);
+        this.textureControl.setSelectedPath(this.element.texturePath);
     }
 
     @Override
@@ -92,5 +97,22 @@ public final class Object3dElementInspector extends BasicInspector {
                 this.element.modelPath = path;
         } else
             this.element.modelPath = null;
+
+        if (this.textureControl.hasSelectedPath()) {
+            final String path = this.textureControl.getSelectedPath();
+            final ResourceManager resourceManager = this.context.getResourceManager();
+
+            if (!resourceManager.hasTextureLoaded(path)) {
+                try {
+                    resourceManager.loadTexture(path);
+                    this.element.texturePath = path;
+                } catch (IOException exception) {
+                    JOptionPane.showMessageDialog(null, exception.getMessage(),
+                        "Failed to load texture", JOptionPane.ERROR_MESSAGE);
+                }
+            } else
+                this.element.texturePath = path;
+        } else
+            this.element.texturePath = null;
     }
 }

@@ -37,6 +37,7 @@ public final class ObjFileLoader {
                     break;
                 case "o":
                 case "mtllib":
+                case "usemtl":
                 case "s":
                     // TODO Implement when needed
                     break;
