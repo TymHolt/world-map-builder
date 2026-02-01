@@ -2,6 +2,11 @@ package org.wmb.gui;
 
 import org.wmb.Log;
 import org.wmb.editor.element.Element;
+import org.wmb.gui.component.Align;
+import org.wmb.gui.component.menu.Menu;
+import org.wmb.gui.component.scenetree.TreeViewComponent;
+import org.wmb.gui.component.text.Label;
+import org.wmb.gui.data.Bounds;
 import org.wmb.gui.data.DynamicSize;
 import org.wmb.gui.data.Size;
 import org.wmb.gui.input.KeyClickEvent;
@@ -9,7 +14,6 @@ import org.wmb.gui.input.MouseClickEvent;
 import org.wmb.gui.input.MouseMoveEvent;
 import org.wmb.WmbContext;
 import org.wmb.gui.component.elementinspector.ElementInspectorComponent;
-import org.wmb.gui.component.scenetree.SceneTreeComponent;
 import org.wmb.gui.component.sceneview3d.SceneView3dComponent;
 import org.wmb.gui.component.container.CompassContainerComponent;
 import org.wmb.gui.component.MenuBarComponent;
@@ -26,8 +30,10 @@ public final class MainGui {
     private final WmbContext context;
     private final GuiGraphics graphics;
     private final CompassContainerComponent container;
+    private final TreeViewComponent treeViewComponent;
     private final SceneView3dComponent sceneViewComponent;
     private final ElementInspectorComponent elementInspector;
+    private Menu openedMenu;
 
     public MainGui(WmbContext context) throws IOException {
         Objects.requireNonNull(context, "Context is null");
@@ -54,8 +60,21 @@ public final class MainGui {
         final MenuBarComponent menuBar = new MenuBarComponent();
         this.container.setNorth(menuBar);
 
-        final SceneTreeComponent sceneTree = new SceneTreeComponent(this.context);
-        this.container.setWest(sceneTree);
+        // -----------------------------------------------------------------------------------------
+
+        final CompassContainerComponent treeViewContainer = new CompassContainerComponent();
+        treeViewContainer.setBorder(0, 0, 0, 3);
+
+        final Label label = new Label("Scene Tree", Align.CENTER, Theme.FONT_BOLD);
+        label.setBackground(Theme.BACKGROUND);
+        treeViewContainer.setNorth(label);
+
+        this.treeViewComponent = new TreeViewComponent(context);
+        treeViewContainer.setCenter(this.treeViewComponent);
+
+        this.container.setWest(treeViewContainer);
+
+        // -----------------------------------------------------------------------------------------
 
         this.elementInspector = new ElementInspectorComponent(context);
         this.container.setEast(this.elementInspector);
@@ -64,6 +83,15 @@ public final class MainGui {
 
             @Override
             public void mouseClick(MouseClickEvent event) {
+                if (openedMenu != null) {
+                    final Bounds menuBounds = openedMenu.getOuterBounds();
+                    if (menuBounds.contains(event.x, event.y)) {
+                        openedMenu.onMouseClick(event);
+                        return;
+                    } else
+                        openedMenu = null;
+                }
+
                 container.onMouseClick(event);
             }
 
@@ -71,8 +99,10 @@ public final class MainGui {
             public void mouseMove(MouseMoveEvent event) {
                 container.onMouseMove(event);
 
-                final Window window = context.getWindow();
-                window.setCursor(container.getCursor(event.xTo, event.yTo));
+                if (openedMenu != null && openedMenu.contains(event.xTo, event.yTo))
+                    context.getWindow().setCursor(openedMenu.getCursor(event.xTo, event.yTo));
+                else
+                    context.getWindow().setCursor(container.getCursor(event.xTo, event.yTo));
             }
 
             @Override
@@ -117,6 +147,19 @@ public final class MainGui {
         this.elementInspector.notifyWriteScene();
     }
 
+    public void onElementAdd() {
+        this.treeViewComponent.onElementAdd();
+    }
+
+    public void onElementRemove(Element element) {
+        Objects.requireNonNull(element, "Element is null");
+        this.treeViewComponent.onElementRemove(element);
+    }
+
+    public void setOpenedMenu(Menu menu) {
+        this.openedMenu = menu;
+    }
+
     private long count = -1L;
 
     public void draw() throws IOException {
@@ -140,7 +183,11 @@ public final class MainGui {
         }
 
         this.graphics.clear();
-        this.container.draw(graphics);
+        this.container.draw(this.graphics);
+
+        if (this.openedMenu != null)
+            this.openedMenu.draw(this.graphics);
+
         this.graphics.resetPipeline();
     }
 

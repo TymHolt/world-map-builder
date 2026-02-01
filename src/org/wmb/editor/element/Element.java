@@ -2,6 +2,8 @@ package org.wmb.editor.element;
 
 import org.wmb.WmbContext;
 import org.wmb.gui.component.elementinspector.Inspector;
+import org.wmb.gui.component.menu.Menu;
+import org.wmb.gui.component.menu.MenuItem;
 import org.wmb.gui.icon.Icon;
 
 import java.util.ArrayList;
@@ -15,11 +17,10 @@ public abstract class Element {
     private Element parent;
     private final List<Element> children;
 
-    public Element(String name, Element parent, WmbContext context) {
+    public Element(String name, WmbContext context) {
         Objects.requireNonNull(context);
         this.context = context;
         setName(name);
-        setParent(parent);
         this.children = new ArrayList<>();
     }
 
@@ -40,6 +41,18 @@ public abstract class Element {
         return this.parent;
     }
 
+    public void addChild(Element element) {
+        Objects.requireNonNull(element, "Element is null");
+        this.children.add(element);
+        element.setParent(this);
+        this.context.notifyElementAdd(element);
+    }
+
+    public void removeChild(Element element) {
+        if (this.children.remove(element))
+            this.context.notifyElementRemove(element);
+    }
+
     public List<Element> getChildren() {
         return this.children;
     }
@@ -53,4 +66,10 @@ public abstract class Element {
     }
 
     public abstract Inspector getInspector();
+
+    public void addMenuActions(Menu menu) {
+        final MenuItem deleteItem = new MenuItem("Delete", this.context);
+        deleteItem.setMenuAction(new ElementDeleteAction(this));
+        menu.addComponent(deleteItem);
+    }
 }

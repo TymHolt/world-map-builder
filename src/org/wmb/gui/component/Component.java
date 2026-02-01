@@ -4,6 +4,7 @@ import org.wmb.gui.data.Bounds;
 import org.wmb.gui.data.DynamicBounds;
 import org.wmb.gui.data.DynamicSides;
 import org.wmb.gui.data.DynamicSize;
+import org.wmb.gui.data.Position;
 import org.wmb.gui.data.Sides;
 import org.wmb.gui.Theme;
 import org.wmb.gui.input.Cursor;
@@ -294,5 +295,13 @@ public abstract class Component {
 
     public boolean isListeningForKeyboard() {
         return false;
+    }
+
+    public boolean contains(int x, int y) {
+        return this.bounds.contains(x, y);
+    }
+
+    public boolean contains(Position position) {
+        return contains(position.getX(), position.getY());
     }
 }

@@ -12,8 +12,8 @@ public final class Object3dElement extends Element {
     public String modelPath;
     public String texturePath;
 
-    public Object3dElement(Element parent, WmbContext context) {
-        super("Object3dElement", parent, context);
+    public Object3dElement(WmbContext context) {
+        super("Object3dElement", context);
         this.transform = new ObjectTransform(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
         this.modelPath = null;
         this.texturePath = null;

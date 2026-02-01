@@ -1,9 +1,13 @@
 package org.wmb.loading.obj;
 
+import org.wmb.Log;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public final class ObjFileLoader {
+
+    private static final String TAG = "ObjFileLoader";
 
     private ObjFileLoader() {
 
@@ -39,7 +43,7 @@ public final class ObjFileLoader {
                 case "mtllib":
                 case "usemtl":
                 case "s":
-                    // TODO Implement when needed
+                    Log.info(TAG, "Identifier not implemented: " + identifier);
                     break;
                 default:
                     throw new ObjFormatException("Unknown identifier " + identifier);

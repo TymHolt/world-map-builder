@@ -2,9 +2,12 @@ package org.wmb.gui.component.scenetree;
 
 import org.wmb.WmbContext;
 import org.wmb.editor.element.Element;
+import org.wmb.editor.element.ElementDeleteAction;
 import org.wmb.gui.GuiGraphics;
 import org.wmb.gui.Theme;
 import org.wmb.gui.component.Component;
+import org.wmb.gui.component.menu.Menu;
+import org.wmb.gui.component.menu.MenuItem;
 import org.wmb.gui.data.Bounds;
 import org.wmb.gui.data.DynamicBounds;
 import org.wmb.gui.data.DynamicSize;
@@ -20,7 +23,7 @@ import java.awt.Toolkit;
 import java.util.List;
 import java.util.Objects;
 
-final class TreeViewComponent extends Component {
+public final class TreeViewComponent extends Component {
 
     private static final int childIndent = 20;
 
@@ -57,39 +60,47 @@ final class TreeViewComponent extends Component {
     public void onMouseClick(MouseClickEvent event) {
         super.onMouseClick(event);
 
-        if (event.action != ClickAction.PRESS || event.button != MouseButton.LEFT)
+        if (event.action != ClickAction.RELEASE)
             return;
 
         final Bounds innerBounds = getInnerBounds();
         final int innerY = event.y - innerBounds.getY();
         final int elementClickedIndex = innerY / this.elementHeight;
-        final java.util.List<TreeNode> tree = this.sceneTree.getTree();
+        final List<TreeNode> tree = this.sceneTree.getTree();
 
         if (innerY < 0 || elementClickedIndex >= tree.size())
             return;
 
         final TreeNode treeNode = tree.get(elementClickedIndex);
-        final int iconSize = this.elementHeight;
-        final int collapseIconX = innerBounds.getX() + (treeNode.indentLevel * childIndent);
 
-        final boolean collapseAction = event.x >= collapseIconX &&
-            event.x < collapseIconX + iconSize && treeNode.hasChildren;
+        if (event.button == MouseButton.LEFT) {
+            final int iconSize = this.elementHeight;
+            final int collapseIconX = innerBounds.getX() + (treeNode.indentLevel * childIndent);
 
-        if (collapseAction)
-            this.sceneTree.switchCollapsed(treeNode.element);
-        else
-            this.context.setSelectedElement(treeNode.element);
+            final boolean collapseAction = event.x >= collapseIconX &&
+                event.x < collapseIconX + iconSize && treeNode.hasChildren;
+
+            if (collapseAction)
+                this.sceneTree.switchCollapsed(treeNode.element);
+            else
+                this.context.setSelectedElement(treeNode.element);
+        } else if (event.button == MouseButton.RIGHT) {
+            final Menu menu = new Menu();
+            treeNode.element.addMenuActions(menu);
+            menu.popAt(event.x, event.y);
+            this.context.getGui().setOpenedMenu(menu);
+        }
     }
 
     @Override
-    public org.wmb.gui.input.Cursor getCursor(int mouseX, int mouseY) {
+    public Cursor getCursor(int mouseX, int mouseY) {
         final Bounds innerBounds = getInnerBounds();
         final int innerY = mouseY - innerBounds.getY();
         final int elementClickedIndex = innerY / this.elementHeight;
         final List<TreeNode> tree = this.sceneTree.getTree();
 
         if (innerY < 0 || elementClickedIndex >= tree.size())
-            return org.wmb.gui.input.Cursor.DEFAULT;
+            return Cursor.DEFAULT;
 
         return Cursor.HAND;
     }

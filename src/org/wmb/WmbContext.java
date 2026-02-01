@@ -11,6 +11,7 @@ import java.awt.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public final class WmbContext {
 
@@ -31,7 +32,6 @@ public final class WmbContext {
         this.window.makeContextCurrent();
 
         this.scene = new Scene3d(this);
-        this.scene.getChildren().add(new Object3dElement(this.scene, this));
 
         try {
             this.gui = new MainGui(this);
@@ -51,6 +51,8 @@ public final class WmbContext {
         }
 
         addContext(this);
+
+        this.scene.addChild(new Object3dElement(this));
     }
 
     public Window getWindow() {
@@ -80,6 +82,20 @@ public final class WmbContext {
 
     public void notifyWriteScene() {
         this.gui.notifyWriteScene();
+    }
+
+    public void notifyElementAdd(Element element) {
+        Objects.requireNonNull(element, "Element is null");
+        this.gui.onElementAdd();
+    }
+
+    public void notifyElementRemove(Element element) {
+        Objects.requireNonNull(element, "Element is null");
+
+        if (this.selectedElement == element)
+            this.selectedElement = null;
+
+        this.gui.onElementRemove(element);
     }
 
     private int lastWidth = -1;
