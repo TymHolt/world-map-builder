@@ -3,10 +3,12 @@ package org.wmb.gui.component.sceneview3d;
 import org.lwjgl.opengl.GL30;
 import org.wmb.Log;
 import org.wmb.rendering.AllocatedLineData;
-import org.wmb.rendering.AllocatedShaderProgram;
+import org.wmb.rendering.shader.AllocatedShaderProgram;
 import org.wmb.rendering.Camera;
 import org.wmb.rendering.Color;
 import org.wmb.rendering.OpenGLStateException;
+import org.wmb.rendering.shader.uniform.CameraUniform;
+import org.wmb.rendering.shader.uniform.ColorUniform;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -18,9 +20,8 @@ final class GridLineRenderer {
 
     private final AllocatedShaderProgram gridLineShaderProgram;
     private final AllocatedLineData lineData;
-    private final int projectionUl;
-    private final int viewUl;
-    private final int colorUl;
+    private final CameraUniform cameraUniform;
+    private final ColorUniform colorUniform;
 
     GridLineRenderer(int size) throws IOException {
         if (size < 1)
@@ -37,9 +38,9 @@ final class GridLineRenderer {
         }
 
         try {
-            this.projectionUl = this.gridLineShaderProgram.getUniformLocation("u_projection");
-            this.viewUl = this.gridLineShaderProgram.getUniformLocation("u_view");
-            this.colorUl = this.gridLineShaderProgram.getUniformLocation("u_color");
+            this.cameraUniform = new CameraUniform(this.gridLineShaderProgram.getUniformLocation("u_view"),
+                this.gridLineShaderProgram.getUniformLocation("u_projection"));
+            this.colorUniform = new ColorUniform(this.gridLineShaderProgram.getUniformLocation("u_color"));
         } catch (OpenGLStateException exception) {
             this.gridLineShaderProgram.delete();
             Log.error(TAG, "Shader program failed to resolve uniform location");
@@ -87,9 +88,8 @@ final class GridLineRenderer {
         GL30.glEnable(GL30.GL_DEPTH_TEST);
         GL30.glDisable(GL30.GL_BLEND);
 
-        AllocatedShaderProgram.uniformMat4(this.viewUl, camera.getViewMatrix());
-        AllocatedShaderProgram.uniformMat4(this.projectionUl, camera.getProjectionMatrix(aspect));
-        AllocatedShaderProgram.uniformColor(this.colorUl, color);
+        this.cameraUniform.uniform(camera, aspect);
+        this.colorUniform.uniform(color);
 
         GL30.glBindVertexArray(this.lineData.getId());
         GL30.glDrawArrays(GL30.GL_LINES, 0, this.lineData.vertexCount);

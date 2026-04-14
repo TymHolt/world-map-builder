@@ -1,10 +1,9 @@
-package org.wmb.rendering;
+package org.wmb.rendering.shader;
 
-import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL30;
-import org.lwjgl.system.MemoryStack;
 import org.wmb.Log;
 import org.wmb.loading.ResourceLoader;
+import org.wmb.rendering.OpenGLStateException;
 
 import java.io.IOException;
 import java.util.Objects;
@@ -132,16 +131,5 @@ public final class AllocatedShaderProgram {
 
     public void delete() {
         GL30.glDeleteProgram(this.programId);
-    }
-
-    public static void uniformColor(int location, Color color) {
-        GL30.glUniform4f(location, color.getRed(), color.getGreen(), color.getBlue(),
-            color.getAlpha());
-    }
-
-    public static void uniformMat4(int location, Matrix4f matrix) {
-        try (MemoryStack stack = MemoryStack.stackPush()) {
-            GL30.glUniformMatrix4fv(location, false, matrix.get(stack.mallocFloat(16)));
-        }
     }
 }

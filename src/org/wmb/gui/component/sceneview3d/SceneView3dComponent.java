@@ -241,12 +241,7 @@ public final class SceneView3dComponent extends ContainerComponent {
         this.object3dElementRenderer.preparePipeline(0, 0, innerBoundsWidth, innerBoundsHeight);
         this.object3dElementRenderer.uniformCamera(this.camera, this.aspect);
 
-        try {
-            recursiveRender(scene);
-        } catch (IOException exception) {
-            Log.error(TAG, "Exception during recursive render");
-            throw exception;
-        }
+        recursiveRender(scene);
 
         this.object3dElementRenderer.resetPipeline();
 
@@ -255,7 +250,7 @@ public final class SceneView3dComponent extends ContainerComponent {
         // -----------------------------------------------------------------------------------------
     }
 
-    private void recursiveRender(Element element) throws IOException {
+    private void recursiveRender(Element element) {
         if (element == null)
             return;
 

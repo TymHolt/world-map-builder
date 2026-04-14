@@ -5,9 +5,11 @@ import org.lwjgl.opengl.GL30;
 import org.wmb.Log;
 import org.wmb.editor.element.Object3dElement.Object3dElement;
 import org.wmb.rendering.AllocatedMeshData;
-import org.wmb.rendering.AllocatedShaderProgram;
+import org.wmb.rendering.shader.AllocatedShaderProgram;
 import org.wmb.rendering.Camera;
 import org.wmb.rendering.OpenGLStateException;
+import org.wmb.rendering.shader.uniform.CameraUniform;
+import org.wmb.rendering.shader.uniform.Matrix4fUniform;
 
 import java.io.IOException;
 
@@ -16,9 +18,8 @@ public final class GizmoRenderer {
     private static final String TAG = "GizmoRenderer";
 
     private final AllocatedShaderProgram gizmoShaderProgram;
-    private final int transformUl;
-    private final int viewUl;
-    private final int projectionUl;
+    private final Matrix4fUniform transformMatrixUniform;
+    private final CameraUniform cameraUniform;
 
     public GizmoRenderer() throws IOException {
         try {
@@ -32,9 +33,10 @@ public final class GizmoRenderer {
         }
 
         try {
-            this.transformUl = gizmoShaderProgram.getUniformLocation("u_transform");
-            this.viewUl = gizmoShaderProgram.getUniformLocation("u_view");
-            this.projectionUl = gizmoShaderProgram.getUniformLocation("u_projection");
+            this.transformMatrixUniform = new Matrix4fUniform(
+                this.gizmoShaderProgram.getUniformLocation("u_transform"));
+            this.cameraUniform = new CameraUniform(this.gizmoShaderProgram.getUniformLocation("u_view"),
+                this.gizmoShaderProgram.getUniformLocation("u_projection"));
         } catch (OpenGLStateException exception) {
             this.gizmoShaderProgram.delete();
             Log.error(TAG, "Shader program failed to resolve uniform location");
@@ -51,8 +53,7 @@ public final class GizmoRenderer {
         GL30.glUseProgram(this.gizmoShaderProgram.getId());
         GL30.glEnable(GL30.GL_DEPTH_TEST);
         GL30.glDisable(GL30.GL_BLEND);
-        AllocatedShaderProgram.uniformMat4(this.viewUl, camera.getViewMatrix());
-        AllocatedShaderProgram.uniformMat4(this.projectionUl, camera.getProjectionMatrix(aspect));
+        this.cameraUniform.uniform(camera, aspect);
     }
 
     public void renderGizmo(Gizmo gizmo, Object3dElement object3dElement) {
@@ -61,7 +62,7 @@ public final class GizmoRenderer {
 
         final Matrix4f transform = new Matrix4f();
         gizmo.getTransform(object3dElement, transform);
-        AllocatedShaderProgram.uniformMat4(this.transformUl, transform);
+        this.transformMatrixUniform.uniform(transform);
 
         GL30.glDrawElements(GL30.GL_TRIANGLES, gizmoMesh.vertexCount,
             GL30.GL_UNSIGNED_INT, 0);
