@@ -3,12 +3,9 @@ package org.wmb.gui.component.sceneview3d;
 import org.lwjgl.opengl.GL30;
 import org.wmb.Log;
 import org.wmb.rendering.AllocatedLineData;
-import org.wmb.rendering.shader.AllocatedShaderProgram;
 import org.wmb.rendering.Camera;
 import org.wmb.rendering.Color;
 import org.wmb.rendering.OpenGLStateException;
-import org.wmb.rendering.shader.uniform.CameraUniform;
-import org.wmb.rendering.shader.uniform.ColorUniform;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -18,39 +15,24 @@ final class GridLineRenderer {
 
     private static final String TAG = "GridLineRenderer";
 
-    private final AllocatedShaderProgram gridLineShaderProgram;
+    private final GridLineShader shader;
     private final AllocatedLineData lineData;
-    private final CameraUniform cameraUniform;
-    private final ColorUniform colorUniform;
 
     GridLineRenderer(int size) throws IOException {
         if (size < 1)
             throw new IllegalArgumentException("Size is less than 1");
 
         try {
-            this.gridLineShaderProgram = AllocatedShaderProgram.fromResources(
-                "/org/wmb/gui/component/sceneview3d/grid_line_vs.glsl",
-                "/org/wmb/gui/component/sceneview3d/grid_line_fs.glsl"
-            );
+            this.shader = new GridLineShader();
         } catch (IOException exception) {
-            Log.error(TAG, "Shader program failed to load");
-            throw exception;
-        }
-
-        try {
-            this.cameraUniform = new CameraUniform(this.gridLineShaderProgram.getUniformLocation("u_view"),
-                this.gridLineShaderProgram.getUniformLocation("u_projection"));
-            this.colorUniform = new ColorUniform(this.gridLineShaderProgram.getUniformLocation("u_color"));
-        } catch (OpenGLStateException exception) {
-            this.gridLineShaderProgram.delete();
-            Log.error(TAG, "Shader program failed to resolve uniform location");
+            Log.error(TAG, "Shader failed to load");
             throw exception;
         }
 
         try {
             this.lineData = new AllocatedLineData(generateLineData(size));
         } catch (OpenGLStateException exception) {
-            this.gridLineShaderProgram.delete();
+            this.shader.delete();
             Log.error(TAG, "Line data failed to load");
             throw exception;
         }
@@ -84,12 +66,12 @@ final class GridLineRenderer {
 
     void render(int x, int y, int width, int height, Camera camera, float aspect, Color color) {
         GL30.glViewport(x, y, width, height);
-        GL30.glUseProgram(this.gridLineShaderProgram.getId());
+        this.shader.use();
         GL30.glEnable(GL30.GL_DEPTH_TEST);
         GL30.glDisable(GL30.GL_BLEND);
 
-        this.cameraUniform.uniform(camera, aspect);
-        this.colorUniform.uniform(color);
+        this.shader.camera.uniform(camera, aspect);
+        this.shader.color.uniform(color);
 
         GL30.glBindVertexArray(this.lineData.getId());
         GL30.glDrawArrays(GL30.GL_LINES, 0, this.lineData.vertexCount);

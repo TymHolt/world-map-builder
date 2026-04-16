@@ -12,10 +12,6 @@ import org.wmb.gui.icon.AllocatedIcons;
 import org.wmb.gui.icon.Icon;
 import org.wmb.rendering.*;
 import org.wmb.rendering.Color;
-import org.wmb.rendering.shader.AllocatedShaderProgram;
-import org.wmb.rendering.shader.uniform.ColorUniform;
-import org.wmb.rendering.shader.uniform.FloatUniform;
-import org.wmb.rendering.shader.uniform.IntUniform;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -48,18 +44,14 @@ public final class GuiGraphics {
 
     private final WmbContext context;
     private final int antiAliasLevel;
+    private final GuiGraphicsQuadShader quadShader;
+    private final AllocatedIcons icons;
+    private final AllocatedMeshData quadMeshData;
     private AllocatedFramebuffer framebuffer;
     private int lastWidth;
     private int lastHeight;
     private final HashMap<FontDefinition, CachedFont> cachedFonts;
     private final List<FontDefinition> fontAllocationQueue;
-    private final AllocatedMeshData quadMeshData;
-    private final AllocatedShaderProgram quadShaderProgram;
-    private final AllocatedIcons icons;
-    private final ColorUniform colorUniform;
-    private final IntUniform textureUniform;
-    private final FloatUniform texturedFlagUniform;
-    private final FloatUniform maskColorFactorUniform;
 
     GuiGraphics(WmbContext context, int antiAliasLevel) throws IOException {
         Objects.requireNonNull(context, "Context is null");
@@ -70,31 +62,16 @@ public final class GuiGraphics {
         this.antiAliasLevel = antiAliasLevel;
 
         try {
-            this.quadShaderProgram = AllocatedShaderProgram.fromResources(
-                "/org/wmb/gui/gui_graphics_quad_vs.glsl",
-                "/org/wmb/gui/gui_graphics_quad_fs.glsl"
-            );
+            this.quadShader = new GuiGraphicsQuadShader();
         } catch (IOException exception) {
-            Log.error(TAG, "Quad shader program failed to load");
-            throw exception;
-        }
-
-        try {
-            this.colorUniform = new ColorUniform(this.quadShaderProgram.getUniformLocation("u_color"));
-            this.textureUniform = new IntUniform(this.quadShaderProgram.getUniformLocation("u_texture"));
-            this.texturedFlagUniform = new FloatUniform(this.quadShaderProgram.getUniformLocation("u_textured_flag"));
-            this.maskColorFactorUniform = new FloatUniform(
-                this.quadShaderProgram.getUniformLocation("u_mask_color_factor"));
-        } catch (OpenGLStateException exception) {
-            this.quadShaderProgram.delete();
-            Log.error(TAG, "Quad shader program failed to resolve uniform location");
+            Log.error(TAG, "Quad shader failed to load");
             throw exception;
         }
 
         try {
             this.icons = new AllocatedIcons();
         } catch (IOException exception) {
-            this.quadShaderProgram.delete();
+            this.quadShader.delete();
             Log.error(TAG, "Icons failed to load");
             throw exception;
         }
@@ -119,7 +96,7 @@ public final class GuiGraphics {
             });
             this.quadMeshData = new AllocatedMeshData(meshDataDescription);
         } catch(OpenGLStateException exception) {
-            this.quadShaderProgram.delete();
+            this.quadShader.delete();
             this.icons.delete();
             Log.error(TAG, "Quad mesh data failed to load");
             throw exception;
@@ -128,7 +105,7 @@ public final class GuiGraphics {
         try {
             this.framebuffer = new AllocatedFramebuffer(2, 2);
         } catch (OpenGLStateException exception) {
-            this.quadShaderProgram.delete();
+            this.quadShader.delete();
             this.icons.delete();
             this.quadMeshData.delete();
             Log.error(TAG, "Framebuffer failed to load");
@@ -175,8 +152,8 @@ public final class GuiGraphics {
 
         GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, this.framebuffer.getFboId());
 
-        GL30.glUseProgram(this.quadShaderProgram.getId());
-        this.textureUniform.uniform(0);
+        this.quadShader.use();
+        this.quadShader.texture.uniform(0);
         GL30.glBindVertexArray(this.quadMeshData.getId());
         GL30.glDisable(GL30.GL_DEPTH_TEST);
         GL30.glBlendFunc(GL30.GL_SRC_ALPHA, GL30.GL_ONE_MINUS_SRC_ALPHA);
@@ -192,8 +169,8 @@ public final class GuiGraphics {
         final Size windowSize = this.context.getWindow().getSize();
         GL30.glViewport(0, 0, windowSize.getWidth(), windowSize.getHeight());
         GL30.glBindTexture(GL30.GL_TEXTURE_2D, this.framebuffer.getId());
-        this.texturedFlagUniform.uniform(1.0f);
-        this.maskColorFactorUniform.uniform(0.0f);
+        this.quadShader.texturedFlag.uniform(1.0f);
+        this.quadShader.maskColorFactor.uniform(0.0f);
         GL30.glDrawElements(GL30.GL_TRIANGLES, this.quadMeshData.vertexCount,
             GL30.GL_UNSIGNED_INT, 0);
 
@@ -221,7 +198,7 @@ public final class GuiGraphics {
     }
 
     void delete() {
-        this.quadShaderProgram.delete();
+        this.quadShader.delete();
         this.icons.delete();
         this.quadMeshData.delete();
         this.framebuffer.delete();
@@ -238,8 +215,8 @@ public final class GuiGraphics {
 
     public void fillQuadColor(int x, int y, int width, int height, Color color) {
         correctViewport(x, y, width, height);
-        this.colorUniform.uniform(color);
-        this.texturedFlagUniform.uniform(0.0f);
+        this.quadShader.color.uniform(color);
+        this.quadShader.texturedFlag.uniform(0.0f);
         GL30.glDrawElements(GL30.GL_TRIANGLES, this.quadMeshData.vertexCount,
             GL30.GL_UNSIGNED_INT, 0);
     }
@@ -251,8 +228,8 @@ public final class GuiGraphics {
     public void fillQuadTexture(int x, int y, int width, int height, ITexture texture) {
         correctViewport(x, y, width, height);
         GL30.glBindTexture(GL30.GL_TEXTURE_2D, texture.getId());
-        this.texturedFlagUniform.uniform(1.0f);
-        this.maskColorFactorUniform.uniform(0.0f);
+        this.quadShader.texturedFlag.uniform(1.0f);
+        this.quadShader.maskColorFactor.uniform(0.0f);
         GL30.glDrawElements(GL30.GL_TRIANGLES, this.quadMeshData.vertexCount,
             GL30.GL_UNSIGNED_INT, 0);
     }
@@ -265,9 +242,9 @@ public final class GuiGraphics {
     public void fillQuadMask(int x, int y, int width, int height, ITexture texture, Color color) {
         correctViewport(x, y, width, height);
         GL30.glBindTexture(GL30.GL_TEXTURE_2D, texture.getId());
-        this.colorUniform.uniform(color);
-        this.texturedFlagUniform.uniform(1.0f);
-        this.maskColorFactorUniform.uniform(1.0f);
+        this.quadShader.color.uniform(color);
+        this.quadShader.texturedFlag.uniform(1.0f);
+        this.quadShader.maskColorFactor.uniform(1.0f);
         GL30.glDrawElements(GL30.GL_TRIANGLES, this.quadMeshData.vertexCount,
             GL30.GL_UNSIGNED_INT, 0);
     }
@@ -280,9 +257,9 @@ public final class GuiGraphics {
     public void fillQuadIcon(int x, int y, int width, int height, Icon icon, Color color) {
         correctViewport(x, y, width, height);
         GL30.glBindTexture(GL30.GL_TEXTURE_2D, this.icons.getIconTexture(icon).getId());
-        this.colorUniform.uniform(color);
-        this.texturedFlagUniform.uniform(1.0f);
-        this.maskColorFactorUniform.uniform(1.0f);
+        this.quadShader.color.uniform(color);
+        this.quadShader.texturedFlag.uniform(1.0f);
+        this.quadShader.maskColorFactor.uniform(1.0f);
         GL30.glDrawElements(GL30.GL_TRIANGLES, this.quadMeshData.vertexCount,
             GL30.GL_UNSIGNED_INT, 0);
     }
@@ -290,9 +267,9 @@ public final class GuiGraphics {
     public void fillQuadIcon(Bounds bounds, Icon icon, Color color) {
         correctViewport(bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getHeight());
         GL30.glBindTexture(GL30.GL_TEXTURE_2D, this.icons.getIconTexture(icon).getId());
-        this.colorUniform.uniform(color);
-        this.texturedFlagUniform.uniform(1.0f);
-        this.maskColorFactorUniform.uniform(1.0f);
+        this.quadShader.color.uniform(color);
+        this.quadShader.texturedFlag.uniform(1.0f);
+        this.quadShader.maskColorFactor.uniform(1.0f);
         GL30.glDrawElements(GL30.GL_TRIANGLES, this.quadMeshData.vertexCount,
             GL30.GL_UNSIGNED_INT, 0);
     }
@@ -300,8 +277,8 @@ public final class GuiGraphics {
     public void fillQuadIcon(int x, int y, int width, int height, Icon icon) {
         correctViewport(x, y, width, height);
         GL30.glBindTexture(GL30.GL_TEXTURE_2D, this.icons.getIconTexture(icon).getId());
-        this.texturedFlagUniform.uniform(1.0f);
-        this.maskColorFactorUniform.uniform(0.0f);
+        this.quadShader.texturedFlag.uniform(1.0f);
+        this.quadShader.maskColorFactor.uniform(0.0f);
         GL30.glDrawElements(GL30.GL_TRIANGLES, this.quadMeshData.vertexCount,
             GL30.GL_UNSIGNED_INT, 0);
     }
@@ -309,8 +286,8 @@ public final class GuiGraphics {
     public void fillQuadIcon(Bounds bounds, Icon icon) {
         correctViewport(bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getHeight());
         GL30.glBindTexture(GL30.GL_TEXTURE_2D, this.icons.getIconTexture(icon).getId());
-        this.texturedFlagUniform.uniform(1.0f);
-        this.maskColorFactorUniform.uniform(0.0f);
+        this.quadShader.texturedFlag.uniform(1.0f);
+        this.quadShader.maskColorFactor.uniform(0.0f);
         GL30.glDrawElements(GL30.GL_TRIANGLES, this.quadMeshData.vertexCount,
             GL30.GL_UNSIGNED_INT, 0);
     }
@@ -322,9 +299,9 @@ public final class GuiGraphics {
         if (text == null)
             text = "null";
 
-        this.colorUniform.uniform(color);
-        this.texturedFlagUniform.uniform(1.0f);
-        this.maskColorFactorUniform.uniform(1.0f);
+        this.quadShader.color.uniform(color);
+        this.quadShader.texturedFlag.uniform(1.0f);
+        this.quadShader.maskColorFactor.uniform(1.0f);
 
         final AllocatedFont allocatedFont;
         if (this.cachedFonts.containsKey(fontDefinition)) {

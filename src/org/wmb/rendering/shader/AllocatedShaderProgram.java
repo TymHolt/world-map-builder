@@ -125,6 +125,10 @@ public final class AllocatedShaderProgram {
         return uniformLocation;
     }
 
+    public void use() {
+        GL30.glUseProgram(this.programId);
+    }
+
     public int getId() {
         return this.programId;
     }
